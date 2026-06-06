@@ -1,0 +1,27 @@
+{
+  "displayName": "PCG Mazes",
+  "name": "com.elmortem.pcg.mazes",
+  "author": "Makar Osokin",
+  "version": "0.0.1",
+  "unity": "2022.3",
+  "description": "Mazes addon for PCG.",
+  "keywords": [
+    "PCG",
+    "procedural content generator",
+    "world",
+    "generator",
+    "generation",
+    "level",
+    "level generator",
+    "world generator",
+    "procedural",
+    "procedural generator",
+    "maze",
+    "mazes",
+    "labyrinth"
+  ],
+  "category": "Utility",
+  "dependencies": {
+    "com.unity.mathematics": "1.2.6"
+  }
+}

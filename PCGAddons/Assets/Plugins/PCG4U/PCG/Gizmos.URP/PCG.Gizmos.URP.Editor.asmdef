@@ -1,0 +1,33 @@
+{
+	"name": "PCG.Gizmos.URP.Editor",
+	"rootNamespace": "",
+	"references": [
+		"Unity.RenderPipelines.Universal.Runtime",
+		"Unity.RenderPipelines.Core.Runtime"
+	],
+	"includePlatforms": ["Editor"],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": ["PCG_URP", "HAS_UNITASK"],
+	"versionDefines": [
+		{
+			"name": "com.cysharp.unitask",
+			"expression": "2.5.5",
+			"define": "HAS_UNITASK"
+		},
+		{
+			"name": "com.unity.render-pipelines.universal",
+			"expression": "",
+			"define": "PCG_URP"
+		},
+		{
+			"name": "com.unity.render-pipelines.universal",
+			"expression": "17.0.0",
+			"define": "PCG_URP_17"
+		}
+	],
+	"noEngineReferences": false
+}

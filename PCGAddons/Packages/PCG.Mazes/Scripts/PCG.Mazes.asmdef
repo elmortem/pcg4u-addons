@@ -1,0 +1,21 @@
+{
+    "name": "PCG.Mazes",
+    "rootNamespace": "PCG.Mazes",
+    "references": [
+        "PCG",
+        "PCG.Splines",
+        "Unity.Splines",
+        "Unity.Mathematics",
+        "TriangulationDelone",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

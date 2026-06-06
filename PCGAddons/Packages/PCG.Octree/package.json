@@ -1,0 +1,26 @@
+{
+  "displayName": "PCG Octree",
+  "name": "com.elmortem.pcg.octree",
+  "author": "Makar Osokin",
+  "version": "0.0.1",
+  "unity": "2022.3",
+  "description": "Octree addon for PCG.",
+  "keywords": [
+    "PCG",
+    "procedural content generator",
+    "world",
+    "generator",
+    "generation",
+    "level",
+    "level generator",
+    "world generator",
+    "procedural",
+    "procedural generator",
+    "octree"
+  ],
+  "category": "Utility",
+  "dependencies": {
+    "com.unity.mathematics": "1.2.6",
+	"com.elmortem.octree": "0.0.1"
+  }
+}

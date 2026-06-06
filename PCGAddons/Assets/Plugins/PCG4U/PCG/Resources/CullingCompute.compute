@@ -1,0 +1,55 @@
+#pragma kernel CSMain
+
+struct Matrix4x4
+{
+    float4 column0;
+    float4 column1;
+    float4 column2;
+    float4 column3;
+};
+
+StructuredBuffer<Matrix4x4> _InputBuffer;
+StructuredBuffer<float4> _ColorBuffer;
+AppendStructuredBuffer<Matrix4x4> _OutputBuffer;
+AppendStructuredBuffer<float4> _CulledColorBuffer;
+StructuredBuffer<float4> _Planes;
+
+float3 _CameraPosition;
+float _MaxDrawDistance;
+
+int _StartIndex;
+int _ItemCount;
+
+bool IsInsideFrustum(float3 worldPos)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        float4 plane = _Planes[i];
+        if (dot(float4(worldPos, 1.0), plane) < 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+[numthreads(64,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    uint globalId = id.x + (uint)_StartIndex;
+    if (globalId >= (uint)(_StartIndex + _ItemCount))
+        return;
+
+    Matrix4x4 worldMatrix = _InputBuffer[globalId];
+    //float3 worldPos = worldMatrix.column3.xyz;
+
+    //float distanceToCamera = length(worldPos - _CameraPosition);
+    //if (distanceToCamera > _MaxDrawDistance)
+    //    return;
+
+    //if (IsInsideFrustum(worldPos))
+    {
+        _OutputBuffer.Append(worldMatrix);
+        _CulledColorBuffer.Append(_ColorBuffer[globalId]);
+    }
+}

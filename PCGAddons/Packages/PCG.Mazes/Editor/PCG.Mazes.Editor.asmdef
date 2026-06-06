@@ -1,0 +1,26 @@
+{
+    "name": "PCG.Mazes.Editor",
+    "rootNamespace": "PCG.Mazes.Editors",
+    "references": [
+        "PCG",
+        "PCG.Editors",
+        "PCG.Gizmos.Editor",
+        "PCG.Mazes",
+        "PCG.Splines",
+        "Unity.Splines",
+        "Unity.Mathematics",
+        "TriangulationDelone",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

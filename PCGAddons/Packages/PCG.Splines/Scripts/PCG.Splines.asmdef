@@ -1,0 +1,19 @@
+{
+    "name": "PCG.Splines",
+    "rootNamespace": "PCG.Splines",
+    "references": [
+        "PCG",
+        "Unity.Splines",
+        "Unity.Mathematics",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

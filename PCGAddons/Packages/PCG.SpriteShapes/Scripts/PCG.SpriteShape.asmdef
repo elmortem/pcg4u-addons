@@ -1,0 +1,21 @@
+{
+    "name": "PCG.SpriteShapes",
+    "rootNamespace": "PCG.SpriteShapes",
+    "references": [
+        "PCG",
+        "PCG.Splines",
+        "Unity.Splines",
+        "Unity.Mathematics",
+        "Unity.2D.SpriteShape.Runtime",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

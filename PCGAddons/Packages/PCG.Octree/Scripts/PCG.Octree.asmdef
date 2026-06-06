@@ -1,0 +1,21 @@
+{
+    "name": "PCG.Octree",
+    "rootNamespace": "PCG.Octree",
+    "references": [
+        "PCG",
+        "Unity.Mathematics",
+		"Unity.Burst",
+        "Octree",
+        "UniTask",
+		"Unity.Collections.BurstCompatibilityGen"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

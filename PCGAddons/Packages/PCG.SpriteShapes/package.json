@@ -1,0 +1,27 @@
+{
+  "displayName": "PCG SpriteShapes",
+  "name": "com.elmortem.pcg.spriteshapes",
+  "author": "Makar Osokin",
+  "version": "0.0.1",
+  "unity": "2022.3",
+  "description": "SpriteShapes addon for PCG.",
+  "keywords": [
+    "PCG",
+    "procedural content generator",
+    "world",
+    "generator",
+    "generation",
+    "level",
+    "level generator",
+    "world generator",
+    "procedural",
+    "procedural generator",
+    "splines",
+	"sprite shape",
+    "bezier"
+  ],
+  "category": "Utility",
+  "dependencies": {
+    "com.unity.mathematics": "1.2.6"
+  }
+}

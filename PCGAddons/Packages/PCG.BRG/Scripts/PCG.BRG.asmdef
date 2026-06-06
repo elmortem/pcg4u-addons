@@ -1,0 +1,20 @@
+{
+    "name": "PCG.BRG",
+    "rootNamespace": "PCG.BRG",
+    "references": [
+        "PCG",
+        "Unity.EditorCoroutines.Editor",
+        "BRG",
+        "Unity.Mathematics",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,26 @@
+{
+    "name": "PCG.Octree.Editor",
+    "rootNamespace": "PCG.Octree.Editors",
+    "references": [
+        "PCG",
+        "PCG.Editors",
+        "PCG.Gizmos.Editor",
+        "PCG.Octree",
+        "Unity.Mathematics",
+        "Unity.Burst",
+        "Octree",
+        "UniTask",
+        "Unity.Collections.BurstCompatibilityGen"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

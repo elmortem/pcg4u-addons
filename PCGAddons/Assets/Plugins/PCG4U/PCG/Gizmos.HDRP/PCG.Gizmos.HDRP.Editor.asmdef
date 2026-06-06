@@ -1,0 +1,28 @@
+{
+	"name": "PCG.Gizmos.HDRP.Editor",
+	"rootNamespace": "",
+	"references": [
+		"Unity.RenderPipelines.HighDefinition.Runtime",
+		"Unity.RenderPipelines.Core.Runtime"
+	],
+	"includePlatforms": ["Editor"],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": ["PCG_HDRP", "HAS_UNITASK"],
+	"versionDefines": [
+		{
+			"name": "com.cysharp.unitask",
+			"expression": "2.5.5",
+			"define": "HAS_UNITASK"
+		},
+		{
+			"name": "com.unity.render-pipelines.high-definition",
+			"expression": "",
+			"define": "PCG_HDRP"
+		}
+	],
+	"noEngineReferences": false
+}

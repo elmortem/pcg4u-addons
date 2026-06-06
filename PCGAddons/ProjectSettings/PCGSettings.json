@@ -1,0 +1,16 @@
+{
+    "PerFrameMs": 100,
+    "MaxListPoints": 50000000,
+    "MaxPointsDraw": 10000,
+    "MaxGeneratePoints": 30000,
+    "MaxDrawDistance": 1000.0,
+    "DetailLevels": 5,
+    "DetailLevelsMul": 2,
+    "CameraMovementThreshold": 1.0,
+    "CameraRotationThreshold": 0.009999999776482582,
+    "FramesToRemove": 3,
+    "UpdateDelay": 0.4000000059604645,
+    "MinProcessingPoints": 1000,
+    "MaxProcessingPoints": 100000,
+    "CalcFrustumCulling": false
+}

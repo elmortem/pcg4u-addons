@@ -1,0 +1,26 @@
+{
+    "name": "PCG.SpriteShapes.Editor",
+    "rootNamespace": "PCG.SpriteShapes.Editors",
+    "references": [
+        "PCG",
+        "PCG.Editors",
+        "PCG.Gizmos.Editor",
+        "PCG.SpriteShapes",
+        "PCG.Splines",
+        "UniTask",
+        "Unity.Splines",
+        "Unity.Mathematics",
+        "Unity.2D.SpriteShape.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
