@@ -24,10 +24,20 @@ Many nodes have 2 checkboxes in bottom-left corner:
 * [[Sphere Surface Node|PCG/CreatePoints/Sphere-Surface-Node]]
 * [[Mesh Surface Node|PCG/CreatePoints/Mesh-Surface-Node]]
 * [[Terrain Surface Node|PCG/CreatePoints/Terrain-Surface-Node]]
+* [[Collider Surface Node|PCG/CreatePoints/Collider-Surface-Node]]
 
 ### Select Points
 * [[Percent Points Node|PCG/SelectPoints/Percent-Points-Node]]
 * [[Points By Density Node|PCG/SelectPoints/Points-By-Density-Node]]
+* [[Points By Slope Node|PCG/SelectPoints/Points-By-Slope-Node]]
+* [[Points By Height Node|PCG/SelectPoints/Points-By-Height-Node]]
+
+### Noises
+* [[Perlin Noise Node|PCG/Noises/Perline-Noise-Node]]
+* [[Simplex Noise Node|PCG/Noises/Simplex-Noise-Node]]
+* [[Worley Noise Node|PCG/Noises/Worley-Noise-Node]]
+* [[FBM Noise Node|PCG/Noises/Fbm-Noise-Node]] - wraps a source noise with octave summation
+* [[Ridged Noise Node|PCG/Noises/Ridged-Noise-Node]] - wraps a source noise to produce ridges
 
 ### Instances
 * [[GameObjects Node|PCG/Instances/Game-Objects-Node]] - converts points to GameObject instances

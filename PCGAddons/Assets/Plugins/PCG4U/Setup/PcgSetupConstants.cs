@@ -7,5 +7,9 @@ namespace PCG.Setup
 		public const string UniTaskOpenUpmVersion = "2.5.11";
 		public const string SetupDismissKey = "PCG.Setup.Dismissed";
 		public const string SetupPendingExtrasKey = "PCG.Setup.PendingExtras";
+		public const string UrpPackageName = "com.unity.render-pipelines.universal";
+		public const string HdrpPackageName = "com.unity.render-pipelines.high-definition";
+		public const string UrpGizmosAsmdefName = "PCG.Gizmos.URP.Editor";
+		public const string HdrpGizmosAsmdefName = "PCG.Gizmos.HDRP.Editor";
 	}
 }

@@ -2237,7 +2237,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 107284388}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff69005447aa32949af1aefe2f56b3a6, type: 3}
+  m_Script: {fileID: -443603769, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Controller: {fileID: 107284393}
@@ -14686,7 +14686,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 875305011}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54a0578762aa451b8f89d7e21415cce1, type: 3}
+  m_Script: {fileID: -327042926, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Terrains:
@@ -14702,7 +14702,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 875305011}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a8d8c95ae674a6a877fbf168751abf3, type: 3}
+  m_Script: {fileID: 873139010, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Parent: {fileID: 875305016}
@@ -14793,7 +14793,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 875305011}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cf91aeb870e4c8d9a50aef678d97d77, type: 3}
+  m_Script: {fileID: 1518408817, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   GraphId: b5ff78a324b04678be8d216b6f92b570
@@ -14894,7 +14894,7 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 2
       ToPort: Splines
-    NextNodeId: 22
+    NextNodeId: 23
     Variables:
     - Id: Seed
       Name: Seed
@@ -15128,7 +15128,6 @@ MonoBehaviour:
         Collapsed: 0
         Width: 220
         Title: 
-        Instances: []
     - rid: 7906782793500721341
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
@@ -24281,7 +24280,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1362918692}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cf91aeb870e4c8d9a50aef678d97d77, type: 3}
+  m_Script: {fileID: 1518408817, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   GraphId: 29a066c5db454449ab231189f9d055e2
@@ -24313,7 +24312,6 @@ MonoBehaviour:
     - rid: 7906782793500721267
     - rid: 7906782793500721268
     - rid: 7906782793500721269
-    - rid: 7906782793500721270
     - rid: 7906782793500721271
     - rid: 7906782793500721272
     - rid: 7906782793500721273
@@ -24336,6 +24334,8 @@ MonoBehaviour:
     - rid: 7906782793500721391
     - rid: 7906782793500721392
     - rid: 7906782793500721393
+    - rid: 7906782834765070368
+    - rid: 7906782834765070369
     Edges:
     - FromNodeId: 1
       FromPort: Terrain
@@ -24413,10 +24413,6 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 19
       ToPort: Points
-    - FromNodeId: 15
-      FromPort: Results
-      ToNodeId: 34
-      ToPort: Points
     - FromNodeId: 16
       FromPort: Results
       ToNodeId: 22
@@ -24461,14 +24457,6 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 4
       ToPort: Points
-    - FromNodeId: 27
-      FromPort: Results
-      ToNodeId: 28
-      ToPort: Splines
-    - FromNodeId: 27
-      FromPort: Results
-      ToNodeId: 36
-      ToPort: Splines
     - FromNodeId: 28
       FromPort: Outsides
       ToNodeId: 35
@@ -24565,16 +24553,31 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 29
       ToPort: Seed
-    NextNodeId: 50
+    - FromNodeId: 50
+      FromPort: Value
+      ToNodeId: 28
+      ToPort: Splines
+    - FromNodeId: 51
+      FromPort: Value
+      ToNodeId: 36
+      ToPort: Splines
+    NextNodeId: 52
     Variables:
     - Id: Seed
       Name: Seed
       Default:
         rid: 7906782793500721361
+    - Id: Splines
+      Name: ExcludeAreas
+      Default:
+        rid: 7906782834765070366
   Parameters:
   - Id: Seed
     Value:
       rid: 7906782793500721362
+  - Id: Splines
+    Value:
+      rid: 7906782834765070367
   InstanceMakerComponents:
   - {fileID: 1362918696}
   - {fileID: 1362918698}
@@ -25075,21 +25078,6 @@ MonoBehaviour:
         Max: 360
         Seed: 11086790
         Mode: 0
-    - rid: 7906782793500721270
-      type: {class: FindSplinesNode, ns: PCG.Splines, asm: PCG.Splines}
-      data:
-        Id: 27
-        Position: {x: 472, y: -1544}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Name: VillageSpline
-        Tag: 
     - rid: 7906782793500721271
       type: {class: PointsBySplineNode, ns: PCG.SelectPoints, asm: PCG.Splines}
       data:
@@ -25136,7 +25124,6 @@ MonoBehaviour:
         Collapsed: 0
         Width: 220
         Title: 
-        Instances: []
     - rid: 7906782793500721274
       type: {class: DensityByNormalNode, ns: PCG.TransformPoints, asm: PCG}
       data:
@@ -25419,6 +25406,34 @@ MonoBehaviour:
         Width: 220
         Title: 
         VariableId: Seed
+    - rid: 7906782834765070366
+      type: {class: SplinesValue, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        Containers: []
+    - rid: 7906782834765070367
+      type: {class: SplinesValue, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        Containers:
+        - {fileID: 2027394065}
+        - {fileID: 719633074}
+    - rid: 7906782834765070368
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 50
+        Position: {x: 507.91025, y: -1347.002}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Splines
+    - rid: 7906782834765070369
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 51
+        Position: {x: -405.60718, y: 1343.2012}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Splines
 --- !u!4 &1362918694
 Transform:
   m_ObjectHideFlags: 0
@@ -25850,7 +25865,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1362918692}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a8d8c95ae674a6a877fbf168751abf3, type: 3}
+  m_Script: {fileID: 873139010, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Parent: {fileID: 1362918694}
@@ -26276,7 +26291,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1362918692}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54a0578762aa451b8f89d7e21415cce1, type: 3}
+  m_Script: {fileID: -327042926, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Terrains:

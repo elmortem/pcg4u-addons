@@ -19,7 +19,8 @@ Shader "PCG4U/FastGizmosShapeUrp"
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma target 4.5
-			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+			float4x4 unity_MatrixVP;
 
 			StructuredBuffer<float4x4> _Matrices;
 			StructuredBuffer<float4> _Colors;
@@ -45,7 +46,7 @@ Shader "PCG4U/FastGizmosShapeUrp"
 				Varyings output;
 				float4x4 objectToWorld = _Matrices[input.instanceID];
 				float3 positionWS = mul(objectToWorld, float4(input.positionOS.xyz, 1.0)).xyz;
-				output.positionCS = TransformWorldToHClip(positionWS);
+				output.positionCS = mul(unity_MatrixVP, float4(positionWS, 1.0));
 				output.normalWS = normalize(mul((float3x3)objectToWorld, input.normalOS));
 				output.color = _Colors[input.instanceID].rgb;
 				return output;

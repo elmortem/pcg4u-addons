@@ -1,0 +1,22 @@
+{
+    "id": "Task_20260607_134000",
+    "status": "success",
+    "logs": [
+        "[cfg] MaxDrawDistance = 1000",
+        "[cfg] DetailLevels = 5",
+        "[cfg] CameraMovementThreshold = 1",
+        "[cfg] CameraRotationThreshold = 0,01",
+        "[cfg] UpdateDelay = 0,4",
+        "[cfg] FramesToRemove = 3",
+        "[cfg] CalcFrustumCulling = True",
+        "[cfg] MinProcessingPoints = 1000",
+        "[cfg] MaxProcessingPoints = 100000",
+        "[planes stored] left=float4(0,8850094f, -0,1982346f, 0,4212617f, 100,1732f) right=float4(-0,7849288f, -0,1978661f, 0,587142f, 175,9662f) bottom=float4(0,07733282f, 0,624568f, 0,7771322f, 138,8209f) top=float4(0,0146512f, -0,9886242f, 0,1496915f, 114,9788f) ",
+        "[planes] stored TestPoint(pivot) = True",
+        "[planes refreshed] left=float4(0,8850094f, -0,1982346f, 0,4212617f, 100,1732f) right=float4(-0,7849288f, -0,1978661f, 0,587142f, 175,9662f) bottom=float4(0,07733282f, 0,624568f, 0,7771322f, 138,8209f) top=float4(0,0146512f, -0,9886242f, 0,1496915f, 114,9788f) ",
+        "[planes] refreshed TestPoint(pivot) = True"
+    ],
+    "return_value": "Experiment 3 scheduled (culling ON, planes refreshed)",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

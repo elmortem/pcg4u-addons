@@ -1,0 +1,14 @@
+{
+    "id": "Task_20260607_143000",
+    "status": "success",
+    "logs": [
+        "GlobalSettings asset: HDRenderPipelineGlobalSettings (UnityEngine.Rendering.HighDefinition.HDRenderPipelineGlobalSettings)",
+        "[FS field] m_RenderingPathDefaultCameraFrameSettings: CustomPass=True OpaqueObjects=True TransparentObjects=True",
+        "[FS field] m_RenderingPathDefaultBakedOrCustomReflectionFrameSettings: CustomPass=True OpaqueObjects=True TransparentObjects=True",
+        "[FS field] m_RenderingPathDefaultRealtimeReflectionFrameSettings: CustomPass=True OpaqueObjects=True TransparentObjects=True",
+        "[HDCameraData] Default HDAdditionalCameraData customRenderingSettings=False"
+    ],
+    "return_value": "Frame settings dump complete",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

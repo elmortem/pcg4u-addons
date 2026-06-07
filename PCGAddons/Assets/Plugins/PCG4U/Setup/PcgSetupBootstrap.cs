@@ -15,14 +15,15 @@ namespace PCG.Setup
 		{
 			if (Application.isBatchMode)
 				return;
-			if (PcgPackageUtility.IsInstalled(PcgSetupConstants.UniTaskPackageName))
+			var uniTaskInstalled = PcgPackageUtility.IsInstalled(PcgSetupConstants.UniTaskPackageName);
+			if (uniTaskInstalled && !PcgRenderPipelineCleanup.IsCleanupNeeded())
 			{
-				PcgSetupFlow.CompleteUniTaskInstall();
+				PcgSetupFlow.CompleteSetup();
 				return;
 			}
 			if (SessionState.GetBool(PcgSetupConstants.SetupDismissKey, false))
 				return;
-			PcgSetupWindow.Open();
+			PcgSetupWindow.Open(uniTaskInstalled ? PcgSetupPage.RenderPipeline : PcgSetupPage.UniTask);
 		}
 	}
 }

@@ -5,7 +5,19 @@ namespace PCG.Setup
 {
 	public static class PcgSetupFlow
 	{
-		public static void CompleteUniTaskInstall()
+		public static void TryContinue()
+		{
+			if (!PcgPackageUtility.IsInstalled(PcgSetupConstants.UniTaskPackageName))
+				return;
+			if (PcgRenderPipelineCleanup.IsCleanupNeeded())
+			{
+				PcgSetupWindow.Open(PcgSetupPage.RenderPipeline);
+				return;
+			}
+			CompleteSetup();
+		}
+
+		public static void CompleteSetup()
 		{
 			if (!SessionState.GetBool(PcgSetupConstants.SetupPendingExtrasKey, false))
 				return;

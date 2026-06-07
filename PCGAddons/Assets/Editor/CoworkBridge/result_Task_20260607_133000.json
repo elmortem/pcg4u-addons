@@ -1,0 +1,15 @@
+{
+    "id": "Task_20260607_133000",
+    "status": "success",
+    "logs": [
+        "cam pos=(21.10, 79.57, -244.68) fwd=(0.09, -0.36, 0.93) pivot=(52.28, -43.82, 69.45) size=169,4629",
+        "cam orthographic=False fov=60 near=1,694629 far=338925,8",
+        "projectionMatrix:\n1.54239\t0.00000\t0.00000\t0.00000\n0.00000\t1.73205\t0.00000\t0.00000\n0.00000\t0.00000\t-1.00001\t-3.38927\n0.00000\t0.00000\t-1.00000\t0.00000\n",
+        "manual planes test for pivot: L=184,379 R=184,379 B=169,463 T=169,463",
+        "GeometryUtility test for pivot: 0=184,379 1=184,379 2=169,463 3=169,463 4=337,231 5=337690,900 ",
+        "manual planes test for point 10m in front: L=5,440 R=5,440 B=5,000 T=5,000"
+    ],
+    "return_value": "Frustum test complete",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

@@ -1,0 +1,11 @@
+{
+    "id": "Task_20260607_132000",
+    "status": "success",
+    "logs": [
+        "CalcFrustumCulling set to false",
+        "Experiment 2 started, no culling, 300 ticks"
+    ],
+    "return_value": "Experiment 2 scheduled",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

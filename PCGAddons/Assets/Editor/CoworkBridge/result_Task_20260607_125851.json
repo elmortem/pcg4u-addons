@@ -1,0 +1,15 @@
+{
+    "id": "Task_20260607_125851",
+    "status": "compiler_error",
+    "logs": [],
+    "return_value": "",
+    "compiler_errors": [
+        {
+            "type": "Error",
+            "message": "Assets\\Editor\\CoworkBridge\\Task_20260607_125851.cs(47,13): error CS0122: 'HDRenderPipelineGlobalSettings' is inaccessible due to its protection level",
+            "file": "Assets\\Editor\\CoworkBridge\\Task_20260607_125851.cs",
+            "line": 47
+        }
+    ],
+    "foreign_errors": false
+}

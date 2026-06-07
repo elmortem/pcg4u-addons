@@ -1,0 +1,19 @@
+{
+    "id": "Task_20260607_130312",
+    "status": "success",
+    "logs": [
+        "[1] Pipeline: UnityEngine.Rendering.HighDefinition.HDRenderPipelineAsset / HDRenderPipelineAsset",
+        "[2] Shader found, isSupported=True, hasErrors=False",
+        "[3] supportCustomPass=True",
+        "[4] FrameSettings check failed: Cannot invoke method returning ByRef type via reflection",
+        "[5] CustomPassVolume count: 0",
+        "[6] Types: FastGizmos=PCG.Gizmos.Editor, FastGizmosHdrpPass=PCG.Gizmos.HDRP.Editor, Bootstrap=found",
+        "[7] FastGizmos._backend = null",
+        "[8] FastGizmos._gizmoDatas count = 0",
+        "[9] FastGizmosHdrpPass.Backend = null",
+        "[10] SceneView.lastActiveSceneView = ok, camera=SceneCamera"
+    ],
+    "return_value": "Diagnostics complete",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

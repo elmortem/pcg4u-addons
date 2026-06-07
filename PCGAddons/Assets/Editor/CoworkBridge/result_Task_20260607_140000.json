@@ -1,0 +1,10 @@
+{
+    "id": "Task_20260607_140000",
+    "status": "success",
+    "logs": [
+        "Draw + capture loop started at pivot (52.28, -43.82, 69.45) spread=8,473144"
+    ],
+    "return_value": "Draw + capture scheduled",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

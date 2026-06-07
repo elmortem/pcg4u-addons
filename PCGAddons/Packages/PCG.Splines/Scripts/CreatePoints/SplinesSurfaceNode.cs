@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -7,6 +8,7 @@ using PCG.Points;
 
 namespace PCG.CreatePoints
 {
+	[Serializable]
 	public class SplinesSurfaceNode : PcgPreviewNode
 	{
 		[Output] public List<PointData> Results => default;

@@ -1,0 +1,14 @@
+{
+    "id": "Task_20260607_131000",
+    "status": "success",
+    "logs": [
+        "[A] SceneView.drawGizmos = True",
+        "[B] PcgComponent in scene: 1",
+        "[C] PcgGraph windows open: 1",
+        "[D] Registry entries: 1",
+        "[E] Experiment started: drawing 100 red boxes at pivot (52.28, -43.82, 69.45) for ~150 editor ticks. Results in Temp/fastgizmos_diag.txt"
+    ],
+    "return_value": "Experiment scheduled",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

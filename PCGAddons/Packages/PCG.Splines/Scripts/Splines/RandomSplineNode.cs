@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -6,6 +7,7 @@ using PCG.GraphModel;
 
 namespace PCG.Splines
 {
+	[Serializable]
 	public class RandomSplineNode : PcgPreviewNode
 	{
 		[Output] public List<Spline> Results => default;

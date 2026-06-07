@@ -68,6 +68,8 @@ namespace PCG.Setup
 
 		private void OnGUI()
 		{
+			PcgSetupBanner.Draw();
+			EditorGUILayout.Space(6f);
 			DrawRow("UniTask (required)",
 				"Allocation-free async/await library used by the PCG4U compute pipeline.",
 				PcgSetupConstants.UniTaskPackageName,
