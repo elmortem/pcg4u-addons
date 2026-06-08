@@ -28,7 +28,11 @@ PCG4U provides a visual graph-based system for procedural generation. It lets yo
 * [[Instancers|Instancers]] - creating objects in scene
 
 ## Addons
-* [[Splines|Splines-Addon]] - Unity Splines integration
-* [[SpriteShapes|SpriteShapes-Addon]] - 2D SpriteShape support
-* [[Mazes|Mazes-Addon]] - maze and graph generation
-* [[BRG|BRG-Addon]] - BatchRendererGroup rendering
+
+PCG4U is extended by optional addon packages, installed separately via the Unity Package Manager. See [[Addons|Addons]] for the full list and installation.
+
+* **Splines** - Unity Splines integration
+* **SpriteShapes** - 2D SpriteShape support
+* **Mazes** - maze and graph generation
+* **BRG** - BatchRendererGroup rendering
+* **Octree** - octree-based spatial point queries

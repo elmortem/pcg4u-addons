@@ -70,7 +70,7 @@ namespace PCG.SpriteShapes
 			controller.transform.localPosition = p;
 		}
 
-		public override async UniTask<bool> TryAdd(int ownerNodeId, string groupName, IEnumerable<InstanceData> instances, CancellationToken ct = default)
+		public override async UniTask<bool> TryAdd(string ownerKey, string groupName, IEnumerable<InstanceData> instances, CancellationToken ct = default)
 		{
 			if (instances == null)
 			{
@@ -91,11 +91,11 @@ namespace PCG.SpriteShapes
 			
 			var spriteShapes = instanceDatas.Cast<SpriteShapeInstanceData>();
 			
-			using (var scope = OperationScope.Start(ownerNodeId))
+			using (var scope = OperationScope.Start(ownerKey))
 			{
 				foreach (var data in spriteShapes)
 				{
-					var item = GetObjectsItem(ownerNodeId, groupName);
+					var item = GetObjectsItem(ownerKey, groupName);
 					var go = AddSpriteShape(data, item.Parent);
 					item.Objects.Add(go);
 					

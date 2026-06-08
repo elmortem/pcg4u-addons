@@ -46,8 +46,4 @@ Many nodes have 2 checkboxes in bottom-left corner:
 
 ## Addon Nodes
 
-* [[Spline Nodes|Splines-Addon]]
-* [[Maze Nodes|Mazes-Addon]]
-* [[SpriteShape Nodes|SpriteShapes-Addon]]
-* [[Octree Nodes|Octree-Addon]]
-* [[BRG Nodes|BRG-Addon]]
+Addon nodes are shipped in their own packages. See [[Addons|Addons]] for the list of addons and how to install them; each addon's node documentation is included inside its package.

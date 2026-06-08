@@ -501,7 +501,6 @@ MonoBehaviour:
     - rid: 7906782876126674951
     - rid: 7906782876126674952
     - rid: 7906782876126674953
-    - rid: 7906782876126674954
     Edges:
     - FromNodeId: 3
       FromPort: Value
@@ -666,22 +665,6 @@ MonoBehaviour:
         Width: 220
         Title: 
         VariableId: Int
-    - rid: 7906782876126674954
-      type: {class: PointsNearSplinesNode, ns: PCG.SelectPoints, asm: PCG.Splines}
-      data:
-        Id: 9
-        Position: {x: -1691.7268, y: 317.1601}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Points: []
-        Splines: []
-        Distance: 1
 --- !u!4 &1697597767
 Transform:
   m_ObjectHideFlags: 0

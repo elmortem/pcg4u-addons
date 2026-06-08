@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -524942693, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: ForestGraph
+  m_EditorClassIdentifier: 
+  GraphData:
+    Nodes:
+    - rid: 7906782834765070373
+    - rid: 7906782834765070374
+    Edges: []
+    NextNodeId: 3
+    Variables: []
+  ContentVersion: 30
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 7906782834765070373
+      type: {class: SubGraphInputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        Id: 1
+        Position: {x: 130, y: 186}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        Name: TreePrefabs
+        Value:
+          rid: 7906782834765070377
+    - rid: 7906782834765070374
+      type: {class: SubGraphInputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        Id: 2
+        Position: {x: 117, y: 340}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        Name: Input
+        Value:
+          rid: -2
+    - rid: 7906782834765070377
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []

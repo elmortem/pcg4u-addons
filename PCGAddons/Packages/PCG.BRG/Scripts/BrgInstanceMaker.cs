@@ -19,7 +19,7 @@ namespace PCG.BRG
 		{
 		}
 		
-		public override async UniTask<bool> TryAdd(int ownerNodeId, string groupName, IEnumerable<InstanceData> instances, CancellationToken ct = default)
+		public override async UniTask<bool> TryAdd(string ownerKey, string groupName, IEnumerable<InstanceData> instances, CancellationToken ct = default)
 		{
 			if (instances == null)
 			{
@@ -32,7 +32,7 @@ namespace PCG.BRG
 				return false;
 			}
 			
-			using (var scope = OperationScope.Start(ownerNodeId))
+			using (var scope = OperationScope.Start(ownerKey))
 			{
 				foreach (var data in instanceDatas)
 				{
@@ -64,7 +64,7 @@ namespace PCG.BRG
 						var count = Mathf.CeilToInt(brgData.Points.Count / 65000f);
 						for (int i = 0; i < count; i++)
 						{
-							var item = GetObjectsItem(ownerNodeId, groupName);
+							var item = GetObjectsItem(ownerKey, groupName);
 							var go = new GameObject($"RBG_{prefab.name}_{i}");
 							go.transform.parent = item.Parent;
 							item.Objects.Add(go);

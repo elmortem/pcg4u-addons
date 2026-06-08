@@ -1,0 +1,886 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!29 &1
+OcclusionCullingSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_OcclusionBakeSettings:
+    smallestOccluder: 5
+    smallestHole: 0.25
+    backfaceThreshold: 100
+  m_SceneGUID: 00000000000000000000000000000000
+  m_OcclusionCullingData: {fileID: 0}
+--- !u!104 &2
+RenderSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 9
+  m_Fog: 0
+  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogMode: 3
+  m_FogDensity: 0.01
+  m_LinearFogStart: 0
+  m_LinearFogEnd: 300
+  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
+  m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
+  m_AmbientIntensity: 1
+  m_AmbientMode: 0
+  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_HaloStrength: 0.5
+  m_FlareStrength: 1
+  m_FlareFadeSpeed: 3
+  m_HaloTexture: {fileID: 0}
+  m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
+  m_DefaultReflectionMode: 0
+  m_DefaultReflectionResolution: 128
+  m_ReflectionBounces: 1
+  m_ReflectionIntensity: 1
+  m_CustomReflection: {fileID: 0}
+  m_Sun: {fileID: 0}
+  m_UseRadianceAmbientProbe: 0
+--- !u!157 &3
+LightmapSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 12
+  m_GIWorkflowMode: 1
+  m_GISettings:
+    serializedVersion: 2
+    m_BounceScale: 1
+    m_IndirectOutputScale: 1
+    m_AlbedoBoost: 1
+    m_EnvironmentLightingMode: 0
+    m_EnableBakedLightmaps: 1
+    m_EnableRealtimeLightmaps: 0
+  m_LightmapEditorSettings:
+    serializedVersion: 12
+    m_Resolution: 2
+    m_BakeResolution: 40
+    m_AtlasSize: 1024
+    m_AO: 0
+    m_AOMaxDistance: 1
+    m_CompAOExponent: 1
+    m_CompAOExponentDirect: 0
+    m_ExtractAmbientOcclusion: 0
+    m_Padding: 2
+    m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
+    m_TextureCompression: 1
+    m_FinalGather: 0
+    m_FinalGatherFiltering: 1
+    m_FinalGatherRayCount: 256
+    m_ReflectionCompression: 2
+    m_MixedBakeMode: 2
+    m_BakeBackend: 1
+    m_PVRSampling: 1
+    m_PVRDirectSampleCount: 32
+    m_PVRSampleCount: 512
+    m_PVRBounces: 2
+    m_PVREnvironmentSampleCount: 256
+    m_PVREnvironmentReferencePointCount: 2048
+    m_PVRFilteringMode: 1
+    m_PVRDenoiserTypeDirect: 1
+    m_PVRDenoiserTypeIndirect: 1
+    m_PVRDenoiserTypeAO: 1
+    m_PVRFilterTypeDirect: 0
+    m_PVRFilterTypeIndirect: 0
+    m_PVRFilterTypeAO: 0
+    m_PVREnvironmentMIS: 1
+    m_PVRCulling: 1
+    m_PVRFilteringGaussRadiusDirect: 1
+    m_PVRFilteringGaussRadiusIndirect: 5
+    m_PVRFilteringGaussRadiusAO: 2
+    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
+    m_PVRFilteringAtrousPositionSigmaIndirect: 2
+    m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
+  m_LightingDataAsset: {fileID: 0}
+  m_LightingSettings: {fileID: 0}
+--- !u!196 &4
+NavMeshSettings:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_BuildSettings:
+    serializedVersion: 3
+    agentTypeID: 0
+    agentRadius: 0.5
+    agentHeight: 2
+    agentSlope: 45
+    agentClimb: 0.4
+    ledgeDropHeight: 0
+    maxJumpAcrossDistance: 0
+    minRegionArea: 2
+    manualCellSize: 0
+    cellSize: 0.16666667
+    manualTileSize: 0
+    tileSize: 256
+    buildHeightMesh: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
+    debug:
+      m_Flags: 0
+  m_NavMeshData: {fileID: 0}
+--- !u!1 &9802076
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9802079}
+  - component: {fileID: 9802078}
+  - component: {fileID: 9802077}
+  m_Layer: 0
+  m_Name: Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!81 &9802077
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9802076}
+  m_Enabled: 1
+--- !u!20 &9802078
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9802076}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &9802079
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9802076}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &396170539
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 396170541}
+  - component: {fileID: 396170540}
+  m_Layer: 0
+  m_Name: Directional Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!108 &396170540
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396170539}
+  m_Enabled: 1
+  serializedVersion: 10
+  m_Type: 1
+  m_Shape: 0
+  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Intensity: 1
+  m_Range: 10
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 2
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+--- !u!4 &396170541
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396170539}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1013409670
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1013409674}
+  - component: {fileID: 1013409673}
+  - component: {fileID: 1013409672}
+  - component: {fileID: 1013409671}
+  m_Layer: 0
+  m_Name: PcgGrass
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1013409671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013409670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -327042926, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Terrains:
+  - Terrain: {fileID: 1300180583}
+    TreeInstances: []
+    GrassInstances:
+    - OwnerNodeId: 13
+      DetailIndex: 0
+--- !u!114 &1013409672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013409670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 873139010, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Parent: {fileID: 1013409674}
+  Groups: []
+  Items: []
+--- !u!114 &1013409673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013409670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1518408817, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GraphId: d8fa3b5b35bc4c108c80211131b14eb3
+  GraphData:
+    Nodes:
+    - rid: 7906782834765070383
+    - rid: 7906782834765070384
+    - rid: 7906782834765070392
+    - rid: 7906782834765070404
+    - rid: 7906782834765070417
+    - rid: 7906782834765070436
+    - rid: 7906782834765070437
+    - rid: 7906782834765070439
+    - rid: 7906782834765070440
+    - rid: 7906782834765070441
+    - rid: 7906782834765070443
+    - rid: 7906782834765070460
+    - rid: 7906782834765070461
+    - rid: 7906782834765070462
+    Edges:
+    - FromNodeId: 4
+      FromPort: Terrain
+      ToNodeId: 2
+      ToPort: vTerrainObject_Terrain
+    - FromNodeId: 4
+      FromPort: Offset
+      ToNodeId: 2
+      ToPort: vTerrainObject_Offset
+    - FromNodeId: 7
+      FromPort: Value
+      ToNodeId: 2
+      ToPort: vInt
+    - FromNodeId: 10
+      FromPort: Value
+      ToNodeId: 2
+      ToPort: vInt_1
+    - FromNodeId: 8
+      FromPort: Value
+      ToNodeId: 2
+      ToPort: vTerrainGrassDetailWeights
+    - FromNodeId: 4
+      FromPort: Terrain
+      ToNodeId: 11
+      ToPort: Terrain
+    - FromNodeId: 4
+      FromPort: Offset
+      ToNodeId: 11
+      ToPort: Offset
+    - FromNodeId: 10
+      FromPort: Value
+      ToNodeId: 11
+      ToPort: Count
+    - FromNodeId: 7
+      FromPort: Value
+      ToNodeId: 11
+      ToPort: Seed
+    - FromNodeId: 15
+      FromPort: Value
+      ToNodeId: 13
+      ToPort: Seed
+    - FromNodeId: 14
+      FromPort: Value
+      ToNodeId: 13
+      ToPort: Details
+    - FromNodeId: 11
+      FromPort: Results
+      ToNodeId: 16
+      ToPort: Points
+    - FromNodeId: 17
+      FromPort: Value
+      ToNodeId: 2
+      ToPort: vGameObjectWeights
+    - FromNodeId: 13
+      FromPort: Results
+      ToNodeId: 1
+      ToPort: Instances
+    - FromNodeId: 16
+      FromPort: Results
+      ToNodeId: 18
+      ToPort: Points
+    - FromNodeId: 19
+      FromPort: Value
+      ToNodeId: 18
+      ToPort: Seed
+    - FromNodeId: 18
+      FromPort: Results
+      ToNodeId: 13
+      ToPort: Points
+    NextNodeId: 20
+    Variables:
+    - Id: TerrainObject
+      Name: Terrain
+      Default:
+        rid: 7906782834765070390
+    - Id: Int
+      Name: Seed
+      Default:
+        rid: 7906782834765070397
+    - Id: TerrainGrassDetailWeights
+      Name: GrassDetails
+      Default:
+        rid: 7906782834765070415
+    - Id: GameObjectWeights
+      Name: FlowerPrefabs
+      Default:
+        rid: 7906782834765070418
+    - Id: Int_1
+      Name: GrassCount
+      Default:
+        rid: 7906782834765070434
+  Variables:
+  - Id: TerrainObject
+    Value:
+      rid: 7906782834765070391
+  - Id: Int
+    Value:
+      rid: 7906782834765070398
+  - Id: TerrainGrassDetailWeights
+    Value:
+      rid: 7906782834765070416
+  - Id: GameObjectWeights
+    Value:
+      rid: 7906782834765070419
+  - Id: Int_1
+    Value:
+      rid: 7906782834765070435
+  InstanceMakerComponents:
+  - {fileID: 1013409672}
+  - {fileID: 1013409671}
+  GeneratedVersions:
+  - NodeId: 2
+    Version: 279575694
+  EditorMaxZoom: 1.8
+  AutoCompactZoom: 0.6
+  DrawPointsDistance: 50
+  references:
+    version: 2
+    RefIds:
+    - rid: 7906782834765070383
+      type: {class: ResultNode, ns: PCG, asm: PCG}
+      data:
+        Id: 1
+        Position: {x: 671.5497, y: 627.275}
+        Collapsed: 0
+        Width: 220
+        Title: 
+    - rid: 7906782834765070384
+      type: {class: SubGraphNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        Id: 2
+        Position: {x: -742, y: -67}
+        Collapsed: 0
+        Width: 220
+        Title: Sub Graph
+        SubGraph: {fileID: 11400000, guid: 4b26bca202e093747bdbc926be791bd1, type: 2}
+        VariableValues:
+        - Id: TerrainObject
+          Value:
+            rid: 7906782834765070429
+        - Id: Int
+          Value:
+            rid: 7906782834765070430
+        - Id: Int_1
+          Value:
+            rid: 7906782834765070431
+        - Id: TerrainGrassDetailWeights
+          Value:
+            rid: 7906782834765070432
+        - Id: GameObjectWeights
+          Value:
+            rid: 7906782834765070459
+    - rid: 7906782834765070390
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 0}
+    - rid: 7906782834765070391
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 1300180583}
+    - rid: 7906782834765070392
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 4
+        Position: {x: -959.10645, y: -57.184143}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: TerrainObject
+    - rid: 7906782834765070397
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 12345
+    - rid: 7906782834765070398
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 12345
+    - rid: 7906782834765070404
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 7
+        Position: {x: -947.7317, y: 32.853485}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070415
+      type: {class: TerrainGrassDetailWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Details: []
+    - rid: 7906782834765070416
+      type: {class: TerrainGrassDetailWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Details:
+        - DetailPrefab: {fileID: 4150921509123921083, guid: d3cc81e7246b1c04fb9feb749c13ca7d, type: 3}
+          DetailTexture: {fileID: 0}
+          MinWidth: 1
+          MaxWidth: 2
+          MinHeight: 1
+          MaxHeight: 2
+          Density: 3
+          Radius: 20
+          Weight: 2
+    - rid: 7906782834765070417
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 8
+        Position: {x: -1040.0193, y: 120.3692}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: TerrainGrassDetailWeights
+    - rid: 7906782834765070418
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []
+    - rid: 7906782834765070419
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights:
+        - Prefab: {fileID: 284655108346373599, guid: bd748a8ba751d824d80e7c1cc526cd10, type: 3}
+          Weight: 5
+        - Prefab: {fileID: 1891582194234202150, guid: 9d7a65209b4364e42b9a82c74038cab2, type: 3}
+          Weight: 1
+    - rid: 7906782834765070429
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 0}
+    - rid: 7906782834765070430
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 12345
+    - rid: 7906782834765070431
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1000
+    - rid: 7906782834765070432
+      type: {class: TerrainGrassDetailWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Details: []
+    - rid: 7906782834765070434
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1000
+    - rid: 7906782834765070435
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 100000
+    - rid: 7906782834765070436
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 10
+        Position: {x: -969.0137, y: 77.54318}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int_1
+    - rid: 7906782834765070437
+      type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
+      data:
+        Id: 11
+        Position: {x: -718.68304, y: 454.31436}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Count: 100
+        Seed: -1
+        PoissonMinDistance: 1
+        ShuffleRegularPoints: 0
+        PointMode: 5
+    - rid: 7906782834765070439
+      type: {class: TerrainGrassDetailWeightsNode, ns: PCG.Instances, asm: PCG}
+      data:
+        Id: 13
+        Position: {x: 264.5738, y: 626.83417}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Points: []
+        Seed: -1
+        Details:
+        - DetailPrefab: {fileID: 4150921509123921083, guid: d3cc81e7246b1c04fb9feb749c13ca7d, type: 3}
+          DetailTexture: {fileID: 0}
+          MinWidth: 1
+          MaxWidth: 1
+          MinHeight: 1
+          MaxHeight: 1
+          Density: 8
+          Radius: 4
+          Weight: 2
+    - rid: 7906782834765070440
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 14
+        Position: {x: 56.093086, y: 802.6417}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: TerrainGrassDetailWeights
+    - rid: 7906782834765070441
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 15
+        Position: {x: 93.81025, y: 756.9558}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070443
+      type: {class: PointsNearPointsNode, ns: PCG.SelectPoints, asm: PCG}
+      data:
+        Id: 16
+        Position: {x: -394.87503, y: 457.53375}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        OtherPoints: []
+        Radius: 5
+        RemoveThemselves: 1
+        UseScale: 0
+    - rid: 7906782834765070459
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []
+    - rid: 7906782834765070460
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 17
+        Position: {x: -1096.6884, y: 322.51715}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: GameObjectWeights
+    - rid: 7906782834765070461
+      type: {class: ChangeDensityNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 18
+        Position: {x: -43.935455, y: 455.9334}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0.5
+        Max: 2
+        Seed: -1
+        Mode: 2
+    - rid: 7906782834765070462
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 19
+        Position: {x: -257.83478, y: 727.7289}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+--- !u!4 &1013409674
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013409670}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1300180581
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1300180584}
+  - component: {fileID: 1300180583}
+  - component: {fileID: 1300180582}
+  m_Layer: 0
+  m_Name: Terrain
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!154 &1300180582
+TerrainCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1300180581}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_TerrainData: {fileID: 15600000, guid: b96bd93acc8602c4097750c1e76f1a54, type: 2}
+  m_EnableTreeColliders: 1
+--- !u!218 &1300180583
+Terrain:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1300180581}
+  m_Enabled: 1
+  serializedVersion: 6
+  m_TerrainData: {fileID: 15600000, guid: b96bd93acc8602c4097750c1e76f1a54, type: 2}
+  m_TreeDistance: 5000
+  m_TreeBillboardDistance: 50
+  m_TreeCrossFadeLength: 5
+  m_TreeMaximumFullLODCount: 50
+  m_DetailObjectDistance: 80
+  m_DetailObjectDensity: 1
+  m_HeightmapPixelError: 5
+  m_SplatMapDistance: 1000
+  m_HeightmapMinimumLODSimplification: 0
+  m_HeightmapMaximumLOD: 0
+  m_ShadowCastingMode: 2
+  m_DrawHeightmap: 1
+  m_DrawInstanced: 0
+  m_DrawTreesAndFoliage: 1
+  m_StaticShadowCaster: 0
+  m_IgnoreQualitySettings: 0
+  m_ReflectionProbeUsage: 1
+  m_MaterialTemplate: {fileID: 10652, guid: 0000000000000000f000000000000000, type: 0}
+  m_BakeLightProbesForTrees: 1
+  m_PreserveTreePrototypeLayers: 0
+  m_DeringLightProbesForTrees: 1
+  m_ReceiveGI: 1
+  m_ScaleInLightmap: 0.0256
+  m_LightmapParameters: {fileID: 15203, guid: 0000000000000000f000000000000000, type: 0}
+  m_GroupingID: 0
+  m_RenderingLayerMask: 1
+  m_AllowAutoConnect: 1
+  m_EnableHeightmapRayTracing: 1
+  m_EnableTreesAndDetailsRayTracing: 0
+  m_TreeMotionVectorModeOverride: 3
+--- !u!4 &1300180584
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1300180581}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 9802079}
+  - {fileID: 396170541}
+  - {fileID: 1013409674}
+  - {fileID: 1300180584}
