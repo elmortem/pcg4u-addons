@@ -343,7 +343,7 @@ MonoBehaviour:
   - Terrain: {fileID: 1300180583}
     TreeInstances: []
     GrassInstances:
-    - OwnerNodeId: 13
+    - OwnerKey: sg:1:2:o9
       DetailIndex: 0
 --- !u!114 &1013409672
 MonoBehaviour:
@@ -381,14 +381,7 @@ MonoBehaviour:
     - rid: 7906782834765070404
     - rid: 7906782834765070417
     - rid: 7906782834765070436
-    - rid: 7906782834765070437
-    - rid: 7906782834765070439
-    - rid: 7906782834765070440
-    - rid: 7906782834765070441
-    - rid: 7906782834765070443
     - rid: 7906782834765070460
-    - rid: 7906782834765070461
-    - rid: 7906782834765070462
     Edges:
     - FromNodeId: 4
       FromPort: Terrain
@@ -410,54 +403,14 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 2
       ToPort: vTerrainGrassDetailWeights
-    - FromNodeId: 4
-      FromPort: Terrain
-      ToNodeId: 11
-      ToPort: Terrain
-    - FromNodeId: 4
-      FromPort: Offset
-      ToNodeId: 11
-      ToPort: Offset
-    - FromNodeId: 10
-      FromPort: Value
-      ToNodeId: 11
-      ToPort: Count
-    - FromNodeId: 7
-      FromPort: Value
-      ToNodeId: 11
-      ToPort: Seed
-    - FromNodeId: 15
-      FromPort: Value
-      ToNodeId: 13
-      ToPort: Seed
-    - FromNodeId: 14
-      FromPort: Value
-      ToNodeId: 13
-      ToPort: Details
-    - FromNodeId: 11
-      FromPort: Results
-      ToNodeId: 16
-      ToPort: Points
     - FromNodeId: 17
       FromPort: Value
       ToNodeId: 2
       ToPort: vGameObjectWeights
-    - FromNodeId: 13
-      FromPort: Results
+    - FromNodeId: 2
+      FromPort: o9
       ToNodeId: 1
       ToPort: Instances
-    - FromNodeId: 16
-      FromPort: Results
-      ToNodeId: 18
-      ToPort: Points
-    - FromNodeId: 19
-      FromPort: Value
-      ToNodeId: 18
-      ToPort: Seed
-    - FromNodeId: 18
-      FromPort: Results
-      ToNodeId: 13
-      ToPort: Points
     NextNodeId: 20
     Variables:
     - Id: TerrainObject
@@ -501,7 +454,11 @@ MonoBehaviour:
   - {fileID: 1013409671}
   GeneratedVersions:
   - NodeId: 2
-    Version: 279575694
+    OwnerKey: 2
+    Version: 879198282
+  - NodeId: 0
+    OwnerKey: sg:1:2:o9
+    Version: -1349513700
   EditorMaxZoom: 1.8
   AutoCompactZoom: 0.6
   DrawPointsDistance: 50
@@ -512,7 +469,7 @@ MonoBehaviour:
       type: {class: ResultNode, ns: PCG, asm: PCG}
       data:
         Id: 1
-        Position: {x: 671.5497, y: 627.275}
+        Position: {x: -389.07367, y: 59.76953}
         Collapsed: 0
         Width: 220
         Title: 
@@ -570,7 +527,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 7
-        Position: {x: -947.7317, y: 32.853485}
+        Position: {x: -957.3921, y: 31.47342}
         Collapsed: 0
         Width: 220
         Title: 
@@ -589,14 +546,14 @@ MonoBehaviour:
           MaxWidth: 2
           MinHeight: 1
           MaxHeight: 2
-          Density: 3
+          Density: 2
           Radius: 20
-          Weight: 2
+          Weight: 1
     - rid: 7906782834765070417
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 8
-        Position: {x: -1040.0193, y: 120.3692}
+        Position: {x: -998.61804, y: 124.50934}
         Collapsed: 0
         Width: 220
         Title: 
@@ -641,93 +598,11 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 10
-        Position: {x: -969.0137, y: 77.54318}
+        Position: {x: -988.3342, y: 77.54318}
         Collapsed: 0
         Width: 220
         Title: 
         VariableId: Int_1
-    - rid: 7906782834765070437
-      type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
-      data:
-        Id: 11
-        Position: {x: -718.68304, y: 454.31436}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Terrain: {fileID: 0}
-        Offset: {x: 0, y: 0, z: 0}
-        Count: 100
-        Seed: -1
-        PoissonMinDistance: 1
-        ShuffleRegularPoints: 0
-        PointMode: 5
-    - rid: 7906782834765070439
-      type: {class: TerrainGrassDetailWeightsNode, ns: PCG.Instances, asm: PCG}
-      data:
-        Id: 13
-        Position: {x: 264.5738, y: 626.83417}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Enabled: 1
-        Points: []
-        Seed: -1
-        Details:
-        - DetailPrefab: {fileID: 4150921509123921083, guid: d3cc81e7246b1c04fb9feb749c13ca7d, type: 3}
-          DetailTexture: {fileID: 0}
-          MinWidth: 1
-          MaxWidth: 1
-          MinHeight: 1
-          MaxHeight: 1
-          Density: 8
-          Radius: 4
-          Weight: 2
-    - rid: 7906782834765070440
-      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
-      data:
-        Id: 14
-        Position: {x: 56.093086, y: 802.6417}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        VariableId: TerrainGrassDetailWeights
-    - rid: 7906782834765070441
-      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
-      data:
-        Id: 15
-        Position: {x: 93.81025, y: 756.9558}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        VariableId: Int
-    - rid: 7906782834765070443
-      type: {class: PointsNearPointsNode, ns: PCG.SelectPoints, asm: PCG}
-      data:
-        Id: 16
-        Position: {x: -394.87503, y: 457.53375}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Points: []
-        OtherPoints: []
-        Radius: 5
-        RemoveThemselves: 1
-        UseScale: 0
     - rid: 7906782834765070459
       type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
       data:
@@ -736,38 +611,11 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 17
-        Position: {x: -1096.6884, y: 322.51715}
+        Position: {x: -1004.2259, y: 167.95276}
         Collapsed: 0
         Width: 220
         Title: 
         VariableId: GameObjectWeights
-    - rid: 7906782834765070461
-      type: {class: ChangeDensityNode, ns: PCG.TransformPoints, asm: PCG}
-      data:
-        Id: 18
-        Position: {x: -43.935455, y: 455.9334}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Points: []
-        Min: 0.5
-        Max: 2
-        Seed: -1
-        Mode: 2
-    - rid: 7906782834765070462
-      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
-      data:
-        Id: 19
-        Position: {x: -257.83478, y: 727.7289}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        VariableId: Int
 --- !u!4 &1013409674
 Transform:
   m_ObjectHideFlags: 0
@@ -835,7 +683,7 @@ Terrain:
   m_TreeBillboardDistance: 50
   m_TreeCrossFadeLength: 5
   m_TreeMaximumFullLODCount: 50
-  m_DetailObjectDistance: 80
+  m_DetailObjectDistance: 1500
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 5
   m_SplatMapDistance: 1000

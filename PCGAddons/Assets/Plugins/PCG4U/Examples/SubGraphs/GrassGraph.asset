@@ -35,6 +35,8 @@ MonoBehaviour:
     - rid: 7906782834765070454
     - rid: 7906782834765070456
     - rid: 7906782834765070457
+    - rid: 7906782834765070463
+    - rid: 7906782834765070464
     Edges:
     - FromNodeId: 3
       FromPort: Results
@@ -120,14 +122,6 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 29
       ToPort: Value
-    - FromNodeId: 12
-      FromPort: Value
-      ToNodeId: 10
-      ToPort: Seed
-    - FromNodeId: 12
-      FromPort: Value
-      ToNodeId: 16
-      ToPort: Seed
     - FromNodeId: 6
       FromPort: Results
       ToNodeId: 16
@@ -136,7 +130,15 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 4
       ToPort: Value
-    NextNodeId: 30
+    - FromNodeId: 30
+      FromPort: Value
+      ToNodeId: 16
+      ToPort: Seed
+    - FromNodeId: 31
+      FromPort: Value
+      ToNodeId: 10
+      ToPort: Seed
+    NextNodeId: 32
     Variables:
     - Id: TerrainObject
       Name: Terrain
@@ -158,7 +160,7 @@ MonoBehaviour:
       Name: FlowerPrefabs
       Default:
         rid: 7906782834765070455
-  ContentVersion: 282
+  ContentVersion: 292
   references:
     version: 2
     RefIds:
@@ -186,7 +188,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 4
-        Position: {x: 1757.0776, y: 74.392075}
+        Position: {x: 1771.6235, y: 85.70557}
         Collapsed: 0
         Width: 220
         Title: 
@@ -219,7 +221,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 9
-        Position: {x: 1772.2467, y: 607.63196}
+        Position: {x: 1775.479, y: 424.9995}
         Collapsed: 0
         Width: 220
         Title: 
@@ -230,7 +232,7 @@ MonoBehaviour:
       type: {class: TerrainGrassDetailWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
         Id: 10
-        Position: {x: 1436.1462, y: 482.19275}
+        Position: {x: 1455.5408, y: 419.16028}
         Collapsed: 0
         Width: 220
         Title: 
@@ -294,7 +296,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 15
-        Position: {x: 1248.4348, y: 720.9057}
+        Position: {x: 1181.76, y: 704.949}
         Collapsed: 0
         Width: 220
         Title: 
@@ -457,3 +459,21 @@ MonoBehaviour:
       type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
       data:
         InstanceDatas: []
+    - rid: 7906782834765070463
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 30
+        Position: {x: 875.256, y: 666.4677}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070464
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 31
+        Position: {x: 1212.8738, y: 657.58484}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
