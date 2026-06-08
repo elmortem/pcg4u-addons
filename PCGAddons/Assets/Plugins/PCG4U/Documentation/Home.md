@@ -1,8 +1,8 @@
-PCG (Procedural Content Generation) for Unity - node-based tool for creating procedural content in Unity Editor and runtime.
+PCG4U (Procedural Content Generation for Unity) - node-based tool for creating procedural content in Unity Editor and runtime.
 
 ## Overview
 
-Unity PCG provides a visual graph-based system for procedural generation. Built on XNode, it allows you to create complex generation pipelines by connecting nodes that process and transform data.
+PCG4U provides a visual graph-based system for procedural generation. It lets you build complex generation pipelines by connecting nodes that process and transform data.
 
 **Key features:**
 * **Node-based workflow** - visual graph editor for building generation logic

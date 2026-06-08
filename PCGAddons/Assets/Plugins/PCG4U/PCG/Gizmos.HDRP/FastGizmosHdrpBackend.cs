@@ -25,7 +25,7 @@ namespace PCG.Fast.Hdrp
 			_volumeHost.hideFlags = HideFlags.HideAndDontSave;
 			var volume = _volumeHost.AddComponent<CustomPassVolume>();
 			volume.isGlobal = true;
-			volume.injectionPoint = CustomPassInjectionPoint.BeforeTransparent;
+			volume.injectionPoint = CustomPassInjectionPoint.BeforePostProcess;
 			volume.AddPassOfType(typeof(FastGizmosHdrpPass));
 
 			FastGizmosHdrpPass.Backend = this;

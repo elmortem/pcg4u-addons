@@ -1,6 +1,6 @@
 ## How it works
 
-PCG nodes are XNode-based graph elements that process and generate procedural data. Nodes connect via input/output ports to form processing pipelines.
+PCG nodes are graph elements that process and generate procedural data. Nodes connect via input/output ports to form processing pipelines.
 
 Node execution flow:
 1. Nodes with inputs request data from connected upstream nodes
@@ -41,6 +41,7 @@ Many nodes have 2 checkboxes in bottom-left corner:
 
 ### Instances
 * [[GameObjects Node|PCG/Instances/Game-Objects-Node]] - converts points to GameObject instances
+* [[GameObjects Assembly Node|PCG/Instances/Game-Objects-Assembly-Node]] - stamps a prefab collage on each point as per-element instances
 * [[Terrain Grass Detail Node|PCG/Instances/Terrain-Grass-Detail-Node]] - converts points to terrain details
 
 ## Addon Nodes

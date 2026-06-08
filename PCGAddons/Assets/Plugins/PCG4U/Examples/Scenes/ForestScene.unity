@@ -24629,6 +24629,7 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Count: 200000
         Seed: 1088412912
+        PoissonMinDistance: 1
         ShuffleRegularPoints: 0
         PointMode: 1
     - rid: 7906782793500721247
@@ -24740,6 +24741,7 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Count: 500000
         Seed: 1089436801
+        PoissonMinDistance: 1
         ShuffleRegularPoints: 0
         PointMode: 1
     - rid: 7906782793500721252
@@ -24912,6 +24914,7 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Count: 100000
         Seed: 1088709320
+        PoissonMinDistance: 1
         ShuffleRegularPoints: 1
         PointMode: 1
     - rid: 7906782793500721260
