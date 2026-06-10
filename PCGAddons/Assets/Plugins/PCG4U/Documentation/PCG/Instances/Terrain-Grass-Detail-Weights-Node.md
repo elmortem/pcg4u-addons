@@ -14,7 +14,7 @@ Grass patches will be spawned at these points.
 
 ### Seed
 
-Seed for deterministic weighted selection. Use -1 for non-deterministic behavior.
+Seed for deterministic weighted selection. Use 0 or less for non-deterministic behavior — a random seed is generated and stored on bind.
 
 ## Variables
 

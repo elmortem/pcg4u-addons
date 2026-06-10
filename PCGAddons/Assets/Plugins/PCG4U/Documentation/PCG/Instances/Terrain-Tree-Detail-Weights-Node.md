@@ -14,10 +14,10 @@ Each point will select a tree detail according to the weights in the `Details` l
 
 ### Seed
 
-Seed for deterministic weighted selection. Use -1 for non-deterministic behavior.
+Seed for deterministic weighted selection. Use 0 or less for non-deterministic behavior — a random seed is generated and stored on bind.
 
 #### Remarks
-If -1, the node will use a random seed for each computation.
+If 0 or less, the node generates a random seed and stores it on bind (stable across editor restarts).
 
 ## Variables
 

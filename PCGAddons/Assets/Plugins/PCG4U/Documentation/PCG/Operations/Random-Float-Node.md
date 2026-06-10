@@ -14,7 +14,7 @@ Lower bound (inclusive).
 
 ### Seed
 
-Random seed. Use -1 for non-deterministic behavior; a generated seed is assigned on bind so the value stays stable across editor restarts.
+Random seed. Use 0 or less for non-deterministic behavior; a generated seed is assigned on bind so the value stays stable across editor restarts.
 
 ## Outputs
 

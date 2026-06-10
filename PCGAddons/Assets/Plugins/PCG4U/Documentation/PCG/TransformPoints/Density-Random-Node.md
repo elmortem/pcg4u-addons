@@ -12,7 +12,7 @@ Input points to receive random density.
 
 ### Seed
 
-Seed for deterministic randomness. Use -1 for non-deterministic behavior.
+Seed for deterministic randomness. Use 0 or less for non-deterministic behavior — a random seed is generated and stored on bind.
 
 ## Outputs
 

@@ -27,7 +27,7 @@ The minimum distance between points used by the `Poisson` mode. Larger values yi
 
 ### Seed
 
-The seed for random number generation. `-1` picks a random seed on bind.
+The seed for random number generation. `0` or less picks a random seed on bind.
 
 ### Size
 

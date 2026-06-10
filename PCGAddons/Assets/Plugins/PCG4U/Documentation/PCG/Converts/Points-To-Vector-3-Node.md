@@ -14,7 +14,7 @@ Input list(s) of points to convert.
 
 ### Seed
 
-Seed for deterministic Random mode. Use -1 for non-deterministic behavior.
+Seed for deterministic Random mode. Use 0 or less for non-deterministic behavior — a random seed is generated and stored on bind.
 
 ## Variables
 

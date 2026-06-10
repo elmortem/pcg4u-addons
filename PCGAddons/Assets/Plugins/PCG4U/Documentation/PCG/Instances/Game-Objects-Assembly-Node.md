@@ -21,7 +21,7 @@ instanced as a single element.
 
 ### Seed
 
-Seed for deterministic variations. Use -1 for non-deterministic behavior.
+Seed for deterministic variations. Use 0 or less for non-deterministic behavior — a random seed is generated and stored on bind.
 
 ### Position Jitter
 

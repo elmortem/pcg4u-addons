@@ -14,7 +14,7 @@ Minimum range value (inclusive) for random generation.
 
 ### Seed
 
-Random seed. Use -1 for non-deterministic behavior.
+Random seed. Use 0 or less for non-deterministic behavior — a random seed is generated and stored on bind.
 
 ### Value
 
@@ -30,7 +30,7 @@ Mode of modification applied to the input value using a sampled vector R from [M
 - Set: Result = R (ignores Value)
 Notes:
 - If Min == Max, R equals Min (no randomness).
-- Randomness is controlled by Seed; Seed == -1 means non-deterministic.
+- Randomness is controlled by Seed; Seed <= 0 means non-deterministic (a random seed is generated on bind).
 
 ## Outputs
 
