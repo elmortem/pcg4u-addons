@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.GraphModel;
 using PCG.Splines.Utilities;
+using PCG.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -23,7 +24,7 @@ namespace PCG.Splines
 		{
 			base.OnBind();
 
-			if (Data.Seed == -1)
+			if (Data.Seed <= 0)
 				Data.Seed = UnityEngine.Random.Range(1, int.MaxValue);
 		}
 
@@ -81,7 +82,7 @@ namespace PCG.Splines
 			await UniTask.SwitchToThreadPool();
 
 			var batchResults = new List<Spline>();
-			var localRandom = new Unity.Mathematics.Random((uint)seed);
+			var localRandom = PcgRandom.Create(seed);
 
 			for (int i = start; i < end; i++)
 			{

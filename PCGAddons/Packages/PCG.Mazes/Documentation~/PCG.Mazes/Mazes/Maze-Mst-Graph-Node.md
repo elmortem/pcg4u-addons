@@ -11,7 +11,7 @@ Input graph to convert into maze.
 
 ### Seed
 
-Seed for deterministic randomization of edge weights. Use -1 for non-deterministic behavior.
+Seed for deterministic randomization of edge weights. Use 0 (or any value ≤ 0) for non-deterministic behavior.
 
 ## Outputs
 

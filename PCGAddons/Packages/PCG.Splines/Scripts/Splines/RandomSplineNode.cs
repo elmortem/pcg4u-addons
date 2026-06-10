@@ -20,6 +20,6 @@ namespace PCG.Splines
 
 		[Input] public Vector2 Height = new Vector2(3f, 5f);
 
-		[Input] public int Seed = -1;
+		[Input] public int Seed = 0;
 	}
 }

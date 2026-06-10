@@ -20,7 +20,7 @@ Points are processed in pairs - every two consecutive points form start and end 
 
 The seed for the random number generator.
 Using the same seed will produce identical spline variations.
-Set to -1 for random seed on startup.
+Set to 0 (or any value ≤ 0) for a random seed on startup.
 
 ### Segments
 

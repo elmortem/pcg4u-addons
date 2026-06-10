@@ -15,6 +15,6 @@ namespace PCG.Splines
 
 		[Input] public Vector3 Max = new(1f, 1f, 1f);
 
-		[Input] public int Seed = -1;
+		[Input] public int Seed = 0;
 	}
 }

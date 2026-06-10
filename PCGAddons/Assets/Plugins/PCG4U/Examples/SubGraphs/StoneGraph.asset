@@ -1,0 +1,519 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -524942693, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: StoneGraph
+  m_EditorClassIdentifier: 
+  GraphData:
+    Nodes:
+    - rid: 7906782834765070487
+    - rid: 7906782834765070488
+    - rid: 7906782834765070489
+    - rid: 7906782834765070490
+    - rid: 7906782834765070491
+    - rid: 7906782834765070492
+    - rid: 7906782834765070493
+    - rid: 7906782834765070494
+    - rid: 7906782834765070495
+    - rid: 7906782834765070496
+    - rid: 7906782834765070497
+    - rid: 7906782834765070498
+    - rid: 7906782834765070499
+    - rid: 7906782834765070500
+    - rid: 7906782834765070504
+    - rid: 7906782834765070505
+    - rid: 7906782834765070506
+    - rid: 7906782834765070507
+    - rid: 7906782834765070508
+    - rid: 7906782834765070509
+    - rid: 7906782834765070510
+    - rid: 7906782834765070529
+    - rid: 7906782943574228999
+    - rid: 7906782943574229000
+    - rid: 7906782943574229001
+    Edges:
+    - FromNodeId: 1
+      FromPort: Terrain
+      ToNodeId: 2
+      ToPort: Terrain
+    - FromNodeId: 1
+      FromPort: Offset
+      ToNodeId: 2
+      ToPort: Offset
+    - FromNodeId: 3
+      FromPort: Value
+      ToNodeId: 2
+      ToPort: Count
+    - FromNodeId: 4
+      FromPort: Value
+      ToNodeId: 2
+      ToPort: Seed
+    - FromNodeId: 5
+      FromPort: Results
+      ToNodeId: 6
+      ToPort: Points
+    - FromNodeId: 6
+      FromPort: Results
+      ToNodeId: 7
+      ToPort: Points
+    - FromNodeId: 8
+      FromPort: Value
+      ToNodeId: 6
+      ToPort: Seed
+    - FromNodeId: 9
+      FromPort: Value
+      ToNodeId: 5
+      ToPort: Seed
+    - FromNodeId: 10
+      FromPort: Value
+      ToNodeId: 7
+      ToPort: Seed
+    - FromNodeId: 12
+      FromPort: Results
+      ToNodeId: 13
+      ToPort: Value
+    - FromNodeId: 11
+      FromPort: Results
+      ToNodeId: 14
+      ToPort: Value
+    - FromNodeId: 16
+      FromPort: Value
+      ToNodeId: 11
+      ToPort: Seed
+    - FromNodeId: 17
+      FromPort: Value
+      ToNodeId: 11
+      ToPort: Weights
+    - FromNodeId: 18
+      FromPort: Value
+      ToNodeId: 12
+      ToPort: Weights
+    - FromNodeId: 20
+      FromPort: Value
+      ToNodeId: 19
+      ToPort: Seed
+    - FromNodeId: 7
+      FromPort: Results
+      ToNodeId: 19
+      ToPort: Points
+    - FromNodeId: 19
+      FromPort: Results
+      ToNodeId: 12
+      ToPort: Points
+    - FromNodeId: 5
+      FromPort: Results
+      ToNodeId: 21
+      ToPort: Points
+    - FromNodeId: 22
+      FromPort: Value
+      ToNodeId: 21
+      ToPort: Seed
+    - FromNodeId: 21
+      FromPort: Results
+      ToNodeId: 11
+      ToPort: Points
+    - FromNodeId: 21
+      FromPort: Results
+      ToNodeId: 23
+      ToPort: Value
+    - FromNodeId: 2
+      FromPort: Results
+      ToNodeId: 24
+      ToPort: Points
+    - FromNodeId: 24
+      FromPort: Results
+      ToNodeId: 5
+      ToPort: Points
+    - FromNodeId: 25
+      FromPort: Value
+      ToNodeId: 24
+      ToPort: MinAngle
+    - FromNodeId: 26
+      FromPort: Value
+      ToNodeId: 24
+      ToPort: MaxAngle
+    NextNodeId: 27
+    Variables:
+    - Id: Int
+      Name: Seed
+      Default:
+        rid: 7906782834765070483
+    - Id: TerrainObject
+      Name: Terrain
+      Default:
+        rid: 7906782834765070484
+    - Id: GameObjectWeights
+      Name: StonePrefabs
+      Default:
+        rid: 7906782834765070485
+    - Id: Int_1
+      Name: StoneCount
+      Default:
+        rid: 7906782834765070486
+    - Id: Float
+      Name: MinSlope
+      Default:
+        rid: 7906782943574228997
+    - Id: Float_1
+      Name: MaxSlope
+      Default:
+        rid: 7906782943574228998
+  ContentVersion: 182
+  references:
+    version: 2
+    RefIds:
+    - rid: 7906782834765070483
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 12345
+    - rid: 7906782834765070484
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 0}
+    - rid: 7906782834765070485
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []
+    - rid: 7906782834765070486
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 0
+    - rid: 7906782834765070487
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 1
+        Position: {x: -410.15845, y: 377.80725}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: TerrainObject
+    - rid: 7906782834765070488
+      type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
+      data:
+        Id: 2
+        Position: {x: -255.15839, y: 368.80725}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Count: 100
+        Seed: -1
+        PoissonMinDistance: 1
+        ShuffleRegularPoints: 0
+        PointMode: 5
+    - rid: 7906782834765070489
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 3
+        Position: {x: -525.1585, y: 527.80725}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int_1
+    - rid: 7906782834765070490
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 4
+        Position: {x: -478.15845, y: 585.80725}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070491
+      type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 5
+        Position: {x: 578, y: 429}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 2
+        Max: 4
+        Seed: 1684433569
+        Mode: 2
+    - rid: 7906782834765070492
+      type: {class: AroundPointsNode, ns: PCG.CreatePoints, asm: PCG}
+      data:
+        Id: 6
+        Position: {x: 870, y: 217}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Radius: {x: 2, y: 3}
+        Count: {x: 0, y: 10}
+        AxesMult: {x: 1, y: 0, z: 1}
+        Seed: -1
+    - rid: 7906782834765070493
+      type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 7
+        Position: {x: 1156, y: 217}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 1
+        Max: 10
+        Seed: 1878058019
+        Mode: 2
+    - rid: 7906782834765070494
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 8
+        Position: {x: 698, y: 355}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070495
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 9
+        Position: {x: 420, y: 638}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070496
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 10
+        Position: {x: 1031, y: 181}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070497
+      type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
+      data:
+        Id: 11
+        Position: {x: 1366.6316, y: 716.03064}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Points: []
+        Seed: -1
+        Weights: []
+    - rid: 7906782834765070498
+      type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
+      data:
+        Id: 12
+        Position: {x: 1770.0068, y: 213.59766}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Points: []
+        Seed: -1
+        Weights: []
+    - rid: 7906782834765070499
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        Id: 13
+        Position: {x: 2054.0127, y: 211.1145}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        Name: SmallStones
+        Value:
+          rid: 7906782834765070501
+    - rid: 7906782834765070500
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        Id: 14
+        Position: {x: 1750.7644, y: 711.46735}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        Name: BigStones
+        Value:
+          rid: 7906782834765070502
+    - rid: 7906782834765070501
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []
+    - rid: 7906782834765070502
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []
+    - rid: 7906782834765070504
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 16
+        Position: {x: 1176.7634, y: 948.86456}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070505
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 17
+        Position: {x: 1136.1401, y: 1000.7758}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: GameObjectWeights
+    - rid: 7906782834765070506
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 18
+        Position: {x: 1585.5128, y: 446.7226}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: GameObjectWeights
+    - rid: 7906782834765070507
+      type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 19
+        Position: {x: 1483.6838, y: 214.38147}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0
+        Max: 360
+        Seed: -1
+        Mode: 2
+    - rid: 7906782834765070508
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 20
+        Position: {x: 1300.4191, y: 447.30518}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070509
+      type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 21
+        Position: {x: 1035.6965, y: 716.83923}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0
+        Max: 360
+        Seed: -1
+        Mode: 2
+    - rid: 7906782834765070510
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 22
+        Position: {x: 831.4115, y: 918.14343}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
+    - rid: 7906782834765070529
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        Id: 23
+        Position: {x: 1750.8992, y: 557.8472}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        Name: BigStonePoints
+        Value:
+          rid: 7906782834765070531
+    - rid: 7906782834765070531
+      type: {class: PointsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Points: []
+    - rid: 7906782943574228997
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 0
+    - rid: 7906782943574228998
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 45
+    - rid: 7906782943574228999
+      type: {class: PointsBySlopeNode, ns: PCG.SelectPoints, asm: PCG}
+      data:
+        Id: 24
+        Position: {x: 147.00111, y: 419.16327}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        MinAngle: 0
+        MaxAngle: 45
+        Up: {x: 0, y: 1, z: 0}
+    - rid: 7906782943574229000
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 25
+        Position: {x: -41.97104, y: 637.1815}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Float
+    - rid: 7906782943574229001
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 26
+        Position: {x: -36.735962, y: 707.3315}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Float_1

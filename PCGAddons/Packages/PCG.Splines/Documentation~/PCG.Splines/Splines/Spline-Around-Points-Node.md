@@ -25,7 +25,7 @@ Each control point of the spline will be placed at a random distance within this
 
 The seed for the random number generator.
 Using the same seed will produce the same spline shapes.
-Set to -1 for random seed on startup.
+Set to 0 (or any value ≤ 0) for a random seed on startup.
 
 ### Up
 

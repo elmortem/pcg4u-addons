@@ -18,6 +18,6 @@ namespace PCG.Splines
 
 		[Input] public Vector3 Up = new(0f, 1f, 0f);
 
-		[Input] public int Seed = -1;
+		[Input] public int Seed = 0;
 	}
 }

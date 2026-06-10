@@ -18,6 +18,6 @@ namespace PCG.CreatePoints
 		[NodeEnum]
 		public GeneratePointMode PointMode;
 		[Input] public int Count = 100;
-		[Input] public int Seed = -1;
+		[Input] public int Seed = 0;
 	}
 }

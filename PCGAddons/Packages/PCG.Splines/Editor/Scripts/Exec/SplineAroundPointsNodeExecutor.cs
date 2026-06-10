@@ -18,6 +18,14 @@ namespace PCG.Splines
 
 		public override bool IsEmpty => Results.Value == null;
 
+		public override void OnBind()
+		{
+			base.OnBind();
+
+			if (Data.Seed <= 0)
+				Data.Seed = UnityEngine.Random.Range(1, int.MaxValue);
+		}
+
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
 			Results.Value = new List<Spline>();
@@ -31,10 +39,7 @@ namespace PCG.Splines
 			var up = GetInputValue(nameof(Data.Up), Data.Up);
 			var seed = GetInputValue(nameof(Data.Seed), Data.Seed);
 
-			if (seed == -1)
-				seed = UnityEngine.Random.Range(1, int.MaxValue);
-
-			RandomUtility.PushSeed(seed);
+			var random = PcgRandom.Create(seed);
 
 			using (var scope = OperationScope.Start(this))
 			{
@@ -57,7 +62,7 @@ namespace PCG.Splines
 						for (int i = 0; i < pointsCount; i++)
 						{
 							var angle = angleStep * i;
-							var currentRadius = RandomUtility.Range(radius);
+							var currentRadius = random.NextFloat(radius.x, radius.y);
 
 							var offset = right * (math.cos(angle) * currentRadius) +
 									   forward * (math.sin(angle) * currentRadius);
@@ -74,8 +79,6 @@ namespace PCG.Splines
 					}
 				}
 			}
-
-			RandomUtility.PopSeed();
 		}
 
 		public override void DrawPreview(Transform transform)

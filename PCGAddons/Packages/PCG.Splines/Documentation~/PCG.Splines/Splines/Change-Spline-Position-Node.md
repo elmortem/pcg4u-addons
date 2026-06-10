@@ -16,7 +16,7 @@ The minimum values for the position change in each axis.
 ### Seed
 
 The seed for random number generation.
-Set to -1 for random seed on startup.
+Set to 0 (or any value ≤ 0) for a random seed on startup.
 
 ### Splines
 

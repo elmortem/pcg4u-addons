@@ -21,10 +21,10 @@ World-space offset applied to generated points.
 
 ### Seed
 
-Seed for deterministic generation. Use -1 for non-deterministic behavior.
+Seed for deterministic generation. Use 0 (or any value ≤ 0) for non-deterministic behavior.
 
 #### Remarks
-Seed for deterministic generation. Use -1 for non-deterministic behavior.
+Seed for deterministic generation. Use 0 (or any value ≤ 0) for non-deterministic behavior.
 
 ### Splines
 

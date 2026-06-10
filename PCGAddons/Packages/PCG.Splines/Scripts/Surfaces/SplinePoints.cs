@@ -105,13 +105,13 @@ namespace PCG.Splines.Surfaces
 		private static async UniTask GetSurfaceRandomPoints(OperationScope scope, List<PointData> results, Spline spline, int count,
 			Vector3 offset, int seed, CancellationToken ct)
 		{
-			RandomUtility.PushSeed(seed);
-			
+			var random = PcgRandom.Create(seed);
+
 			count = math.min(count, PCG.MaxListPoints);
-			
+
 			for (int i = 0; i < count; i++)
 			{
-				spline.Evaluate(RandomUtility.Range01(), out var point, out var tangent, out var upVector);
+				spline.Evaluate(random.NextFloat(), out var point, out var tangent, out var upVector);
 				results.Add(new PointData
 				{
 					Position = offset + (Vector3)point,
@@ -119,11 +119,9 @@ namespace PCG.Splines.Surfaces
 					Scale = 1f,
 					Angle = Quaternion.LookRotation(tangent, upVector).eulerAngles.y
 				});
-				
+
 				await scope.Step(ct: ct);
 			}
-			
-			RandomUtility.PopSeed();
 		}
 
 		private static async UniTask GetVolumeRandomPoints(OperationScope scope, List<PointData> results, Spline spline, int count,
@@ -133,9 +131,9 @@ namespace PCG.Splines.Surfaces
 				return;
 			
 			count = math.min(count, PCG.MaxListPoints);
-			
-			RandomUtility.PushSeed(seed);
-			
+
+			var random = PcgRandom.Create(seed);
+
 			float3 splineUp = float3.zero;
 			for (var i = 0; i < spline.Count; i++)
 			{
@@ -146,17 +144,15 @@ namespace PCG.Splines.Surfaces
 			var tryCount = count * 3;
 			while(results.Count < count && tryCount-- > 0)
 			{
-				var point = new Vector3(RandomUtility.Range(bounds.min.x, bounds.max.x), bounds.center.y,
-					RandomUtility.Range(bounds.min.z, bounds.max.z));
+				var point = new Vector3(random.NextFloat(bounds.min.x, bounds.max.x), bounds.center.y,
+					random.NextFloat(bounds.min.z, bounds.max.z));
 				if (spline.IsInsideSpline(point))
 				{
 					results.Add(new PointData { Position = point + offset, Normal = splineUp, Scale = 1f });
 				}
-					
+
 				await scope.Step(ct: ct);
 			}
-			
-			RandomUtility.PopSeed();
 		}
 	}
 }

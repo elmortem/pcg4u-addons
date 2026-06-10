@@ -8,7 +8,7 @@ namespace PCG.Mazes
 	public class MazeMstGraphNode : PcgPreviewNode
 	{
 		[Input] public Graph Graph;
-		[Input] public int Seed = -1;
+		[Input] public int Seed = 0;
 
 		[Output] public Graph Result => default;
 		[Output] public List<PointData> EndPoints => default;

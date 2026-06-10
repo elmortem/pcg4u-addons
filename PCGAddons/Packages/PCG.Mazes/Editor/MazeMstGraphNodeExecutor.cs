@@ -21,6 +21,14 @@ namespace PCG.Mazes
 
 		public override bool IsEmpty => Result.Value == null || EndPoints.Value == null;
 
+		public override void OnBind()
+		{
+			base.OnBind();
+
+			if (Data.Seed <= 0)
+				Data.Seed = UnityEngine.Random.Range(1, int.MaxValue);
+		}
+
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
 			Result.Value = new();
@@ -31,16 +39,14 @@ namespace PCG.Mazes
 				return;
 
 			var seed = GetInputValue(nameof(Data.Seed), Data.Seed);
-			if (seed == -1)
-				seed = Random.Range(1, int.MaxValue);
 
-			RandomUtility.PushSeed(seed);
+			var random = PcgRandom.Create(seed);
 
 			using (var scope = OperationScope.Start(this))
 			{
 				foreach (var edge in inputGraph.Edges)
 				{
-					edge.Weight = RandomUtility.Range01();
+					edge.Weight = random.NextFloat();
 				}
 
 				await MazeGenerator.GenerateMaze(scope, inputGraph, Result.Value, ct);
@@ -51,8 +57,6 @@ namespace PCG.Mazes
 						Position = new Vector3(p.Point.x, 0f, p.Point.y), Normal = Vector3.up, Scale = 1f
 					}));
 			}
-
-			RandomUtility.PopSeed();
 		}
 
 		public override void DrawPreview(Transform transform)

@@ -19,6 +19,14 @@ namespace PCG.CreatePoints
 		public override bool IsEmpty => Results.Value == null;
 		public int PointsCount => Results.Value?.Count ?? 0;
 
+		public override void OnBind()
+		{
+			base.OnBind();
+
+			if (Data.Seed <= 0)
+				Data.Seed = UnityEngine.Random.Range(1, int.MaxValue);
+		}
+
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
 			Results.Value = new List<PointData>();
@@ -34,9 +42,6 @@ namespace PCG.CreatePoints
 
 			var offset = GetInputValue(nameof(Data.Offset), Data.Offset);
 			var seed = GetInputValue(nameof(Data.Seed), Data.Seed);
-
-			if (seed == -1)
-				seed = Random.Range(0, int.MaxValue);
 
 			using (var scope = OperationScope.Start(this))
 			{
