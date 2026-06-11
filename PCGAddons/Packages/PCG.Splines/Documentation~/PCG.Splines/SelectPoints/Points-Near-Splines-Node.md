@@ -17,6 +17,16 @@ Input points to test for proximity.
 
 Splines to measure distance against.
 
+## Variables
+
+### Mode
+
+Proximity mode. ThreeD measures distance in 3D; TwoD ignores the Y axis and measures distance in the XZ plane only.
+
+### UseScale
+
+If true, scales the distance threshold per point using its Scale.
+
 ## Outputs
 
 ### NearPoints

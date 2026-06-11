@@ -57,9 +57,21 @@ namespace PCG.Splines
 					hash = (hash * 397) ^ (container != null ? container.GetInstanceID() : 0);
 					if (container != null)
 					{
-						hash = (hash * 397) ^ container.transform.position.GetHashCode();
+						hash = (hash * 397) ^ container.transform.localToWorldMatrix.GetHashCode();
 						foreach (var spline in container.Splines)
+						{
 							hash = (hash * 397) ^ spline.Count;
+							hash = (hash * 397) ^ spline.Closed.GetHashCode();
+							for (int k = 0; k < spline.Count; k++)
+							{
+								var knot = spline[k];
+								hash = (hash * 397) ^ knot.Position.GetHashCode();
+								hash = (hash * 397) ^ knot.TangentIn.GetHashCode();
+								hash = (hash * 397) ^ knot.TangentOut.GetHashCode();
+								hash = (hash * 397) ^ knot.Rotation.GetHashCode();
+								hash = (hash * 397) ^ (int)spline.GetTangentMode(k);
+							}
+						}
 					}
 				}
 

@@ -13,5 +13,8 @@ namespace PCG.SelectPoints
 		[Input] public List<PointData> Points = new();
 		[Input] public List<Spline> Splines;
 		[Input] public float Distance = 1f;
+
+		public PointsNearSplinesMode Mode = PointsNearSplinesMode.ThreeD;
+		public bool UseScale;
 	}
 }

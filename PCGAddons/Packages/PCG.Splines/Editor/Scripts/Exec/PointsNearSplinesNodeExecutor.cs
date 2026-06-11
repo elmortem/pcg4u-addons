@@ -84,10 +84,20 @@ namespace PCG.SelectPoints
 				}
 			}
 
-			var sqrDist = distance * distance;
+			var effectiveDistance = distance;
+			if (Data.UseScale)
+				effectiveDistance *= point.Scale;
+
+			var sqrDist = effectiveDistance * effectiveDistance;
+			var pointPosition = (float3)point.Position;
+
 			foreach (var pointCache in _pointsCache)
 			{
-				if (math.lengthsq(pointCache - (float3)point.Position) < sqrDist)
+				var delta = pointCache - pointPosition;
+				if (Data.Mode == PointsNearSplinesMode.TwoD)
+					delta.y = 0f;
+
+				if (math.lengthsq(delta) < sqrDist)
 				{
 					return true;
 				}

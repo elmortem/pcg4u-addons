@@ -15,10 +15,6 @@ MonoBehaviour:
   GraphData:
     Nodes:
     - rid: 7906782975558942868
-    - rid: 7906782975558942870
-    - rid: 7906782975558942871
-    - rid: 7906782975558942875
-    - rid: 7906782975558942878
     - rid: 7906782975558942880
     - rid: 7906782975558942882
     - rid: 7906782975558942883
@@ -27,26 +23,9 @@ MonoBehaviour:
     - rid: 7906782975558942902
     - rid: 7906782975558942904
     - rid: 7906782975558942905
-    - rid: 7906782975558942909
     - rid: 7906782975558942910
     - rid: 7906782975558942912
     Edges:
-    - FromNodeId: 1
-      FromPort: Value
-      ToNodeId: 3
-      ToPort: Splines
-    - FromNodeId: 1
-      FromPort: Value
-      ToNodeId: 4
-      ToPort: Splines
-    - FromNodeId: 5
-      FromPort: Value
-      ToNodeId: 4
-      ToPort: Seed
-    - FromNodeId: 7
-      FromPort: Value
-      ToNodeId: 4
-      ToPort: Count
     - FromNodeId: 9
       FromPort: Terrain
       ToNodeId: 8
@@ -75,10 +54,6 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 17
       ToPort: Points
-    - FromNodeId: 17
-      FromPort: Results
-      ToNodeId: 19
-      ToPort: Points
     - FromNodeId: 21
       FromPort: Value
       ToNodeId: 20
@@ -91,11 +66,11 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 20
       ToPort: Splines
-    - FromNodeId: 19
+    - FromNodeId: 17
       FromPort: Results
       ToNodeId: 14
       ToPort: Points
-    NextNodeId: 22
+    NextNodeId: 23
     Variables:
     - Id: Splines
       Name: RoadSplines
@@ -105,10 +80,6 @@ MonoBehaviour:
       Name: Seed
       Default:
         rid: 7906782975558942874
-    - Id: Int_1
-      Name: PlateCount
-      Default:
-        rid: 7906782975558942877
     - Id: GameObjectWeights
       Name: PlatePrefabs
       Default:
@@ -121,7 +92,7 @@ MonoBehaviour:
       Name: PlateSize
       Default:
         rid: 7906782975558942911
-  ContentVersion: 142
+  ContentVersion: 157
   references:
     version: 2
     RefIds:
@@ -133,71 +104,15 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 1
-        Position: {x: 53, y: 331}
+        Position: {x: -52, y: 99}
         Collapsed: 0
         Width: 220
         Title: 
         VariableId: Splines
-    - rid: 7906782975558942870
-      type: {class: PointsNearSplinesNode, ns: PCG.SelectPoints, asm: PCG.Splines}
-      data:
-        Id: 3
-        Position: {x: 264.7948, y: 542.49615}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Points: []
-        Splines: []
-        Distance: 1
-    - rid: 7906782975558942871
-      type: {class: SplinesSurfaceNode, ns: PCG.CreatePoints, asm: PCG.Splines}
-      data:
-        Id: 4
-        Position: {x: 271.90134, y: 93.73027}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Splines: []
-        Offset: {x: 0, y: 0, z: 0}
-        PointMode: 1
-        Count: 100
-        Seed: 1803213656
     - rid: 7906782975558942874
       type: {class: IntValue, ns: PCG.Values, asm: PCG}
       data:
         Value: 0
-    - rid: 7906782975558942875
-      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
-      data:
-        Id: 5
-        Position: {x: 81.53308, y: 195.34119}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        VariableId: Int
-    - rid: 7906782975558942877
-      type: {class: IntValue, ns: PCG.Values, asm: PCG}
-      data:
-        Value: 300
-    - rid: 7906782975558942878
-      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
-      data:
-        Id: 7
-        Position: {x: 72.8064, y: 145.27963}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        VariableId: Int_1
     - rid: 7906782975558942879
       type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
       data:
@@ -206,7 +121,7 @@ MonoBehaviour:
       type: {class: PointToTerrainNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 8
-        Position: {x: 600.5391, y: 102.655334}
+        Position: {x: 563.10394, y: 106.278076}
         Collapsed: 0
         Width: 220
         Title: 
@@ -227,7 +142,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 9
-        Position: {x: 399.48132, y: -3.2678223}
+        Position: {x: 400.6889, y: -23.796722}
         Collapsed: 0
         Width: 220
         Title: 
@@ -236,7 +151,7 @@ MonoBehaviour:
       type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
         Id: 10
-        Position: {x: 2332.1235, y: 146.48215}
+        Position: {x: 2258.4604, y: 100.593994}
         Collapsed: 0
         Width: 220
         Title: 
@@ -253,7 +168,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 11
-        Position: {x: 2172.5298, y: 389.12854}
+        Position: {x: 2027.6199, y: 356.5238}
         Collapsed: 0
         Width: 220
         Title: 
@@ -262,7 +177,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 13
-        Position: {x: 2644.109, y: 149.24869}
+        Position: {x: 2632.0332, y: 96.11502}
         Collapsed: 0
         Width: 220
         Title: 
@@ -277,7 +192,7 @@ MonoBehaviour:
       type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 14
-        Position: {x: 1716.7946, y: 146.74396}
+        Position: {x: 1580.3376, y: 104.478546}
         Collapsed: 0
         Width: 220
         Title: 
@@ -287,15 +202,15 @@ MonoBehaviour:
           PointSize: 1
         IsPreviewLocal: 0
         Points: []
-        Min: 0.8
-        Max: 1.3
+        Min: 0.9
+        Max: 1.1
         Seed: 310674832
         Mode: 2
     - rid: 7906782975558942904
       type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 16
-        Position: {x: 1993.6216, y: 149.82831}
+        Position: {x: 1916.3362, y: 101.524994}
         Collapsed: 0
         Width: 220
         Title: 
@@ -313,7 +228,7 @@ MonoBehaviour:
       type: {class: PointsNearPointsNode, ns: PCG.SelectPoints, asm: PCG}
       data:
         Id: 17
-        Position: {x: 902.73865, y: 118.8862}
+        Position: {x: 905.1538, y: 101.98001}
         Collapsed: 0
         Width: 220
         Title: 
@@ -327,36 +242,11 @@ MonoBehaviour:
         Radius: 1
         RemoveThemselves: 1
         UseScale: 0
-    - rid: 7906782975558942909
-      type: {class: ChangePositionNode, ns: PCG.TransformPoints, asm: PCG}
-      data:
-        Id: 19
-        Position: {x: 1221.0964, y: 136.54948}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Points: []
-        Mode: 1
-        Min:
-          x: 0.2
-          y: 0.2
-          z: 0.2
-        Max:
-          x: 0.2
-          y: 0.2
-          z: 0.2
-        Seed: 722782098
-        ApplyToGroup: 0
     - rid: 7906782975558942910
       type: {class: SplinePointsByDistanceNode, ns: PCG.CreatePoints, asm: PCG.Splines}
       data:
         Id: 20
-        Position: {x: 277.54767, y: 342.18112}
+        Position: {x: 172.54767, y: 110.18112}
         Collapsed: 0
         Width: 220
         Title: 
@@ -376,7 +266,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 21
-        Position: {x: 71.91599, y: 417.15097}
+        Position: {x: -33.084007, y: 185.15097}
         Collapsed: 0
         Width: 220
         Title: 

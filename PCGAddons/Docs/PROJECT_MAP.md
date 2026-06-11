@@ -153,7 +153,7 @@ public class FooNode : PcgPreviewNode
 | `ChangeSplinePositionNode` | Splines | случайное смещение вершин | `Splines, Min, Max, Seed` → `Results` |
 | `SplineNode` | Splines | базовая нода-сплайн (редактируемый) | → `Results` |
 | `PointsBySplineNode` | SelectPoints | точки внутри/снаружи замкнутого сплайна | `Points, Splines` → `Results, Outsides` |
-| `PointsNearSplinesNode` | SelectPoints | точки близко/далеко от сплайна | `Points, Splines, Distance` → `Results, NearPoints` |
+| `PointsNearSplinesNode` | SelectPoints | точки близко/далеко от сплайна (режим 3D/2D, UseScale) | `Points, Splines, Distance` → `Results, NearPoints` |
 | `PointsOffsetSplinesNode` | CreatePoints | точки вдоль сплайна с offset | `Splines, Offset, Distance, Count, Spacing` → `Results, CornerPoints` |
 | `SplinePointsByDistanceNode` | CreatePoints | точки вдоль сплайна с шагом по длине дуги | `Splines, Distance, Distribute` → `Results` |
 | `SplinesSurfaceNode` | CreatePoints | точки на поверхности/в объёме замкнутого сплайна | `Splines, Offset, PointMode, Count, Seed` → `Results` |

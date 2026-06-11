@@ -43,6 +43,7 @@ MonoBehaviour:
     - rid: 7906782975558942917
     - rid: 7906782975558942918
     - rid: 7906782975558942919
+    - rid: 7906782975558942926
     Edges:
     - FromNodeId: 1
       FromPort: Terrain
@@ -156,7 +157,15 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 28
       ToPort: Splines
-    NextNodeId: 31
+    - FromNodeId: 28
+      FromPort: Results
+      ToNodeId: 32
+      ToPort: Points
+    - FromNodeId: 32
+      FromPort: Results
+      ToNodeId: 5
+      ToPort: Points
+    NextNodeId: 33
     Variables:
     - Id: Int
       Name: Seed
@@ -190,7 +199,7 @@ MonoBehaviour:
       Name: ExcludeSplines
       Default:
         rid: 7906782975558942915
-  ContentVersion: 218
+  ContentVersion: 234
   references:
     version: 2
     RefIds:
@@ -261,7 +270,7 @@ MonoBehaviour:
       type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 5
-        Position: {x: 578, y: 429}
+        Position: {x: 1045.5619, y: 429}
         Collapsed: 0
         Width: 220
         Title: 
@@ -279,7 +288,7 @@ MonoBehaviour:
       type: {class: AroundPointsNode, ns: PCG.CreatePoints, asm: PCG}
       data:
         Id: 6
-        Position: {x: 870, y: 217}
+        Position: {x: 1337.562, y: 217}
         Collapsed: 0
         Width: 220
         Title: 
@@ -297,7 +306,7 @@ MonoBehaviour:
       type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 7
-        Position: {x: 1156, y: 217}
+        Position: {x: 1623.562, y: 217}
         Collapsed: 0
         Width: 220
         Title: 
@@ -315,7 +324,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 8
-        Position: {x: 698, y: 355}
+        Position: {x: 1165.562, y: 355}
         Collapsed: 0
         Width: 220
         Title: 
@@ -324,7 +333,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 9
-        Position: {x: 420, y: 638}
+        Position: {x: 887.56195, y: 638}
         Collapsed: 0
         Width: 220
         Title: 
@@ -333,7 +342,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 10
-        Position: {x: 1031, y: 181}
+        Position: {x: 1482.135, y: 442.4603}
         Collapsed: 0
         Width: 220
         Title: 
@@ -342,7 +351,7 @@ MonoBehaviour:
       type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
         Id: 11
-        Position: {x: 1366.6316, y: 716.03064}
+        Position: {x: 1834.1936, y: 716.03064}
         Collapsed: 0
         Width: 220
         Title: 
@@ -359,7 +368,7 @@ MonoBehaviour:
       type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
         Id: 12
-        Position: {x: 1770.0068, y: 213.59766}
+        Position: {x: 2237.5664, y: 213.59766}
         Collapsed: 0
         Width: 220
         Title: 
@@ -376,7 +385,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 13
-        Position: {x: 2054.0127, y: 211.1145}
+        Position: {x: 2521.5723, y: 211.1145}
         Collapsed: 0
         Width: 220
         Title: 
@@ -387,7 +396,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 14
-        Position: {x: 1750.7644, y: 711.46735}
+        Position: {x: 2218.3242, y: 711.46735}
         Collapsed: 0
         Width: 220
         Title: 
@@ -406,7 +415,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 16
-        Position: {x: 1176.7634, y: 948.86456}
+        Position: {x: 1644.3254, y: 948.86456}
         Collapsed: 0
         Width: 220
         Title: 
@@ -415,7 +424,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 17
-        Position: {x: 1136.1401, y: 1000.7758}
+        Position: {x: 1603.7021, y: 1000.7758}
         Collapsed: 0
         Width: 220
         Title: 
@@ -424,7 +433,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 18
-        Position: {x: 1585.5128, y: 446.7226}
+        Position: {x: 2053.0747, y: 446.7226}
         Collapsed: 0
         Width: 220
         Title: 
@@ -433,7 +442,7 @@ MonoBehaviour:
       type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 19
-        Position: {x: 1483.6838, y: 214.38147}
+        Position: {x: 1951.2458, y: 214.38147}
         Collapsed: 0
         Width: 220
         Title: 
@@ -451,7 +460,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 20
-        Position: {x: 1300.4191, y: 447.30518}
+        Position: {x: 1767.981, y: 447.30518}
         Collapsed: 0
         Width: 220
         Title: 
@@ -460,7 +469,7 @@ MonoBehaviour:
       type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 21
-        Position: {x: 1035.6965, y: 716.83923}
+        Position: {x: 1503.2585, y: 716.83923}
         Collapsed: 0
         Width: 220
         Title: 
@@ -478,7 +487,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 22
-        Position: {x: 831.4115, y: 918.14343}
+        Position: {x: 1298.9734, y: 918.14343}
         Collapsed: 0
         Width: 220
         Title: 
@@ -487,7 +496,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 23
-        Position: {x: 1750.8992, y: 557.8472}
+        Position: {x: 2218.459, y: 557.8472}
         Collapsed: 0
         Width: 220
         Title: 
@@ -536,7 +545,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 26
-        Position: {x: -712.56006, y: 712.1762}
+        Position: {x: -718.688, y: 679.08496}
         Collapsed: 0
         Width: 220
         Title: 
@@ -582,7 +591,9 @@ MonoBehaviour:
         IsPreviewLocal: 0
         Points: []
         Splines: []
-        Distance: 1
+        Distance: 3
+        Mode: 1
+        UseScale: 1
     - rid: 7906782975558942918
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
@@ -601,3 +612,23 @@ MonoBehaviour:
         Width: 220
         Title: 
         VariableId: Splines
+    - rid: 7906782975558942926
+      type: {class: ChangeNormalNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 32
+        Position: {x: 445.8391, y: 432.5196}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        DirectionMin: {x: 0, y: 1, z: 0}
+        DirectionMax: {x: 0, y: 1, z: 0}
+        AmountMin: 1
+        AmountMax: 1
+        Seed: 233919657
+        Mode: 0

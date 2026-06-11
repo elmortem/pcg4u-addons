@@ -197,7 +197,7 @@ MonoBehaviour:
       Name: ExcludeSplines
       Default:
         rid: 7906782975558942803
-  ContentVersion: 238
+  ContentVersion: 242
   references:
     version: 2
     RefIds:
@@ -430,7 +430,9 @@ MonoBehaviour:
         IsPreviewLocal: 0
         Points: []
         Splines: []
-        Distance: 1
+        Distance: 3
+        Mode: 1
+        UseScale: 1
     - rid: 7906782975558942807
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
