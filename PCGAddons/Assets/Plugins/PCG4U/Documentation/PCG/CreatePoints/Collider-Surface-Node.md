@@ -21,10 +21,6 @@ The direction rays travel toward the colliders.
 
 The center of the sampling box in world space.
 
-### PoissonMinDistance
-
-The minimum distance between points used by the `Poisson` mode. Larger values yield sparser, more evenly spaced points and can reduce the final count below `Count`.
-
 ### Seed
 
 The seed for random number generation. `0` or less picks a random seed on bind.
@@ -41,7 +37,7 @@ The physics layers the rays can hit.
 
 ### PointMode
 
-The mode for distributing the rays (surface/volume, random/regular). In `Poisson` mode the rays are cast with the random distribution and the resulting hits are thinned so that no two points are closer than `PoissonMinDistance`.
+The mode for distributing the rays (surface/volume, random/regular).
 
 ## Outputs
 

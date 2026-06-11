@@ -42,6 +42,7 @@ MonoBehaviour:
     - rid: 7906782975558942833
     - rid: 7906782975558942906
     - rid: 7906782975558942907
+    - rid: 7906782975558942928
     Edges:
     - FromNodeId: 4
       FromPort: Value
@@ -163,7 +164,11 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 26
       ToPort: Points
-    NextNodeId: 40
+    - FromNodeId: 40
+      FromPort: Value
+      ToNodeId: 34
+      ToPort: Seed
+    NextNodeId: 41
     Variables:
     - Id: Int
       Name: Seed
@@ -197,7 +202,7 @@ MonoBehaviour:
       Name: ExcludeSplines
       Default:
         rid: 7906782975558942803
-  ContentVersion: 242
+  ContentVersion: 246
   references:
     version: 2
     RefIds:
@@ -260,7 +265,6 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Count: 100
         Seed: 20284108
-        PoissonMinDistance: 1
         ShuffleRegularPoints: 1
         PointMode: 1
     - rid: 7906782975558942772
@@ -486,6 +490,7 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Points: []
         ProjectionMode: 2
+        ProjectNormal: 1
     - rid: 7906782975558942818
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
@@ -612,3 +617,12 @@ MonoBehaviour:
         Max: 360
         Seed: 739111238
         Mode: 2
+    - rid: 7906782975558942928
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 40
+        Position: {x: 2271.8997, y: 1163.1555}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int

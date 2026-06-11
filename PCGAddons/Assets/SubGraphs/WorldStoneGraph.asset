@@ -44,6 +44,7 @@ MonoBehaviour:
     - rid: 7906782975558942918
     - rid: 7906782975558942919
     - rid: 7906782975558942926
+    - rid: 7906782975558942927
     Edges:
     - FromNodeId: 1
       FromPort: Terrain
@@ -163,9 +164,13 @@ MonoBehaviour:
       ToPort: Points
     - FromNodeId: 32
       FromPort: Results
+      ToNodeId: 33
+      ToPort: Points
+    - FromNodeId: 33
+      FromPort: Results
       ToNodeId: 5
       ToPort: Points
-    NextNodeId: 33
+    NextNodeId: 34
     Variables:
     - Id: Int
       Name: Seed
@@ -199,7 +204,7 @@ MonoBehaviour:
       Name: ExcludeSplines
       Default:
         rid: 7906782975558942915
-  ContentVersion: 234
+  ContentVersion: 276
   references:
     version: 2
     RefIds:
@@ -245,7 +250,6 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Count: 100
         Seed: 1537585758
-        PoissonMinDistance: 1
         ShuffleRegularPoints: 0
         PointMode: 1
     - rid: 7906782834765070489
@@ -632,3 +636,28 @@ MonoBehaviour:
         AmountMax: 1
         Seed: 233919657
         Mode: 0
+    - rid: 7906782975558942927
+      type: {class: ChangePositionNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 33
+        Position: {x: 720.3933, y: 429.7464}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Mode: 1
+        Min:
+          x: 0
+          y: -1
+          z: 0
+        Max:
+          x: 0
+          y: -1
+          z: 0
+        Seed: 13947435
+        ApplyToGroup: 0

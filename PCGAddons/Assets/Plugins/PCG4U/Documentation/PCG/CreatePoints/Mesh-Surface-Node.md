@@ -30,10 +30,6 @@ The normal vector used for orienting the generated points.
 
 The offset applied to the generated points.
 
-### PoissonMinDistance
-
-The minimum distance between points used by the `Poisson` mode. Larger values yield sparser, more evenly spaced points and can reduce the final count below `Count`.
-
 ### Scale
 
 The scale factor applied to the generated points.
@@ -46,7 +42,7 @@ The seed for the random number generator.
 
 ### PointMode
 
-The mode used for generating points on the mesh surface. In `Poisson` mode points are scattered evenly over the surface without clumping: the surface is oversampled with the random distribution (using the same projection and grid) and thinned so that no two points are closer than `PoissonMinDistance`.
+The mode used for generating points on the mesh surface.
 
 ### ProjectionMode
 

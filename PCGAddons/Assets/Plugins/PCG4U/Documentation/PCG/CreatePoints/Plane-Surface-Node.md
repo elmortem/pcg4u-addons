@@ -13,10 +13,6 @@ The number of points to generate on the plane.
 
 The offset of the plane from the origin.
 
-### PoissonMinDistance
-
-The minimum distance between points used by the `Poisson` mode. Larger values yield sparser, more evenly spaced points and can reduce the final count below `Count`.
-
 ### Seed
 
 The seed for random number generation.
@@ -38,7 +34,6 @@ Available modes:
 - `GeneratePointMode.SurfaceRegular`: Points are evenly distributed in a grid pattern across the plane surface.
 - `GeneratePointMode.VolumeRandom`: Not applicable for a plane surface. Defaults to SurfaceRegular with a warning.
 - `GeneratePointMode.VolumeRegular`: Not applicable for a plane surface. Defaults to SurfaceRegular with a warning.
-- `GeneratePointMode.Poisson`: Evenly scattered points without clumping. The surface is oversampled with the random distribution and thinned so that no two points are closer than `PoissonMinDistance`.
 
 ## Outputs
 

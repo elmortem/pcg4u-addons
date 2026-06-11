@@ -23,6 +23,10 @@ Target terrain data to project points onto.
 
 Method used for projecting points onto the terrain.
 
+### ProjectNormal
+
+When enabled, each projected point gets the interpolated terrain normal. When disabled, the original point normal is preserved. Enabled by default.
+
 ## Outputs
 
 ### Results

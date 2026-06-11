@@ -12,10 +12,6 @@ The number of points to generate on the sphere.
 
 The offset of the sphere from the origin.
 
-### PoissonMinDistance
-
-The minimum distance between points used by the `Poisson` mode. Larger values yield sparser, more evenly spaced points and can reduce the final count below `Count`.
-
 ### Radius
 
 The radius of the sphere.
@@ -28,7 +24,7 @@ The seed for random number generation.
 
 ### PointMode
 
-The mode for generating points on the sphere surface. In `Poisson` mode points are scattered evenly over the surface without clumping: the surface is oversampled with the random distribution and thinned so that no two points are closer than `PoissonMinDistance`.
+The mode for generating points on the sphere surface.
 
 ## Outputs
 

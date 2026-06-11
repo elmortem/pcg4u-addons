@@ -31,6 +31,7 @@ Many nodes have 2 checkboxes in bottom-left corner:
 * [[Points By Density Node|PCG/SelectPoints/Points-By-Density-Node]]
 * [[Points By Slope Node|PCG/SelectPoints/Points-By-Slope-Node]]
 * [[Points By Height Node|PCG/SelectPoints/Points-By-Height-Node]]
+* [[Poisson Points Node|PCG/SelectPoints/Poisson-Points-Node]] - thins points to a minimum distance
 
 ### Noises
 * [[Perlin Noise Node|PCG/Noises/Perline-Noise-Node]]
