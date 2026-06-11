@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -524942693, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
-  m_Name: StoneGraph
+  m_Name: WorldStoneGraph
   m_EditorClassIdentifier: 
   GraphData:
     Nodes:
@@ -39,6 +39,10 @@ MonoBehaviour:
     - rid: 7906782943574228999
     - rid: 7906782943574229000
     - rid: 7906782943574229001
+    - rid: 7906782975558942916
+    - rid: 7906782975558942917
+    - rid: 7906782975558942918
+    - rid: 7906782975558942919
     Edges:
     - FromNodeId: 1
       FromPort: Terrain
@@ -124,10 +128,6 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 24
       ToPort: Points
-    - FromNodeId: 24
-      FromPort: Results
-      ToNodeId: 5
-      ToPort: Points
     - FromNodeId: 25
       FromPort: Value
       ToNodeId: 24
@@ -140,7 +140,23 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 12
       ToPort: Points
-    NextNodeId: 27
+    - FromNodeId: 24
+      FromPort: Results
+      ToNodeId: 27
+      ToPort: Points
+    - FromNodeId: 29
+      FromPort: Value
+      ToNodeId: 27
+      ToPort: OtherPoints
+    - FromNodeId: 27
+      FromPort: Results
+      ToNodeId: 28
+      ToPort: Points
+    - FromNodeId: 30
+      FromPort: Value
+      ToNodeId: 28
+      ToPort: Splines
+    NextNodeId: 31
     Variables:
     - Id: Int
       Name: Seed
@@ -166,7 +182,15 @@ MonoBehaviour:
       Name: MaxSlope
       Default:
         rid: 7906782943574228998
-  ContentVersion: 203
+    - Id: Points
+      Name: ExcludePoints
+      Default:
+        rid: 7906782975558942914
+    - Id: Splines
+      Name: ExcludeSplines
+      Default:
+        rid: 7906782975558942915
+  ContentVersion: 218
   references:
     version: 2
     RefIds:
@@ -190,7 +214,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 1
-        Position: {x: -410.15845, y: 377.80725}
+        Position: {x: -1085.9827, y: 382.65198}
         Collapsed: 0
         Width: 220
         Title: 
@@ -199,7 +223,7 @@ MonoBehaviour:
       type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
       data:
         Id: 2
-        Position: {x: -255.15839, y: 368.80725}
+        Position: {x: -930.98254, y: 373.65198}
         Collapsed: 0
         Width: 220
         Title: 
@@ -219,7 +243,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 3
-        Position: {x: -525.1585, y: 527.80725}
+        Position: {x: -1200.9827, y: 532.652}
         Collapsed: 0
         Width: 220
         Title: 
@@ -228,7 +252,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 4
-        Position: {x: -478.15845, y: 585.80725}
+        Position: {x: -1153.9824, y: 590.652}
         Collapsed: 0
         Width: 220
         Title: 
@@ -486,7 +510,7 @@ MonoBehaviour:
       type: {class: PointsBySlopeNode, ns: PCG.SelectPoints, asm: PCG}
       data:
         Id: 24
-        Position: {x: 147.00111, y: 419.16327}
+        Position: {x: -528.823, y: 424.008}
         Collapsed: 0
         Width: 220
         Title: 
@@ -503,7 +527,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 25
-        Position: {x: -41.97104, y: 637.1815}
+        Position: {x: -717.79517, y: 642.02625}
         Collapsed: 0
         Width: 220
         Title: 
@@ -512,8 +536,68 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 26
-        Position: {x: -36.735962, y: 707.3315}
+        Position: {x: -712.56006, y: 712.1762}
         Collapsed: 0
         Width: 220
         Title: 
         VariableId: Float_1
+    - rid: 7906782975558942914
+      type: {class: PointsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Points: []
+    - rid: 7906782975558942915
+      type: {class: SplinesValue, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        Containers: []
+    - rid: 7906782975558942916
+      type: {class: PointsNearPointsNode, ns: PCG.SelectPoints, asm: PCG}
+      data:
+        Id: 27
+        Position: {x: -209.72375, y: 425.82794}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        OtherPoints: []
+        Radius: 1
+        RemoveThemselves: 1
+        UseScale: 1
+    - rid: 7906782975558942917
+      type: {class: PointsNearSplinesNode, ns: PCG.SelectPoints, asm: PCG.Splines}
+      data:
+        Id: 28
+        Position: {x: 106.2583, y: 431.65247}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Splines: []
+        Distance: 1
+    - rid: 7906782975558942918
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 29
+        Position: {x: -393.3887, y: 675.247}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Points
+    - rid: 7906782975558942919
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 30
+        Position: {x: -98.01851, y: 700.9847}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Splines

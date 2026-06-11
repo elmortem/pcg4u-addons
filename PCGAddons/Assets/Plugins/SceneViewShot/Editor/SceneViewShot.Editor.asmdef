@@ -1,0 +1,10 @@
+{
+	"name": "SceneViewShot.Editor",
+	"references": [],
+	"includePlatforms": [
+		"Editor"
+	],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"autoReferenced": true
+}

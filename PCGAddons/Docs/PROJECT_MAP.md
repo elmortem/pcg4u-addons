@@ -155,6 +155,7 @@ public class FooNode : PcgPreviewNode
 | `PointsBySplineNode` | SelectPoints | точки внутри/снаружи замкнутого сплайна | `Points, Splines` → `Results, Outsides` |
 | `PointsNearSplinesNode` | SelectPoints | точки близко/далеко от сплайна | `Points, Splines, Distance` → `Results, NearPoints` |
 | `PointsOffsetSplinesNode` | CreatePoints | точки вдоль сплайна с offset | `Splines, Offset, Distance, Count, Spacing` → `Results, CornerPoints` |
+| `SplinePointsByDistanceNode` | CreatePoints | точки вдоль сплайна с шагом по длине дуги | `Splines, Distance, Distribute` → `Results` |
 | `SplinesSurfaceNode` | CreatePoints | точки на поверхности/в объёме замкнутого сплайна | `Splines, Offset, PointMode, Count, Seed` → `Results` |
 | `DensityByDistanceToSplinesNode` | TransformPoints | плотность точек по расстоянию до сплайна | `Points, Splines, Radius, Curve, Mode` → `Results` |
 
@@ -165,7 +166,7 @@ public class FooNode : PcgPreviewNode
 - `SplinesUtility` — point-in-spline (ray-crossing) для замкнутых сплайнов.
 - `SplinesGizmoUtility` — отрисовка линий сплайнов в превью.
 - `SplineSpacingMode` (enum) — Distance / Count / Fit.
-- `SplinePoints` (static) — генерация `PointData` на сплайне (Surface/Volume × Regular/Random).
+- `SplinePoints` (static) — генерация `PointData` на сплайне (Surface/Volume × Regular/Random; `SurfaceRegular` — по длине дуги). `GetPointsByDistance` — точки с шагом по дистанции (с `Distribute`).
 - `SplineNodeRenderer` (`CustomPcgNodeRenderer`) — кнопки Start/Stop Edit в ноде.
 - `GameObjectsToSplinesAdapter` (`PcgPortAdapter`) — `List<GameObject>` → `List<Spline>`.
 

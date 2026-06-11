@@ -1,0 +1,49 @@
+{
+    "OutputFolder": "D:/Hobby/Repositories/unitypcg/Images/Screenshots",
+    "OffsetTop": 46,
+    "OffsetBottom": 0,
+    "OffsetLeft": 2,
+    "OffsetRight": 2,
+    "Items": [
+        {
+            "Name": "WorldShot",
+            "Width": 1920,
+            "Height": 1080,
+            "Pose": {
+                "Pivot": {
+                    "x": -26.152008056640626,
+                    "y": 21.745128631591798,
+                    "z": 960.0321044921875
+                },
+                "Rotation": {
+                    "x": 0.020994720980525018,
+                    "y": -0.18342097103595735,
+                    "z": 0.0036551563534885647,
+                    "w": 0.9828842878341675
+                },
+                "Size": 323.02227783203127,
+                "Orthographic": false
+            }
+        },
+        {
+            "Name": "Shot",
+            "Width": 1920,
+            "Height": 1080,
+            "Pose": {
+                "Pivot": {
+                    "x": 303.945068359375,
+                    "y": 95.02750396728516,
+                    "z": 135.52720642089845
+                },
+                "Rotation": {
+                    "x": 0.004080337937921286,
+                    "y": -0.996265172958374,
+                    "z": 0.0631406158208847,
+                    "w": 0.06013808026909828
+                },
+                "Size": 323.02227783203127,
+                "Orthographic": false
+            }
+        }
+    ]
+}

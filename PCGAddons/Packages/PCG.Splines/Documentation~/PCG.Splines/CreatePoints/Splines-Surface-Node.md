@@ -37,7 +37,7 @@ Input splines to generate points from.
 
 ### PointMode
 
-Generation mode for sampling points along splines.
+Generation mode for sampling points along splines. In `SurfaceRegular` mode the points are spaced evenly by arc length, so the real distance between them stays constant even on curved segments.
 
 ## Outputs
 

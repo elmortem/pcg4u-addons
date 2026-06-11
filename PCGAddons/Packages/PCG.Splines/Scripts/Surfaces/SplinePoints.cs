@@ -42,11 +42,68 @@ namespace PCG.Splines.Surfaces
 			}
 		}
 
+		public static async UniTask GetPointsByDistance(OperationScope scope, List<PointData> results, Spline spline, float distance, bool distribute, CancellationToken ct = default)
+		{
+			if (spline == null)
+			{
+				Debug.LogWarning("Spline is not assigned.");
+				return;
+			}
+
+			if (distance <= 0f)
+				return;
+
+			var length = spline.GetLength();
+			if (length <= 0f)
+				return;
+
+			var intervals = math.max(1, Mathf.RoundToInt(length / distance));
+
+			int count;
+			float step;
+
+			if (distribute)
+			{
+				step = length / intervals;
+				count = spline.Closed ? intervals : intervals + 1;
+			}
+			else
+			{
+				step = distance;
+				count = Mathf.FloorToInt(length / distance) + 1;
+				if (spline.Closed && Mathf.Approximately((count - 1) * distance, length))
+					count -= 1;
+			}
+
+			count = math.min(count, PCG.MaxListPoints);
+
+			for (int i = 0; i < count; i++)
+			{
+				var pointDistance = step * i;
+				var t = spline.ConvertIndexUnit(pointDistance, PathIndexUnit.Distance, PathIndexUnit.Normalized);
+				spline.Evaluate(t, out var point, out var tangent, out var upVector);
+				results.Add(new PointData
+				{
+					Position = (Vector3)point,
+					Normal = upVector,
+					Scale = 1f,
+					Angle = Quaternion.LookRotation(tangent, upVector).eulerAngles.y
+				});
+
+				await scope.Step(ct: ct);
+			}
+		}
+
 		private static async UniTask GetSurfaceRegularPoints(OperationScope scope, List<PointData> results, Spline spline, int count, Vector3 offset, CancellationToken ct)
 		{
+			var length = spline.GetLength();
+			if (length <= 0f)
+				return;
+
 			for (int i = 0; i < count; ++i)
 			{
-				var t = i / (float)count;
+				var distance = length * i / count;
+				var t = spline.ConvertIndexUnit(distance, PathIndexUnit.Distance, PathIndexUnit.Normalized);
 				spline.Evaluate(t, out var point, out var tangent, out var upVector);
 				results.Add(new PointData
 				{
@@ -55,7 +112,7 @@ namespace PCG.Splines.Surfaces
 					Scale = 1f,
 					Angle = Quaternion.LookRotation(tangent, upVector).eulerAngles.y
 				});
-				
+
 				await scope.Step(ct: ct);
 			}
 		}
