@@ -229,7 +229,9 @@ public class FooNode : PcgPreviewNode
 **Особенности исполнителя:** строит `PointOctree<PointData>` с адаптивным размером узла; батч-обработка (5k/батч); при `RemoveThemselves` — параллельный самопоиск дублей (`UniTask.WhenAll`, до 16 батчей по 100k). Превью рисует куб octree + точки выбранного выхода.
 
 ### 4.6 PCG.Polygons — 2D-полигоны и регионы
-Фундамент под городские ноды (subdivide/boolean/inset/lots, отдельный ТДД-3). 2D-полигональный тип данных с именованными атрибутами, геом-бэкенд Clipper2, заливка точками, конверсии со сплайнами. Плоскость XZ (`float2 = (x, z)`), высота набора — `RegionSet.PlaneY`. Зависит от `PCG`, `PCG.Splines`, `Unity.Splines`, `Unity.Mathematics`, `UniTask`.
+Фундамент под городские ноды (subdivide/boolean/inset/lots, отдельный ТДД-3). 2D-полигональный тип данных с именованными атрибутами (на регион **и на ребро**), геом-бэкенд Clipper2, заливка точками, конверсии со сплайнами. Плоскость XZ (`float2 = (x, z)`), высота набора — `RegionSet.PlaneY`. Зависит от `PCG`, `PCG.Splines`, `Unity.Splines`, `Unity.Mathematics`, `UniTask`.
+
+**Z-callback Clipper2 (`USINGZ`).** Рантайм-asmdef `PCG.Polygons` объявляет символ `USINGZ` через `versionDefines` (привязан к самому пакету `com.elmortem.pcg.polygons`, expression пустой → всегда активен для этой сборки). `USINGZ` включает в Clipper2 поле `Point64.Z` и хук `ZCallback` — это backbone проброса рёберных атрибутов через булевы операции. **Важно:** под `USINGZ` вендоренный Clipper2 меняет namespace `Clipper2Lib` → `Clipper2ZLib` (upstream-дизайн), поэтому потребители (`PolygonClipper`, `PolygonEdgeClip`) подключают `Clipper2ZLib`.
 
 **Ноды:**
 
@@ -239,18 +241,20 @@ public class FooNode : PcgPreviewNode
 | `RegionToSplineNode` | регионы → замкнутые сплайны (контур + дырки) | `Region` → `Splines: List<Spline>` |
 
 **Опорные типы (`Scripts/`):**
-- `Polygon2D` — контур `Outer` + дырки `Holes` + геометрия (Contains/GetBounds/Clone/Hash).
+- `Polygon2D` — контур `Outer` + дырки `Holes` + геометрия (Contains/GetBounds/Clone/Hash). `partial`: рёберные атрибуты вынесены в `Polygon/Polygon2DEdges.cs`.
+- `Polygon2D` рёберные атрибуты (`Polygon2DEdges.cs`) — `PcgAttributeSet EdgeAttributes` + индексация рёбер (плоская: рёбра `Outer` `[0..N)`, затем рёбра дырок по порядку). `EdgeCount`, `HoleEdgeOffset(hole)`, `HasEdgeData()`, `GetEdge<T>/SetEdge<T>`. Длина `EdgeAttributes` — либо `0` (данных нет → чтение даёт `default`), либо ровно `EdgeCount`.
 - `RegionSet` (`IPcgAttributeData`) — `List<Polygon2D>` + `PlaneY` + `PcgAttributeSet Attributes` (один регион = одна строка атрибутов). **Value-тип, передаваемый между нодами.**
 - `RegionSetValue` (`PcgValue`) — регистрация типа `RegionSet` в пикере/блекборде (инлайн пустой).
-- `PolygonClipper` (static) — обёртка Clipper2: Union/Intersection/Difference/Inflate/SplitByLine (half-plane). Масштаб метры×1000 → `Int64`; нормализация винтинга (внешний CCW, дырки CW).
+- `PolygonClipper` (static) — обёртка Clipper2 (`Clipper2ZLib`): Union/Intersection/Difference/Inflate; `SplitByLine` (half-plane) теперь идёт через `PolygonEdgeClip.Intersection` с `Action<PcgAttributeSet,int> newEdgeWriter` (старые рёбра наследуют атрибуты, рез помечается). Масштаб метры×1000 → `Int64`; нормализация винтинга (внешний CCW, дырки CW; `NormalizeWinding` — `internal`).
+- `PolygonEdgeClip` (static) — булевы операции с **пробросом рёберных атрибутов** через Z-callback Clipper2: id ребра субъекта → `Point64.Z`, на пересечениях переносится, выходное ребро классифицируется по `Z` + проверка коллинеарности (наследует атрибуты исходного ребра либо отдаётся `newEdgeWriter` как новое). `Difference/Intersection/Union(subject, clip, newEdgeWriter)` + `BuildStrip(a, b, width)` (прямоугольная полоса вдоль ребра — для дорог).
 - `RegionFill` (static) — заливка полигона точками: `FillRandom` (rejection), `FillGrid`.
 - `SplineRegionConvert` (static) — конверсии spline↔region (ресемпл по длине дуги).
-- `Clipper2/` — вендоренный Clipper2 (`Clipper2Lib`, Boost License), входит в asmdef `PCG.Polygons`.
+- `Clipper2/` — вендоренный Clipper2 (Boost License), входит в asmdef `PCG.Polygons`. Namespace `Clipper2ZLib` под `USINGZ` (иначе `Clipper2Lib`).
 
 **Editor (`Editor/Scripts/`):**
 - `SplineToRegionNodeExecutor` / `RegionToSplineNodeExecutor` — исполнители (превью через `RegionGizmoUtility` / `SplinesGizmoUtility`).
 - `SplinesToRegionAdapter` (`PcgPortAdapter`) — `List<Spline>` → `RegionSet` (автоконверсия с дефолтным разрешением).
-- `RegionSetSerializer` (`IPcgCacheSerializer`, `TypeId=2`) — value-cache регионов (блобы `float2[]` чанками + `PcgAttributeSetCacheIO`).
+- `RegionSetSerializer` (`IPcgCacheSerializer`, `TypeId=2`) — value-cache регионов (блобы `float2[]` чанками + `PcgAttributeSetCacheIO`). Порядок: по региону геометрия → его `EdgeAttributes`; затем регион-уровневые `set.Attributes`.
 - `PcgPolygonsBootstrap` (`InitializeOnLoadMethod`) — регистрирует сериализатор в `PcgCacheSerializerRegistry`.
 - `RegionGizmoUtility` — отрисовка регионов (контуры + дырки) на высоте `PlaneY`.
 

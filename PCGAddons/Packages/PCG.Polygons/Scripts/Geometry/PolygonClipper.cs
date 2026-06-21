@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
-using Clipper2Lib;
+using Clipper2ZLib;
+using PCG.Attributes;
 using Unity.Mathematics;
 
 namespace PCG.Polygons
@@ -35,7 +37,7 @@ namespace PCG.Polygons
 			return ToPolygons(solution);
 		}
 
-		public static void SplitByLine(Polygon2D region, float2 a, float2 b, List<Polygon2D> left, List<Polygon2D> right)
+		public static void SplitByLine(Polygon2D region, float2 a, float2 b, List<Polygon2D> left, List<Polygon2D> right, Action<PcgAttributeSet, int> newEdgeWriter)
 		{
 			var dir = math.normalize(b - a);
 			var normal = new float2(-dir.y, dir.x);
@@ -44,8 +46,8 @@ namespace PCG.Polygons
 			var leftRect = HalfPlaneRect(region, a, normal);
 			var rightRect = HalfPlaneRect(region, a, -normal);
 
-			left.AddRange(Intersection(subject, new List<Polygon2D> { leftRect }));
-			right.AddRange(Intersection(subject, new List<Polygon2D> { rightRect }));
+			left.AddRange(PolygonEdgeClip.Intersection(subject, new List<Polygon2D> { leftRect }, newEdgeWriter));
+			right.AddRange(PolygonEdgeClip.Intersection(subject, new List<Polygon2D> { rightRect }, newEdgeWriter));
 		}
 
 		private static Polygon2D HalfPlaneRect(Polygon2D region, float2 origin, float2 normal)
@@ -134,7 +136,7 @@ namespace PCG.Polygons
 			return ring;
 		}
 
-		private static Polygon2D NormalizeWinding(Polygon2D polygon)
+		internal static Polygon2D NormalizeWinding(Polygon2D polygon)
 		{
 			if (SignedArea(polygon.Outer) < 0f)
 				System.Array.Reverse(polygon.Outer);

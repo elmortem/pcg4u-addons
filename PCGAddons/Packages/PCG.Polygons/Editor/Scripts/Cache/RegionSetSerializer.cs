@@ -37,6 +37,8 @@ namespace PCG.Polygons
 				{
 					WriteRing(writer, region.Holes[h]);
 				}
+
+				PcgAttributeSetCacheIO.Write(writer, region.EdgeAttributes);
 			}
 
 			PcgAttributeSetCacheIO.Write(writer, set.Attributes);
@@ -57,6 +59,8 @@ namespace PCG.Polygons
 					region.Holes.Add(ReadRing(reader));
 				}
 
+				var edgeAttributes = PcgAttributeSetCacheIO.Read(reader);
+				region.EdgeAttributes.Append(edgeAttributes);
 				set.Regions.Add(region);
 			}
 

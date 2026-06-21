@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace PCG.Polygons
 {
-	public sealed class Polygon2D
+	public sealed partial class Polygon2D
 	{
 		public float2[] Outer;
 		public List<float2[]> Holes = new();
@@ -42,6 +42,7 @@ namespace PCG.Polygons
 				copy.Holes.Add((float2[])Holes[i].Clone());
 			}
 
+			copy.EdgeAttributes.Append(EdgeAttributes);
 			return copy;
 		}
 
@@ -56,6 +57,7 @@ namespace PCG.Polygons
 					hash = HashRing(hash, Holes[i]);
 				}
 
+				hash = (hash * 397) ^ EdgeAttributes.GetContentHash();
 				return hash;
 			}
 		}
