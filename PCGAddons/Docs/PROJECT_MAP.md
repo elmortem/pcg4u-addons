@@ -228,6 +228,32 @@ public class FooNode : PcgPreviewNode
 
 **Особенности исполнителя:** строит `PointOctree<PointData>` с адаптивным размером узла; батч-обработка (5k/батч); при `RemoveThemselves` — параллельный самопоиск дублей (`UniTask.WhenAll`, до 16 батчей по 100k). Превью рисует куб octree + точки выбранного выхода.
 
+### 4.6 PCG.Polygons — 2D-полигоны и регионы
+Фундамент под городские ноды (subdivide/boolean/inset/lots, отдельный ТДД-3). 2D-полигональный тип данных с именованными атрибутами, геом-бэкенд Clipper2, заливка точками, конверсии со сплайнами. Плоскость XZ (`float2 = (x, z)`), высота набора — `RegionSet.PlaneY`. Зависит от `PCG`, `PCG.Splines`, `Unity.Splines`, `Unity.Mathematics`, `UniTask`.
+
+**Ноды:**
+
+| Нода | Назначение | Input → Output |
+|---|---|---|
+| `SplineToRegionNode` | замкнутые сплайны → регионы (с ресемплом) | `Splines, MaxSegmentLength` → `Result: RegionSet` |
+| `RegionToSplineNode` | регионы → замкнутые сплайны (контур + дырки) | `Region` → `Splines: List<Spline>` |
+
+**Опорные типы (`Scripts/`):**
+- `Polygon2D` — контур `Outer` + дырки `Holes` + геометрия (Contains/GetBounds/Clone/Hash).
+- `RegionSet` (`IPcgAttributeData`) — `List<Polygon2D>` + `PlaneY` + `PcgAttributeSet Attributes` (один регион = одна строка атрибутов). **Value-тип, передаваемый между нодами.**
+- `RegionSetValue` (`PcgValue`) — регистрация типа `RegionSet` в пикере/блекборде (инлайн пустой).
+- `PolygonClipper` (static) — обёртка Clipper2: Union/Intersection/Difference/Inflate/SplitByLine (half-plane). Масштаб метры×1000 → `Int64`; нормализация винтинга (внешний CCW, дырки CW).
+- `RegionFill` (static) — заливка полигона точками: `FillRandom` (rejection), `FillGrid`.
+- `SplineRegionConvert` (static) — конверсии spline↔region (ресемпл по длине дуги).
+- `Clipper2/` — вендоренный Clipper2 (`Clipper2Lib`, Boost License), входит в asmdef `PCG.Polygons`.
+
+**Editor (`Editor/Scripts/`):**
+- `SplineToRegionNodeExecutor` / `RegionToSplineNodeExecutor` — исполнители (превью через `RegionGizmoUtility` / `SplinesGizmoUtility`).
+- `SplinesToRegionAdapter` (`PcgPortAdapter`) — `List<Spline>` → `RegionSet` (автоконверсия с дефолтным разрешением).
+- `RegionSetSerializer` (`IPcgCacheSerializer`, `TypeId=2`) — value-cache регионов (блобы `float2[]` чанками + `PcgAttributeSetCacheIO`).
+- `PcgPolygonsBootstrap` (`InitializeOnLoadMethod`) — регистрирует сериализатор в `PcgCacheSerializerRegistry`.
+- `RegionGizmoUtility` — отрисовка регионов (контуры + дырки) на высоте `PlaneY`.
+
 ---
 
 ## 5. Подсистема Setup (`Assets/Plugins/PCG4U/Setup/`)

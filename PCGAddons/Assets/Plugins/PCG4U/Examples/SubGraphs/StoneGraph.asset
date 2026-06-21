@@ -166,7 +166,7 @@ MonoBehaviour:
       Name: MaxSlope
       Default:
         rid: 7906782943574228998
-  ContentVersion: 203
+  ContentVersion: 205
   references:
     version: 2
     RefIds:
@@ -212,7 +212,6 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Count: 100
         Seed: 1537585758
-        PoissonMinDistance: 1
         ShuffleRegularPoints: 0
         PointMode: 1
     - rid: 7906782834765070489

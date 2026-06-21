@@ -1,0 +1,24 @@
+{
+    "name": "PCG.Polygons.Editor",
+    "rootNamespace": "PCG.Polygons.Editors",
+    "references": [
+        "PCG",
+        "PCG.Editors",
+        "PCG.Polygons",
+        "PCG.Splines",
+        "Unity.Splines",
+        "Unity.Mathematics",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,36 @@
+{
+  "name": "com.elmortem.pcg4u",
+  "displayName": "PCG4U",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.collections": "2.6.7",
+    "com.unity.burst": "1.8.29",
+    "com.unity.mathematics": "1.3.2"
+  },
+  "description": "A visual, node-based procedural content generation toolkit. Scatter and generate content - foliage, rocks, props, terrain details - across terrains, meshes and colliders with live Scene-view preview.",
+  "keywords": [
+    "tools",
+    "workflow",
+    "productivity",
+    "prototype",
+	"level",
+	"level design",
+	"level generator",
+	"open world",
+	"points",
+	"procedural",
+	"procedural dungeon",
+	"procedurap generation",
+	"procedural generator",
+	"procedural level",
+	"procedural level generation",
+	"procedural content generator",
+	"PCG"
+  ],
+  "category": "Workflow",
+  "author": {
+    "name": "Makar Osokin",
+    "url": "https://elmortem.com/pcg4u"
+  }
+}

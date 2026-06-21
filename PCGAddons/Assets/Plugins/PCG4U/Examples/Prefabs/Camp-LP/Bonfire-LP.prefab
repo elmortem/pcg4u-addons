@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: b20c5309112b5414f8430ce12c6a6b9c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.18845418
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b20c5309112b5414f8430ce12c6a6b9c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.3598075
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b20c5309112b5414f8430ce12c6a6b9c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.706329
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b20c5309112b5414f8430ce12c6a6b9c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b20c5309112b5414f8430ce12c6a6b9c, type: 3}
       propertyPath: m_Name
-      value: Bonfire
+      value: Bonfire-LP
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

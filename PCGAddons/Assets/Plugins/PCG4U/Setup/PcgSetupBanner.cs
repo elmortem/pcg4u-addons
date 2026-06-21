@@ -11,7 +11,7 @@ namespace PCG.Setup
 		private const float IconSize = 120f;
 		private const float TextLeft = 130f;
 
-		private const string IconPath = "Assets/Plugins/PCG4U/PCG/Icons/PcgIcon.png";
+		private const string IconPath = "Packages/com.elmortem.pcg4u/PCG/Icons/PcgIcon.png";
 		private const string Title = "PCG4U";
 		private const string Slogan = "Procedural. Controllable. Yours.";
 

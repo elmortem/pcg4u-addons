@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 395b386c9a955164da65e7992e40f4c6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.4634483
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 395b386c9a955164da65e7992e40f4c6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.068118624
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 395b386c9a955164da65e7992e40f4c6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.2127364
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 395b386c9a955164da65e7992e40f4c6, type: 3}
       propertyPath: m_LocalRotation.w
@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 395b386c9a955164da65e7992e40f4c6, type: 3}
       propertyPath: m_Name
-      value: Tent
+      value: Tent-LP
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
