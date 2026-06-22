@@ -10,20 +10,21 @@ namespace PCG.Polygons
 {
 	public static class RegionFill
 	{
-		public static async UniTask FillRandom(OperationScope scope, List<PointData> results, Polygon2D polygon, float planeY, int count, int seed, CancellationToken ct = default)
+		public static async UniTask FillRandom(OperationScope scope, List<PointData> results, IList<Polygon2D> polygons, float planeY, int count, int seed, CancellationToken ct = default)
 		{
-			if (count <= 0)
+			if (count <= 0 || polygons.Count == 0)
 				return;
 
 			count = math.min(count, PCG.MaxListPoints);
-			polygon.GetBounds(out var min, out var max);
+			GetBounds(polygons, out var min, out var max);
 			var random = PcgRandom.Create(seed);
 
-			int tryCount = count * 4;
-			while (results.Count < count && tryCount-- > 0)
+			int added = 0;
+			int tryCount = count * 8;
+			while (added < count && tryCount-- > 0)
 			{
 				var sample = new float2(random.NextFloat(min.x, max.x), random.NextFloat(min.y, max.y));
-				if (polygon.Contains(sample))
+				if (ContainsAny(polygons, sample))
 				{
 					results.Add(new PointData
 					{
@@ -31,25 +32,26 @@ namespace PCG.Polygons
 						Normal = new float3(0f, 1f, 0f),
 						Scale = 1f
 					});
+					added++;
 				}
 
 				await scope.Step(ct: ct);
 			}
 		}
 
-		public static async UniTask FillGrid(OperationScope scope, List<PointData> results, Polygon2D polygon, float planeY, float spacing, CancellationToken ct = default)
+		public static async UniTask FillGrid(OperationScope scope, List<PointData> results, IList<Polygon2D> polygons, float planeY, float spacing, CancellationToken ct = default)
 		{
-			if (spacing <= 0f)
+			if (spacing <= 0f || polygons.Count == 0)
 				return;
 
-			polygon.GetBounds(out var min, out var max);
+			GetBounds(polygons, out var min, out var max);
 
 			for (float x = min.x; x <= max.x; x += spacing)
 			{
 				for (float y = min.y; y <= max.y; y += spacing)
 				{
 					var sample = new float2(x, y);
-					if (polygon.Contains(sample))
+					if (ContainsAny(polygons, sample))
 					{
 						results.Add(new PointData
 						{
@@ -61,6 +63,29 @@ namespace PCG.Polygons
 
 					await scope.Step(ct: ct);
 				}
+			}
+		}
+
+		public static bool ContainsAny(IList<Polygon2D> polygons, float2 p)
+		{
+			for (int i = 0; i < polygons.Count; i++)
+			{
+				if (polygons[i].Contains(p))
+					return true;
+			}
+
+			return false;
+		}
+
+		private static void GetBounds(IList<Polygon2D> polygons, out float2 min, out float2 max)
+		{
+			min = new float2(float.MaxValue, float.MaxValue);
+			max = new float2(float.MinValue, float.MinValue);
+			for (int i = 0; i < polygons.Count; i++)
+			{
+				polygons[i].GetBounds(out var pmin, out var pmax);
+				min = math.min(min, pmin);
+				max = math.max(max, pmax);
 			}
 		}
 	}

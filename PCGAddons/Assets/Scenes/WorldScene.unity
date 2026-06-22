@@ -157305,6 +157305,8 @@ MonoBehaviour:
     - rid: 7906782975558942923
     - rid: 7906783217557176322
     - rid: 7906783217557176323
+    - rid: 7906783217557176324
+    - rid: 7906783217557176325
     Edges:
     - FromNodeId: 3
       FromPort: Value
@@ -157426,7 +157428,15 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 28
       ToPort: Splines
-    NextNodeId: 29
+    - FromNodeId: 28
+      FromPort: Result
+      ToNodeId: 29
+      ToPort: Region
+    - FromNodeId: 30
+      FromPort: Value
+      ToNodeId: 29
+      ToPort: Seed
+    NextNodeId: 31
     Variables:
     - Id: Int
       Name: Seed
@@ -158124,6 +158134,32 @@ MonoBehaviour:
         IsPreviewLocal: 0
         Splines: []
         MaxSegmentLength: 1
+    - rid: 7906783217557176324
+      type: {class: SubdivideRegionNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        Id: 29
+        Position: {x: -862.0747, y: 1749.0426}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        MinSize: 20
+        MaxDepth: 5
+        SplitJitter: 0.2
+        Seed: 0
+    - rid: 7906783217557176325
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 30
+        Position: {x: -1040.5454, y: 1920.7467}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: Int
 --- !u!4 &1159466443
 Transform:
   m_ObjectHideFlags: 0
