@@ -7,6 +7,12 @@ namespace PCG.Polygons.City
 		[Input(Connection = PcgConnectionType.Override)]
 		public RegionSet Blocks;
 
+		public RoadJoinType Join = RoadJoinType.Round;
+
+		public RoadCapType Cap = RoadCapType.Butt;
+
+		public float MiterLimit = 2f;
+
 		[Output]
 		public RegionSet Roads => default;
 	}

@@ -14,6 +14,9 @@ namespace PCG.Polygons.City
 		public float MaxWidth = 8f;
 
 		[Input]
+		public int MinDepth = 1;
+
+		[Input]
 		public int MaxDepth = 6;
 
 		[Output]

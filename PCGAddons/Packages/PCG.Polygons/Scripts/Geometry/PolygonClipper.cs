@@ -37,6 +37,53 @@ namespace PCG.Polygons
 			return ToPolygons(solution);
 		}
 
+		public static List<Polygon2D> InflatePolylines(IList<float2[]> openPaths, IList<float2[]> closedPaths, float delta, JoinType joinType, EndType endType, float miterLimit)
+		{
+			var co = new ClipperOffset(miterLimit);
+
+			if (openPaths != null)
+			{
+				for (int i = 0; i < openPaths.Count; i++)
+					co.AddPath(ToPath(openPaths[i]), joinType, endType);
+			}
+
+			if (closedPaths != null)
+			{
+				for (int i = 0; i < closedPaths.Count; i++)
+					co.AddPath(ToPath(closedPaths[i]), joinType, EndType.Joined);
+			}
+
+			var solution = new Paths64();
+			co.Execute(delta * Scale, solution);
+			return ToPolygons(solution);
+		}
+
+		public static List<float2[]> Triangulate(IList<Polygon2D> polygons)
+		{
+			var paths = ToPaths(polygons);
+			var delaunay = new Delaunay();
+			var result = delaunay.Execute(paths, out var sol);
+			var triangles = new List<float2[]>(sol.Count);
+			if (result != TriangulateResult.success)
+				return triangles;
+
+			for (int i = 0; i < sol.Count; i++)
+			{
+				var p = sol[i];
+				if (p.Count < 3)
+					continue;
+
+				triangles.Add(new[]
+				{
+					new float2((float)(p[0].X / Scale), (float)(p[0].Y / Scale)),
+					new float2((float)(p[1].X / Scale), (float)(p[1].Y / Scale)),
+					new float2((float)(p[2].X / Scale), (float)(p[2].Y / Scale))
+				});
+			}
+
+			return triangles;
+		}
+
 		public static void SplitByLine(Polygon2D region, float2 a, float2 b, List<Polygon2D> left, List<Polygon2D> right, Action<PcgAttributeSet, int> newEdgeWriter)
 		{
 			var dir = math.normalize(b - a);

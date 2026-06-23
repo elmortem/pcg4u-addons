@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Threading;
+using Clipper2ZLib;
 using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.GraphModel;
 using PCG.Polygons.Utilities;
 using PCG.Utilities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace PCG.Polygons.City
@@ -23,38 +25,61 @@ namespace PCG.Polygons.City
 			if (input == null)
 				return;
 
-			var strips = new List<Polygon2D>();
+			var byDepth = RoadPolylineBuilder.CollectByDepth(input);
+			var parts = new List<Polygon2D>();
+			var joinType = ToJoinType(Data.Join);
+			var endType = ToEndType(Data.Cap);
 
 			using (var scope = OperationScope.Start(this))
 			{
-				foreach (var polygon in input.Regions)
+				foreach (var pair in byDepth)
 				{
-					if (!polygon.HasEdgeData() || !polygon.EdgeAttributes.HasColumn(CityAttributes.Width))
-						continue;
+					var segments = pair.Value;
+					float width = segments[0].Width;
 
-					for (int e = 0; e < polygon.Outer.Length; e++)
-					{
-						float width = polygon.GetEdge<float>(CityAttributes.Width, e);
-						if (width <= 0f)
-							continue;
+					var openPaths = new List<float2[]>();
+					var closedPaths = new List<float2[]>();
+					RoadPolylineBuilder.Chain(segments, openPaths, closedPaths);
 
-						var a = polygon.Outer[e];
-						var b = polygon.Outer[(e + 1) % polygon.Outer.Length];
-						var strip = PolygonEdgeClip.BuildStrip(a, b, width);
-						if (strip != null)
-							strips.Add(strip);
+					var ribbons = PolygonClipper.InflatePolylines(openPaths, closedPaths, width * 0.5f, joinType, endType, Data.MiterLimit);
+					parts.AddRange(ribbons);
 
-						await scope.Step(ct: ct);
-					}
+					await scope.Step(ct: ct);
 				}
 
 				var roads = new RegionSet();
 				roads.PlaneY = input.PlaneY;
-				var merged = strips.Count > 0 ? PolygonClipper.Union(strips, new List<Polygon2D>()) : new List<Polygon2D>();
+				var merged = parts.Count > 0 ? PolygonClipper.Union(parts, new List<Polygon2D>()) : new List<Polygon2D>();
 				for (int i = 0; i < merged.Count; i++)
 					roads.AddRegion(merged[i]);
 
 				Roads.Value = roads;
+			}
+		}
+
+		private static JoinType ToJoinType(RoadJoinType join)
+		{
+			switch (join)
+			{
+				case RoadJoinType.Miter:
+					return JoinType.Miter;
+				case RoadJoinType.Square:
+					return JoinType.Square;
+				default:
+					return JoinType.Round;
+			}
+		}
+
+		private static EndType ToEndType(RoadCapType cap)
+		{
+			switch (cap)
+			{
+				case RoadCapType.Square:
+					return EndType.Square;
+				case RoadCapType.Round:
+					return EndType.Round;
+				default:
+					return EndType.Butt;
 			}
 		}
 

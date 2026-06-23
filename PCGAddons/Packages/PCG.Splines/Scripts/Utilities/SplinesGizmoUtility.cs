@@ -18,9 +18,6 @@ namespace PCG.Splines.Utilities
 				if(spline == null || spline.Count < 2)
 					continue;
 
-				var bounds = spline.GetBounds(transform.localToWorldMatrix);
-				Gizmos.DrawWireCube(bounds.center, bounds.size);
-
 				Vector3[] positions;
 				SplinesCache.GetCachedPositions(spline, 16, out positions);
 

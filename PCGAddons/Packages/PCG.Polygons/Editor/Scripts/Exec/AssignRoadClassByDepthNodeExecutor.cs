@@ -23,6 +23,7 @@ namespace PCG.Polygons.City
 				return;
 
 			var maxWidth = GetInputValue(nameof(Data.MaxWidth), Data.MaxWidth);
+			var minDepth = GetInputValue(nameof(Data.MinDepth), Data.MinDepth);
 			var maxDepth = GetInputValue(nameof(Data.MaxDepth), Data.MaxDepth);
 
 			var result = input.Clone();
@@ -40,10 +41,10 @@ namespace PCG.Polygons.City
 					for (int e = 0; e < polygon.EdgeCount; e++)
 					{
 						int d = polygon.GetEdge<int>(CityAttributes.CutDepth, e);
-						if (d <= 0)
+						if (d < minDepth || d > maxDepth)
 							continue;
 
-						float k = maxDepth > 0 ? (float)(d - 1) / maxDepth : 0f;
+						float k = maxDepth > 0 ? (float)d / maxDepth : 0f;
 						float width = Data.WidthByDepth.Evaluate(k) * maxWidth;
 						polygon.SetEdge(CityAttributes.Width, e, width);
 					}

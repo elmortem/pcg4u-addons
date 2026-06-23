@@ -42,6 +42,8 @@ MonoBehaviour:
     - rid: 7906782975558942853
     - rid: 7906782975558942854
     - rid: 7906782975558942924
+    - rid: 7906783217557176346
+    - rid: 7906783217557176348
     Edges:
     - FromNodeId: 1
       FromPort: Terrain
@@ -95,18 +97,10 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 5
       ToPort: Points
-    - FromNodeId: 5
-      FromPort: Results
-      ToNodeId: 16
-      ToPort: Points
     - FromNodeId: 15
       FromPort: Value
       ToNodeId: 16
       ToPort: Splines
-    - FromNodeId: 16
-      FromPort: Results
-      ToNodeId: 14
-      ToPort: Points
     - FromNodeId: 17
       FromPort: Results
       ToNodeId: 18
@@ -151,10 +145,6 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 22
       ToPort: Points
-    - FromNodeId: 14
-      FromPort: Results
-      ToNodeId: 28
-      ToPort: Points
     - FromNodeId: 28
       FromPort: Results
       ToNodeId: 7
@@ -163,7 +153,27 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 17
       ToPort: Points
-    NextNodeId: 29
+    - FromNodeId: 30
+      FromPort: Value
+      ToNodeId: 29
+      ToPort: Regions
+    - FromNodeId: 5
+      FromPort: Results
+      ToNodeId: 16
+      ToPort: Points
+    - FromNodeId: 16
+      FromPort: Results
+      ToNodeId: 29
+      ToPort: Points
+    - FromNodeId: 29
+      FromPort: Results
+      ToNodeId: 14
+      ToPort: Points
+    - FromNodeId: 14
+      FromPort: Results
+      ToNodeId: 28
+      ToPort: Points
+    NextNodeId: 31
     Variables:
     - Id: Int
       Name: Seed
@@ -197,7 +207,11 @@ MonoBehaviour:
       Name: ExcludeSplines
       Default:
         rid: 7906782975558942796
-  ContentVersion: 183
+    - Id: RegionSet
+      Name: ExcludeRegions
+      Default:
+        rid: 7906783217557176347
+  ContentVersion: 215
   references:
     version: 2
     RefIds:
@@ -233,7 +247,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 1
-        Position: {x: -1068.5077, y: 336.90326}
+        Position: {x: -1520.6561, y: 329.28278}
         Collapsed: 0
         Width: 220
         Title: 
@@ -242,7 +256,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 2
-        Position: {x: -1068.5077, y: 481.81323}
+        Position: {x: -1520.6561, y: 474.19275}
         Collapsed: 0
         Width: 220
         Title: 
@@ -251,7 +265,7 @@ MonoBehaviour:
       type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
       data:
         Id: 3
-        Position: {x: -897.03064, y: 346.5639}
+        Position: {x: -1349.1791, y: 338.94342}
         Collapsed: 0
         Width: 220
         Title: 
@@ -264,14 +278,13 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Count: 100
         Seed: 1990162738
-        PoissonMinDistance: 1
         ShuffleRegularPoints: 1
         PointMode: 1
     - rid: 7906782975558942731
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 4
-        Position: {x: -1072.1305, y: 437.1327}
+        Position: {x: -1524.2789, y: 429.5122}
         Collapsed: 0
         Width: 220
         Title: 
@@ -280,7 +293,7 @@ MonoBehaviour:
       type: {class: PointsNearPointsNode, ns: PCG.SelectPoints, asm: PCG}
       data:
         Id: 5
-        Position: {x: 102.583496, y: 339.42532}
+        Position: {x: -336.2635, y: 355.08273}
         Collapsed: 0
         Width: 220
         Title: 
@@ -298,7 +311,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 6
-        Position: {x: -74.57327, y: 612.15485}
+        Position: {x: -526.7217, y: 604.53436}
         Collapsed: 0
         Width: 220
         Title: 
@@ -357,7 +370,7 @@ MonoBehaviour:
       type: {class: DensityByTerrainLayerNode, ns: PCG.TransformPoints, asm: PCG}
       data:
         Id: 11
-        Position: {x: -595.3932, y: 347.30408}
+        Position: {x: -1047.5416, y: 339.6836}
         Collapsed: 0
         Width: 220
         Title: 
@@ -375,7 +388,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 12
-        Position: {x: -757.6543, y: 214.63559}
+        Position: {x: -1209.8027, y: 207.0151}
         Collapsed: 0
         Width: 220
         Title: 
@@ -384,7 +397,7 @@ MonoBehaviour:
       type: {class: PointsByDensityNode, ns: PCG.SelectPoints, asm: PCG}
       data:
         Id: 13
-        Position: {x: -225.84085, y: 349.62476}
+        Position: {x: -677.98926, y: 342.00427}
         Collapsed: 0
         Width: 220
         Title: 
@@ -400,7 +413,7 @@ MonoBehaviour:
       type: {class: PointsBySlopeNode, ns: PCG.SelectPoints, asm: PCG}
       data:
         Id: 14
-        Position: {x: 717.95654, y: 339.28378}
+        Position: {x: 684.43085, y: 351.57654}
         Collapsed: 0
         Width: 220
         Title: 
@@ -421,7 +434,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 15
-        Position: {x: 214.04292, y: 612.88293}
+        Position: {x: -238.10551, y: 605.26245}
         Collapsed: 0
         Width: 220
         Title: 
@@ -430,7 +443,7 @@ MonoBehaviour:
       type: {class: PointsNearSplinesNode, ns: PCG.SelectPoints, asm: PCG.Splines}
       data:
         Id: 16
-        Position: {x: 437.5115, y: 340.404}
+        Position: {x: -14.636932, y: 332.7835}
         Collapsed: 0
         Width: 220
         Title: 
@@ -504,6 +517,7 @@ MonoBehaviour:
         Offset: {x: 0, y: 0, z: 0}
         Points: []
         ProjectionMode: 2
+        ProjectNormal: 1
     - rid: 7906782975558942846
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
@@ -614,3 +628,31 @@ MonoBehaviour:
         Max: 360
         Seed: 1227656570
         Mode: 2
+    - rid: 7906783217557176346
+      type: {class: PointsNearRegionsNode, ns: PCG.SelectPoints, asm: PCG.Polygons}
+      data:
+        Id: 29
+        Position: {x: 328.55103, y: 343.95847}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Radius: 4
+        UseScale: 1
+    - rid: 7906783217557176347
+      type: {class: RegionSetValue, ns: PCG.Polygons, asm: PCG.Polygons}
+      data: 
+    - rid: 7906783217557176348
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 30
+        Position: {x: 67.786194, y: 610.7415}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: RegionSet

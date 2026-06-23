@@ -204,6 +204,10 @@ MonoBehaviour:
       Name: ExcludeSplines
       Default:
         rid: 7906782975558942915
+    - Id: RegionSet
+      Name: ExcludeRegions
+      Default:
+        rid: 7906783217557176344
   ContentVersion: 276
   references:
     version: 2
@@ -661,3 +665,6 @@ MonoBehaviour:
           z: 0
         Seed: 13947435
         ApplyToGroup: 0
+    - rid: 7906783217557176344
+      type: {class: RegionSetValue, ns: PCG.Polygons, asm: PCG.Polygons}
+      data: 

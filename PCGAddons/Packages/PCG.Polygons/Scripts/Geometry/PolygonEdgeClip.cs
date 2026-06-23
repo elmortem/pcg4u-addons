@@ -52,7 +52,6 @@ namespace PCG.Polygons
 			var clipPaths = BuildClipPaths(clip);
 
 			var clipper = new Clipper64();
-			clipper.ZCallback = OnZ;
 			clipper.AddSubject(subjectPaths);
 			clipper.AddClip(clipPaths);
 
@@ -63,19 +62,6 @@ namespace PCG.Polygons
 			var result = new List<Polygon2D>();
 			BuildPolygons(tree, table, newEdgeWriter, result);
 			return result;
-		}
-
-		private static void OnZ(Point64 e1bot, Point64 e1top, Point64 e2bot, Point64 e2top, ref Point64 ip)
-		{
-			long z = e1bot.Z;
-			if (e1top.Z > z)
-				z = e1top.Z;
-			if (e2bot.Z > z)
-				z = e2bot.Z;
-			if (e2top.Z > z)
-				z = e2top.Z;
-
-			ip.Z = z;
 		}
 
 		private static Paths64 BuildSubjectPaths(IList<Polygon2D> subject, List<EdgeSource> table)
@@ -102,7 +88,6 @@ namespace PCG.Polygons
 			for (int i = 0; i < ring.Length; i++)
 			{
 				int next = (i + 1) % ring.Length;
-				int id = table.Count + 1;
 				table.Add(new EdgeSource
 				{
 					Polygon = polygon,
@@ -112,7 +97,6 @@ namespace PCG.Polygons
 				});
 
 				var point = new Point64((long)(ring[i].x * PolygonClipper.Scale), (long)(ring[i].y * PolygonClipper.Scale));
-				point.Z = id;
 				path.Add(point);
 			}
 
@@ -141,7 +125,6 @@ namespace PCG.Polygons
 			for (int i = 0; i < ring.Length; i++)
 			{
 				var point = new Point64((long)(ring[i].x * PolygonClipper.Scale), (long)(ring[i].y * PolygonClipper.Scale));
-				point.Z = 0;
 				path.Add(point);
 			}
 
@@ -154,18 +137,19 @@ namespace PCG.Polygons
 			{
 				var node = tree[i];
 				var polygon = new Polygon2D();
-				polygon.Outer = ResolveRing(node.Polygon, table, newEdgeWriter, polygon.EdgeAttributes);
+				polygon.Outer = ToRing(node.Polygon);
 				for (int h = 0; h < node.Count; h++)
 				{
-					polygon.Holes.Add(ResolveRing(node[h].Polygon, table, newEdgeWriter, polygon.EdgeAttributes));
+					polygon.Holes.Add(ToRing(node[h].Polygon));
 				}
 
 				PolygonClipper.NormalizeWinding(polygon);
+				AssignEdges(polygon, table, newEdgeWriter);
 				result.Add(polygon);
 			}
 		}
 
-		private static float2[] ResolveRing(Path64 path, List<EdgeSource> table, Action<PcgAttributeSet, int> newEdgeWriter, PcgAttributeSet edgeAttributes)
+		private static float2[] ToRing(Path64 path)
 		{
 			int n = path.Count;
 			var ring = new float2[n];
@@ -174,65 +158,68 @@ namespace PCG.Polygons
 				ring[i] = new float2((float)(path[i].X / PolygonClipper.Scale), (float)(path[i].Y / PolygonClipper.Scale));
 			}
 
+			return ring;
+		}
+
+		private static void AssignEdges(Polygon2D polygon, List<EdgeSource> table, Action<PcgAttributeSet, int> newEdgeWriter)
+		{
+			AssignRing(polygon.Outer, table, newEdgeWriter, polygon.EdgeAttributes);
+			for (int h = 0; h < polygon.Holes.Count; h++)
+			{
+				AssignRing(polygon.Holes[h], table, newEdgeWriter, polygon.EdgeAttributes);
+			}
+		}
+
+		private static void AssignRing(float2[] ring, List<EdgeSource> table, Action<PcgAttributeSet, int> newEdgeWriter, PcgAttributeSet edgeAttributes)
+		{
+			int n = ring.Length;
 			for (int i = 0; i < n; i++)
 			{
-				int next = (i + 1) % n;
-				int sourceId = ClassifyEdge(ring[i], ring[next], path[i].Z, path[next].Z, table);
+				var a = ring[i];
+				var b = ring[(i + 1) % n];
+				int sourceId = GeometricSource(a, b, table);
 				if (sourceId > 0)
 				{
 					var src = table[sourceId - 1];
 					if (src.Polygon.HasEdgeData())
-					{
 						edgeAttributes.AppendRow(src.Polygon.EdgeAttributes, src.LocalEdge);
-						continue;
-					}
+					else
+						edgeAttributes.AddRow();
+
+					continue;
 				}
 
 				int row = edgeAttributes.AddRow();
 				newEdgeWriter?.Invoke(edgeAttributes, row);
 			}
-
-			return ring;
 		}
 
-		private static int ClassifyEdge(float2 a, float2 b, long za, long zb, List<EdgeSource> table)
+		private static int GeometricSource(float2 a, float2 b, List<EdgeSource> table)
 		{
-			int candidate = TryCandidate(a, b, za, table);
-			if (candidate > 0)
-				return candidate;
-
-			return TryCandidate(a, b, zb, table);
-		}
-
-		private static int TryCandidate(float2 a, float2 b, long id, List<EdgeSource> table)
-		{
-			if (id <= 0 || id > table.Count)
-				return 0;
-
-			var src = table[(int)id - 1];
-			if (IsCollinearOverlap(a, b, src.A, src.B))
-				return (int)id;
+			var m = (a + b) * 0.5f;
+			for (int i = 0; i < table.Count; i++)
+			{
+				if (OnSegment(m, table[i].A, table[i].B))
+					return i + 1;
+			}
 
 			return 0;
 		}
 
-		private static bool IsCollinearOverlap(float2 a, float2 b, float2 c, float2 d)
+		private static bool OnSegment(float2 m, float2 c, float2 d)
 		{
-			const float eps = 0.001f;
 			var dir = d - c;
 			float len = math.length(dir);
-			if (len < eps)
+			if (len < 1e-4f)
 				return false;
 
 			dir /= len;
-			float distA = math.abs(Cross(dir, a - c));
-			float distB = math.abs(Cross(dir, b - c));
-			return distA < eps && distB < eps;
-		}
+			float cross = dir.x * (m.y - c.y) - dir.y * (m.x - c.x);
+			if (math.abs(cross) > 0.01f)
+				return false;
 
-		private static float Cross(float2 u, float2 v)
-		{
-			return u.x * v.y - u.y * v.x;
+			float t = math.dot(m - c, dir);
+			return t >= -0.01f && t <= len + 0.01f;
 		}
 	}
 }
