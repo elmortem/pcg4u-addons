@@ -34,8 +34,7 @@ namespace PCG.SelectPoints
 				return;
 
 			var regions = GetInputValue(nameof(Data.Regions), Data.Regions);
-			if (regions == null || regions.Count <= 0)
-				return;
+			var hasRegions = regions != null && regions.Count > 0;
 
 			_boundsMin.Clear();
 			_boundsMax.Clear();
@@ -52,7 +51,7 @@ namespace PCG.SelectPoints
 
 					foreach (var point in points)
 					{
-						if (CheckNearRegion(point, regions, radius))
+						if (hasRegions && CheckNearRegion(point, regions, radius))
 							nearPoints.Add(point);
 						else
 							results.Add(point);

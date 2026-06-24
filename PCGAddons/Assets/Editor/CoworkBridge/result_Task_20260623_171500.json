@@ -1,0 +1,10 @@
+{
+    "id": "Task_20260623_171500",
+    "status": "success",
+    "logs": [
+        "[Smoke] no-terrain square 10x10: verts=4, triangles=2"
+    ],
+    "return_value": "OK: compiled and ran. Build returned verts=4, triangles=2",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

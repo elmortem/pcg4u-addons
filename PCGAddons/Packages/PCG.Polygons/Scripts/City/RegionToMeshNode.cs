@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using PCG.GraphModel;
+using PCG.Instances;
 using UnityEngine;
 
 namespace PCG.Polygons.City
 {
-	public sealed class RegionToTerrainNode : PcgPreviewNode
+	public sealed class RegionToMeshNode : PcgPreviewNode
 	{
 		public bool Enabled = true;
 
@@ -18,10 +19,16 @@ namespace PCG.Polygons.City
 		public Vector3 Offset;
 
 		[Input]
-		public float MaxEdgeLength = 2f;
+		public float MaxHeightError = 0.25f;
 
 		[Input]
-		public int MaxSubdivisions = 4;
+		public float MinCellSize = 1f;
+
+		[Input]
+		public float MaxCellSize = 16f;
+
+		[Input]
+		public int MaxDepth = 6;
 
 		[Input]
 		public float HeightOffset = 0.1f;
@@ -32,6 +39,7 @@ namespace PCG.Polygons.City
 		[Input]
 		public string Name = "Road";
 
+		[Input]
 		public Material Material;
 
 		[Output]

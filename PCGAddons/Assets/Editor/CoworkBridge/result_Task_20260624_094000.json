@@ -1,0 +1,8 @@
+{
+    "id": "Task_20260624_094000",
+    "status": "success",
+    "logs": [],
+    "return_value": "OK: project compiled, RegionToMeshNode + RegionToMeshNodeExecutor present",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

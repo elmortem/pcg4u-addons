@@ -1,6 +1,8 @@
 # ТДД: RegionToMesh — меш дороги с драпировкой на террейн
 
-Status: Выполнено
+Status: Выполнено (заменён)
+
+> Алгоритм равномерного midpoint-дробления из этого ТДД заменён адаптивной тесселяцией по рельефу — см. `Docs/tdd/done/260623-1655-TDD-region_terrain_mesh_tessellation.md`. Нода и исполнитель сохранили имена `RegionToMeshNode` / `RegionToMeshNodeExecutor`; `SubdivisionLevel`/`Subdivide` удалены, параметры `MaxEdgeLength`/`MaxSubdivisions` заменены на `MaxHeightError`/`MinCellSize`/`MaxCellSize`/`MaxDepth`.
 
 ## Контекст
 
