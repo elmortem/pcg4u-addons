@@ -28,7 +28,7 @@ namespace PCG.Polygons.City
 				return;
 			}
 
-			var region = GetInputValue(nameof(Data.Region), Data.Region);
+			var region = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Region), ct);
 			if (region == null || region.Count <= 0)
 				return;
 

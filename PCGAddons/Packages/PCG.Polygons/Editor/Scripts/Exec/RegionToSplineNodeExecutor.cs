@@ -20,7 +20,7 @@ namespace PCG.Polygons
 		{
 			Splines.Value = new List<Spline>();
 
-			var region = GetInputValue(nameof(Data.Region), Data.Region);
+			var region = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Region), ct);
 			if (region == null)
 				return;
 

@@ -19,12 +19,12 @@ namespace PCG.Polygons.City
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			var input = GetInputValue(nameof(Data.Region), Data.Region);
+			var input = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Region), ct);
 			var results = Results.Rent(input != null ? input.Count : 0);
 			if (input == null)
 				return;
 
-			var roads = GetInputValue(nameof(Data.Roads), Data.Roads);
+			var roads = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Roads), ct);
 			var count = GetInputValue(nameof(Data.Count), Data.Count);
 			var spacing = GetInputValue(nameof(Data.Spacing), Data.Spacing);
 			var margin = GetInputValue(nameof(Data.Margin), Data.Margin);

@@ -33,7 +33,7 @@ namespace PCG.SelectPoints
 			if (pointsList == null || pointsList.Length <= 0)
 				return;
 
-			var regions = GetInputValue(nameof(Data.Regions), Data.Regions);
+			var regions = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Regions), ct);
 			var hasRegions = regions != null && regions.Count > 0;
 
 			_boundsMin.Clear();

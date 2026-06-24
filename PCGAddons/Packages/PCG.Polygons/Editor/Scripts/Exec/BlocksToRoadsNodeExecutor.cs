@@ -21,7 +21,7 @@ namespace PCG.Polygons.City
 		{
 			Roads.Value = new RegionSet();
 
-			var input = GetInputValue(nameof(Data.Blocks), Data.Blocks);
+			var input = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Blocks), ct);
 			if (input == null)
 				return;
 

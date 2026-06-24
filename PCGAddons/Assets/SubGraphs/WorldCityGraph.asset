@@ -37,6 +37,7 @@ MonoBehaviour:
     - rid: 7906783217557176396
     - rid: 7906783217557176397
     - rid: 7906783217557176398
+    - rid: 7906783217557176407
     Edges:
     - FromNodeId: 1
       FromPort: Value
@@ -110,10 +111,6 @@ MonoBehaviour:
       FromPort: Offset
       ToNodeId: 15
       ToPort: Offset
-    - FromNodeId: 13
-      FromPort: Result
-      ToNodeId: 17
-      ToPort: Value
     - FromNodeId: 15
       FromPort: Results
       ToNodeId: 18
@@ -150,7 +147,19 @@ MonoBehaviour:
       FromPort: Result
       ToNodeId: 19
       ToPort: Region
-    NextNodeId: 25
+    - FromNodeId: 11
+      FromPort: Result
+      ToNodeId: 25
+      ToPort: B
+    - FromNodeId: 24
+      FromPort: Result
+      ToNodeId: 25
+      ToPort: A
+    - FromNodeId: 25
+      FromPort: Result
+      ToNodeId: 17
+      ToPort: Value
+    NextNodeId: 26
     Variables:
     - Id: Int
       Name: Seed
@@ -176,7 +185,7 @@ MonoBehaviour:
       Name: RoadMat
       Default:
         rid: 7906783217557176392
-  ContentVersion: 188
+  ContentVersion: 195
   references:
     version: 2
     RefIds:
@@ -415,7 +424,7 @@ MonoBehaviour:
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
-        Delta: 5
+        Delta: 3
     - rid: 7906783217557176375
       type: {class: PolygonBooleanNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
       data:
@@ -467,7 +476,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 17
-        Position: {x: 2105.2993, y: 141.7778}
+        Position: {x: 3034.7385, y: 96.894714}
         Collapsed: 0
         Width: 220
         Title: 
@@ -493,7 +502,7 @@ MonoBehaviour:
       type: {class: RegionToMeshNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
       data:
         Id: 19
-        Position: {x: 3024.6492, y: 370.70886}
+        Position: {x: 3008.2114, y: 302.76572}
         Collapsed: 0
         Width: 220
         Title: 
@@ -517,7 +526,7 @@ MonoBehaviour:
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
         Id: 20
-        Position: {x: 3395.2922, y: 552.8026}
+        Position: {x: 3383.238, y: 438.83344}
         Collapsed: 0
         Width: 220
         Title: 
@@ -543,7 +552,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 21
-        Position: {x: 2847.9954, y: 629.0377}
+        Position: {x: 2833.7493, y: 592.8744}
         Collapsed: 0
         Width: 220
         Title: 
@@ -561,7 +570,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         Id: 23
-        Position: {x: 2842.243, y: 477.5478}
+        Position: {x: 2847.7224, y: 430.4259}
         Collapsed: 0
         Width: 220
         Title: 
@@ -580,3 +589,17 @@ MonoBehaviour:
           PointSize: 1
         IsPreviewLocal: 0
         Mode: 1
+    - rid: 7906783217557176407
+      type: {class: PolygonBooleanNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        Id: 25
+        Position: {x: 2732.363, y: 98.504974}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Mode: 0

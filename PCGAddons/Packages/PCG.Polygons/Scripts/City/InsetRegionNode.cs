@@ -4,7 +4,7 @@ namespace PCG.Polygons.City
 {
 	public sealed class InsetRegionNode : PcgPreviewNode
 	{
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Region;
 
 		[Input]

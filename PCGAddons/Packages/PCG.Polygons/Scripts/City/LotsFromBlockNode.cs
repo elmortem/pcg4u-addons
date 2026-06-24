@@ -4,7 +4,7 @@ namespace PCG.Polygons.City
 {
 	public sealed class LotsFromBlockNode : PcgPreviewNode
 	{
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Blocks;
 
 		[Input]

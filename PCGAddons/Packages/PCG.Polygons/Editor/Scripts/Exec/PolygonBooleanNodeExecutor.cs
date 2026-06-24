@@ -21,8 +21,8 @@ namespace PCG.Polygons.City
 		{
 			Result.Value = new RegionSet();
 
-			var a = GetInputValue(nameof(Data.A), Data.A);
-			var b = GetInputValue(nameof(Data.B), Data.B);
+			var a = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.A), ct);
+			var b = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.B), ct);
 			if (a == null || b == null)
 				return;
 

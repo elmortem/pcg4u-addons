@@ -5,7 +5,7 @@ namespace PCG.Polygons.City
 {
 	public sealed class AssignRoadClassByDepthNode : PcgPreviewNode
 	{
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Blocks;
 
 		public AnimationCurve WidthByDepth = AnimationCurve.Linear(0f, 1f, 1f, 0.2f);

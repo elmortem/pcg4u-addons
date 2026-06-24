@@ -4,7 +4,7 @@ namespace PCG.Polygons.City
 {
 	public sealed class BlocksToRoadsNode : PcgPreviewNode
 	{
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Blocks;
 
 		public RoadJoinType Join = RoadJoinType.Round;

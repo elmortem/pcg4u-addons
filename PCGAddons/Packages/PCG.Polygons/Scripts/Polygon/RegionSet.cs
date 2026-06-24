@@ -18,6 +18,16 @@ namespace PCG.Polygons
 			return Attributes.AddRow();
 		}
 
+		public void Append(RegionSet other)
+		{
+			for (int i = 0; i < other.Regions.Count; i++)
+			{
+				Regions.Add(other.Regions[i].Clone());
+			}
+
+			Attributes.Append(other.Attributes);
+		}
+
 		public RegionSet Clone()
 		{
 			var copy = new RegionSet();

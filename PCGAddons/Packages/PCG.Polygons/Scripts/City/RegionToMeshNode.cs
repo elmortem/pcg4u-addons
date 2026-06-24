@@ -9,7 +9,7 @@ namespace PCG.Polygons.City
 	{
 		public bool Enabled = true;
 
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Region;
 
 		[Input]

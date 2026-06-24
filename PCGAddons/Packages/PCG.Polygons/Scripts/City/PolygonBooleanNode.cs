@@ -4,10 +4,10 @@ namespace PCG.Polygons.City
 {
 	public sealed class PolygonBooleanNode : PcgPreviewNode
 	{
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet A;
 
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet B;
 
 		public PolygonBooleanMode Mode = PolygonBooleanMode.Difference;

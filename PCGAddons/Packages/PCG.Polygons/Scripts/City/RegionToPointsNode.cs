@@ -6,10 +6,10 @@ namespace PCG.Polygons.City
 {
 	public sealed class RegionToPointsNode : PcgPreviewNode
 	{
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Region;
 
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Roads;
 
 		public RegionToPointsMode Mode = RegionToPointsMode.Centroid;

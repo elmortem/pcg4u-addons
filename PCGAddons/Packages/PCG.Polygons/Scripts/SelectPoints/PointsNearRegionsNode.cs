@@ -12,7 +12,7 @@ namespace PCG.SelectPoints
 
 		[Input] public List<PointData> Points = new();
 
-		[Input(Connection = PcgConnectionType.Override)]
+		[Input]
 		public RegionSet Regions;
 
 		[Input] public float Radius = 1f;

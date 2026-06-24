@@ -19,7 +19,7 @@ namespace PCG.Polygons.City
 		{
 			Result.Value = new RegionSet();
 
-			var input = GetInputValue(nameof(Data.Region), Data.Region);
+			var input = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Region), ct);
 			if (input == null)
 				return;
 
