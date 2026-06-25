@@ -14,6 +14,8 @@ namespace PCG.Splines
 
 		public override Type ValueType => typeof(List<Spline>);
 
+		public override bool IsArray => true;
+
 		public override object GetValue(Transform transform)
 		{
 			var result = new List<Spline>();

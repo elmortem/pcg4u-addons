@@ -89,7 +89,7 @@ public class FooNode : PcgPreviewNode
 - `protected override async UniTask DoComputeAsync(CancellationToken ct)` — вычисление выходов.
 - `public override void DrawPreview(Transform transform)` — отрисовка gizmos-превью.
 - `public override bool IsEmpty` — пусто/нет результата.
-- Получение входов: `GetInputValue(nameof(Data.Field), Data.Field)` (скаляр), `GetInputValues(...)` / `GetInputPort(name).GetInputValues()` (массив значений со всех подключённых связей).
+- Получение входов: `GetInputValue(nameof(Data.Field), Data.Field)` (скаляр), `GetInputValues(...)` / `GetInputPort(name).GetInputValues()` (массив значений со всех подключённых связей). Источник, помеченный `PcgValue.IsArray` (массив-значение — напр. переменная точек/сплайнов/регионов в сабграфе), на мульти-входе разворачивается в несколько элементов; `GetInputValue` (одиночный) берёт первый.
 - Превью: `GetGizmosOptions()` → `GizmosOptions` (цвет и пр.), `GizmosUtility.DrawPoints(...)`.
 
 Опциональные интерфейсы исполнителя (UI-инфо/переключение превью):
@@ -112,7 +112,7 @@ public class FooNode : PcgPreviewNode
   - Паттерн: `if (data is МойInstanceData) { ... } else return false;` (мейкер берёт только свой тип).
 
 ### 3.5 Значения графа — `PcgValue` (namespace `PCG.Values`)
-- `PcgValue` — обёртка ассета/данных для прокидывания в граф как переменной (методы вида `GetValue()`, `GetContentHash()`).
+- `PcgValue` — обёртка ассета/данных для прокидывания в граф как переменной (методы вида `GetValue()`, `GetContentHash()`). Виртуальный `IsArray` (дефолт `false`) помечает тип как массив-значение: на границе сабграфа его порт становится мультивходовым и зеркалит несколько связей внутрь массивом, который внутренние ноды разворачивают фан-аутом. В аддонах помечены `SplinesValue` и `RegionSetValue` (в ядре — `PointsValue`).
 - `PcgPortAdapter` — адаптер типов между несовместимыми портами (напр. `List<GameObject>` → `List<Spline>`).
 - `CustomPcgNodeRenderer` (namespace `PCG.Editors`) — кастомный UI ноды в графе (кнопки и т.п.).
 
@@ -161,7 +161,7 @@ public class FooNode : PcgPreviewNode
 | `DensityByDistanceToSplinesNode` | TransformPoints | плотность точек по расстоянию до сплайна | `Points, Splines, Radius, Curve, Mode` → `Results` |
 
 **Опорные типы:**
-- `SplinesValue` (`PcgValue`) — массив `SplineContainer` как значение графа (с пересчётом локал→мир).
+- `SplinesValue` (`PcgValue`) — массив `SplineContainer` как значение графа (с пересчётом локал→мир). `IsArray=true` → переменная сплайнов в сабграфе принимает несколько связей (зеркалятся внутрь массивом).
 - `SplineListPool` — пул `List<Spline>`.
 - `SplinesCache` — кэш позиций на сплайнах; инвалидация по изменению/undo/prefab.
 - `SplinesUtility` — point-in-spline (ray-crossing) для замкнутых сплайнов.
@@ -234,6 +234,8 @@ public class FooNode : PcgPreviewNode
 
 Пайплайн города: `SplineToRegion` → `SubdivideRegion` (кварталы, рёбра-резы помечаются классом глубины `cutDepth`) → `AssignRoadClassByDepth` (ширина ребру по классу) → `BlocksToRoads` (ленты дорог); ветки `InsetRegion` / `LotsFromBlock` / `RegionToPoints` для участков и точек; `RegionToMesh` кладёт любой регион (ленты дорог) мешем на террейн с адаптивной тесселяцией по рельефу.
 
+**Мультивход RegionSet.** Все `RegionSet`-входы полигональных/городских нод — мультивходовые (поля объявлены `[Input]` без `Override`): исполнители читают их через `RegionSetInput.ReadCombinedAsync` (`Editor/Scripts/Exec/`), несколько связей конкатенируются в один набор (`RegionSet.Append`; при 2+ связях клон+слияние в пуле потоков). Контракт выхода не меняется — всегда один `RegionSet`. Входы террейна (`RegionToMeshNode.Terrain`/`Offset`) не затронуты.
+
 **Clipper2ZLib (`USINGZ`).** Рантайм-asmdef `PCG.Polygons` объявляет символ `USINGZ` через `versionDefines` (привязан к пакету `com.elmortem.pcg.polygons`, expression пустой → всегда активен). Под `USINGZ` вендоренный Clipper2 переезжает из namespace `Clipper2Lib` в `Clipper2ZLib` (upstream-дизайн) и добавляет поле `Point64.Z`, поэтому потребители (`PolygonClipper`, `PolygonEdgeClip`) подключают `Clipper2ZLib`. **Само `Point64.Z`/`ZCallback` для проброса рёберных атрибутов больше не используется** — классификация рёбер геометрическая (см. `PolygonEdgeClip`); `USINGZ` сохранён только ради стабильного namespace вендоренной библиотеки.
 
 **Ноды:**
@@ -265,8 +267,8 @@ public class FooNode : PcgPreviewNode
 **Опорные типы (`Scripts/`):**
 - `Polygon2D` — контур `Outer` + дырки `Holes` + геометрия (Contains/GetBounds/Clone/Hash). `partial`: рёберные атрибуты вынесены в `Polygon/Polygon2DEdges.cs`, расстояние до границы — в `Polygon/Polygon2DDistance.cs` (`DistanceToBoundarySq(float2)` — квадрат дистанции до ближайшего ребра среди `Outer` и `Holes`).
 - `Polygon2D` рёберные атрибуты (`Polygon2DEdges.cs`) — `PcgAttributeSet EdgeAttributes` + индексация рёбер (плоская: рёбра `Outer` `[0..N)`, затем рёбра дырок по порядку). `EdgeCount`, `HoleEdgeOffset(hole)`, `HasEdgeData()`, `GetEdge<T>/SetEdge<T>`. Длина `EdgeAttributes` — либо `0` (данных нет → чтение даёт `default`), либо ровно `EdgeCount`.
-- `RegionSet` (`IPcgAttributeData`) — `List<Polygon2D>` + `PlaneY` + `PcgAttributeSet Attributes` (один регион = одна строка атрибутов). **Value-тип, передаваемый между нодами.**
-- `RegionSetValue` (`PcgValue`) — регистрация типа `RegionSet` в пикере/блекборде (инлайн пустой).
+- `RegionSet` (`IPcgAttributeData`) — `List<Polygon2D>` + `PlaneY` + `PcgAttributeSet Attributes` (один регион = одна строка атрибутов). **Value-тип, передаваемый между нодами.** `Append(other)` — конкатенация наборов (клон полигонов + построчное слияние атрибутов через `Attributes.Append`); используется мультивходом `RegionSetInput`.
+- `RegionSetValue` (`PcgValue`) — регистрация типа `RegionSet` в пикере/блекборде (инлайн пустой). `IsArray=true` → переменная регионов в сабграфе принимает несколько связей.
 - `PolygonClipper` (static) — обёртка Clipper2 (`Clipper2ZLib`): Union/Intersection/Difference/Inflate, `InflatePolylines` (оффсет открытых/замкнутых ломаных одной полуширины через `ClipperOffset` — ленты дорог); `SplitByLine` (half-plane) идёт через `PolygonEdgeClip.Intersection` с `Action<PcgAttributeSet,int> newEdgeWriter` (старые рёбра наследуют атрибуты, рез помечается). Масштаб метры×1000 → `Int64`; нормализация винтинга (внешний CCW, дырки CW; `NormalizeWinding` — `internal`).
 - `PolygonEdgeClip` (static) — булевы операции с **пробросом рёберных атрибутов** через **геометрическую классификацию**: каждое ребро субъекта кладётся в `table` (A/B/Polygon/LocalEdge); выходное ребро наследует атрибуты того ребра субъекта, на отрезок которого ложится его середина (`GeometricSource`/`OnSegment`), иначе считается новым и отдаётся `newEdgeWriter`. `Difference/Intersection/Union(subject, clip, newEdgeWriter)` + `BuildStrip(a, b, width)` (прямоугольная полоса вдоль ребра; дорогами больше не используется — оставлена про запас).
 - `RegionFill` (static) — заливка точками набора полигонов (`IList<Polygon2D>`, трактуется как один регион — например куски inset): `FillRandom` (rejection, локальный счётчик добавленных), `FillGrid`, `ContainsAny`.
@@ -284,6 +286,7 @@ public class FooNode : PcgPreviewNode
 - Исполнители городских нод: `SubdivideRegionNodeExecutor`, `AssignRoadClassByDepthNodeExecutor`, `BlocksToRoadsNodeExecutor`, `InsetRegionNodeExecutor`, `LotsFromBlockNodeExecutor`, `PolygonBooleanNodeExecutor`, `RegionToPointsNodeExecutor` (все в namespace `PCG.Polygons.City`, превью через `RegionGizmoUtility` / `GizmosUtility.DrawPoints`).
 - `RegionToMeshNodeExecutor` (namespace `PCG.Polygons.City`, `INodeInfo`/`IInstancesNode`) — строит меш через `RegionMeshBuilder.Build` и материализует его через host instance maker (`MeshInstanceMaker`); превью пустое, `NodeInfo` = число треугольников.
 - `PointsNearRegionsNodeExecutor` (namespace `PCG.SelectPoints`, `IPointsCount`/`IShowResults`) — сплит точек по близости к регионам; ленивый кэш AABB регионов (`_boundsMin`/`_boundsMax`) как ранний отсев; превью точек выбранного выхода через `GizmosUtility.DrawPoints`.
+- `RegionSetInput` (static, `Editor/Scripts/Exec/`) — чтение мультивхода `RegionSet`: `ReadCombinedAsync(executor, field, ct)` поверх `GetInputValues<RegionSet>`; 0 валидных связей → `null`, 1 → набор как есть (без клона), 2+ → новый `RegionSet` + `Append` каждого в пуле потоков (`UniTask.SwitchToThreadPool` → `UniTaskEditor.SwitchToEditorThread`), `PlaneY` от первого.
 - `SplinesToRegionAdapter` (`PcgPortAdapter`) — `List<Spline>` → `RegionSet` (автоконверсия с дефолтным разрешением).
 - `RegionSetSerializer` (`IPcgCacheSerializer`, `TypeId=2`) — value-cache регионов (блобы `float2[]` чанками + `PcgAttributeSetCacheIO`). Порядок: по региону геометрия → его `EdgeAttributes`; затем регион-уровневые `set.Attributes`.
 - `PcgPolygonsBootstrap` (`InitializeOnLoadMethod`) — регистрирует сериализатор в `PcgCacheSerializerRegistry`.

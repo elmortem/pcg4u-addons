@@ -10,6 +10,8 @@ namespace PCG.Polygons
 	{
 		public override Type ValueType => typeof(RegionSet);
 
+		public override bool IsArray => true;
+
 		public override object GetValue(Transform transform)
 		{
 			return new RegionSet();

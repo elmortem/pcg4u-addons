@@ -185,7 +185,7 @@ MonoBehaviour:
       Name: RoadMat
       Default:
         rid: 7906783217557176392
-  ContentVersion: 195
+  ContentVersion: 430
   references:
     version: 2
     RefIds:
@@ -241,9 +241,9 @@ MonoBehaviour:
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
-        MinSize: 20
+        MinSize: 50
         MaxDepth: 4
-        SplitJitter: 0.3
+        SplitJitter: 0.2
         Seed: 0
     - rid: 7906783217557176363
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
