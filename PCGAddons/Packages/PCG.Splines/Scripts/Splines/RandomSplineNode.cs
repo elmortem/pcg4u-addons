@@ -8,18 +8,34 @@ using PCG.GraphModel;
 namespace PCG.Splines
 {
 	[Serializable]
+	[PcgNodeInfo("Builds random splines connecting pairs of points.",
+		DisplayName = "Random Spline",
+		Category = "Splines",
+		Tags = new[] { "spline", "random", "points", "create" })]
 	public class RandomSplineNode : PcgPreviewNode
 	{
-		[Output] public List<Spline> Results => default;
+		[Output]
+		[PcgMemberInfo("Random splines generated from the points.", Tags = new[] { "spline", "results" })]
+		public List<Spline> Results => default;
 
-		[Input] public List<PointData> Points = new();
+		[Input]
+		[PcgMemberInfo("Points used as spline endpoints.", Tags = new[] { "points", "source" })]
+		public List<PointData> Points = new();
 
-		[Input] public Vector3 Up = new(0f, 1f, 0f);
+		[Input]
+		[PcgMemberInfo("Up axis used to orient the splines.", Tags = new[] { "up", "axis" })]
+		public Vector3 Up = new(0f, 1f, 0f);
 
-		[Input] public int Segments = 10;
+		[Input]
+		[PcgMemberInfo("Number of segments per spline.", Tags = new[] { "segments", "count" })]
+		public int Segments = 10;
 
-		[Input] public Vector2 Height = new Vector2(3f, 5f);
+		[Input]
+		[PcgMemberInfo("Random height range of the spline arcs.", Tags = new[] { "height", "range" })]
+		public Vector2 Height = new Vector2(3f, 5f);
 
-		[Input] public int Seed = 0;
+		[Input]
+		[PcgMemberInfo("Random seed for point pairing and height.", Tags = new[] { "seed", "random" })]
+		public int Seed = 0;
 	}
 }

@@ -4,11 +4,22 @@ using PCG.GraphModel;
 
 namespace PCG.Splines
 {
+	[PcgNodeInfo("Splits splines into closed and open sets.",
+		DisplayName = "Closed Splines",
+		Category = "Splines",
+		Tags = new[] { "spline", "closed", "open", "filter" })]
 	public class ClosedSplinesNode : PcgPreviewNode
 	{
-		[Output] public List<Spline> Results => default;
-		[Output] public List<Spline> OpenedSplines => default;
+		[Output]
+		[PcgMemberInfo("Closed splines from the input.", Tags = new[] { "spline", "closed", "results" })]
+		public List<Spline> Results => default;
 
-		[Input] public List<Spline> Splines = new();
+		[Output]
+		[PcgMemberInfo("Open splines from the input.", Tags = new[] { "spline", "open" })]
+		public List<Spline> OpenedSplines => default;
+
+		[Input]
+		[PcgMemberInfo("Splines to split by closed state.", Tags = new[] { "spline", "source" })]
+		public List<Spline> Splines = new();
 	}
 }

@@ -4,12 +4,22 @@ using PCG.GraphModel;
 
 namespace PCG.Splines
 {
+	[PcgNodeInfo("Finds splines in the scene by name or tag.",
+		DisplayName = "Find Splines",
+		Category = "Splines",
+		Tags = new[] { "spline", "find", "scene" })]
 	public class FindSplinesNode : PcgPreviewNode
 	{
-		[Output] public List<Spline> Results => default;
+		[Output]
+		[PcgMemberInfo("Splines found in the scene.", Tags = new[] { "spline", "results" })]
+		public List<Spline> Results => default;
 
-		[Input] public string Name = "Spline";
+		[Input]
+		[PcgMemberInfo("Object name to search for; empty matches any name.", Tags = new[] { "name", "filter" })]
+		public string Name = "Spline";
 
-		[Input] public string Tag = "";
+		[Input]
+		[PcgMemberInfo("Object tag to search for; empty matches any tag.", Tags = new[] { "tag", "filter" })]
+		public string Tag = "";
 	}
 }

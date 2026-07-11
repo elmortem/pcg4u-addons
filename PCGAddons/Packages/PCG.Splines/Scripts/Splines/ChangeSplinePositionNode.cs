@@ -5,16 +5,30 @@ using PCG.GraphModel;
 
 namespace PCG.Splines
 {
+	[PcgNodeInfo("Randomly offsets each spline knot within a range.",
+		DisplayName = "Change Spline Position",
+		Category = "Splines",
+		Tags = new[] { "spline", "position", "random", "offset" })]
 	public class ChangeSplinePositionNode : PcgPreviewNode
 	{
-		[Output] public List<Spline> Results => default;
+		[Output]
+		[PcgMemberInfo("Splines with displaced knots.", Tags = new[] { "spline", "results" })]
+		public List<Spline> Results => default;
 
-		[Input] public List<Spline> Splines = new();
+		[Input]
+		[PcgMemberInfo("Splines to displace.", Tags = new[] { "spline", "source" })]
+		public List<Spline> Splines = new();
 
-		[Input] public Vector3 Min = new(-1f, -1f, -1f);
+		[Input]
+		[PcgMemberInfo("Minimum per-axis displacement.", Tags = new[] { "min", "range" })]
+		public Vector3 Min = new(-1f, -1f, -1f);
 
-		[Input] public Vector3 Max = new(1f, 1f, 1f);
+		[Input]
+		[PcgMemberInfo("Maximum per-axis displacement.", Tags = new[] { "max", "range" })]
+		public Vector3 Max = new(1f, 1f, 1f);
 
-		[Input] public int Seed = 0;
+		[Input]
+		[PcgMemberInfo("Random seed for the displacement.", Tags = new[] { "seed", "random" })]
+		public int Seed = 0;
 	}
 }

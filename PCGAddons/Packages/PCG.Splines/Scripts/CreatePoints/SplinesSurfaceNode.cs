@@ -9,15 +9,34 @@ using PCG.Points;
 namespace PCG.CreatePoints
 {
 	[Serializable]
+	[PcgNodeInfo("Scatters points on the surface or volume of closed splines.",
+		DisplayName = "Splines Surface",
+		Category = "Create Points/Spline",
+		Tags = new[] { "points", "spline", "surface", "scatter", "create" })]
 	public class SplinesSurfaceNode : PcgPreviewNode
 	{
-		[Output] public List<PointData> Results => default;
+		[Output]
+		[PcgMemberInfo("Points generated inside the closed splines.", Tags = new[] { "points", "results" })]
+		public List<PointData> Results => default;
 
-		[Input] public List<Spline> Splines;
-		[Input] public Vector3 Offset = Vector3.zero;
+		[Input]
+		[PcgMemberInfo("Closed splines defining the fill area.", Tags = new[] { "spline", "region" })]
+		public List<Spline> Splines;
+
+		[Input]
+		[PcgMemberInfo("World-space offset applied to the fill area.", Tags = new[] { "offset", "position" })]
+		public Vector3 Offset = Vector3.zero;
+
 		[NodeEnum]
+		[PcgMemberInfo("Point generation mode (surface or volume, regular or random).", Tags = new[] { "mode" })]
 		public GeneratePointMode PointMode;
-		[Input] public int Count = 100;
-		[Input] public int Seed = 0;
+
+		[Input]
+		[PcgMemberInfo("Number of points to scatter.", Tags = new[] { "count", "amount" })]
+		public int Count = 100;
+
+		[Input]
+		[PcgMemberInfo("Random seed for scattering.", Tags = new[] { "seed", "random" })]
+		public int Seed = 0;
 	}
 }

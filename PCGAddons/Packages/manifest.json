@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.elmortem.coworkbridge": "https://github.com/elmortem/unitycoworkbridge.git?path=CoworkBridge",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.elmortem.brg": "https://github.com/elmortem/brg.git?path=Packages/BRG",
     "com.elmortem.delone": "https://github.com/elmortem/triangulation-delone.git?path=Packages/triangulation-delone",

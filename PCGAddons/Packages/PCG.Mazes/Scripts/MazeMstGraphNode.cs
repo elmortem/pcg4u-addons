@@ -5,12 +5,26 @@ using PCG.Points;
 
 namespace PCG.Mazes
 {
+	[PcgNodeInfo("Carves a maze from a graph via a minimum spanning tree.",
+		DisplayName = "Maze MST Graph",
+		Category = "Mazes",
+		Tags = new[] { "graph", "maze", "mst" })]
 	public class MazeMstGraphNode : PcgPreviewNode
 	{
-		[Input] public Graph Graph;
-		[Input] public int Seed = 0;
+		[Input]
+		[PcgMemberInfo("Source graph to carve the maze from.", Tags = new[] { "graph", "source" })]
+		public Graph Graph;
 
-		[Output] public Graph Result => default;
-		[Output] public List<PointData> EndPoints => default;
+		[Input]
+		[PcgMemberInfo("Random seed for the maze carving.", Tags = new[] { "seed", "random" })]
+		public int Seed = 0;
+
+		[Output]
+		[PcgMemberInfo("The carved maze graph.", Tags = new[] { "graph", "results" })]
+		public Graph Result => default;
+
+		[Output]
+		[PcgMemberInfo("Points at the maze dead ends.", Tags = new[] { "points", "ends" })]
+		public List<PointData> EndPoints => default;
 	}
 }

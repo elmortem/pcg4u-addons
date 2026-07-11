@@ -17,10 +17,13 @@
       "hash": "ca69dae2fd3fa53b77edef129684f07cbb178d79"
     },
     "com.elmortem.coworkbridge": {
-      "version": "file:CoworkBridge",
+      "version": "https://github.com/elmortem/unitycoworkbridge.git?path=CoworkBridge",
       "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.33"
+      },
+      "hash": "d7bdd678a204afbe7e4b65f9208c5d5938e3f16e"
     },
     "com.elmortem.delone": {
       "version": "https://github.com/elmortem/triangulation-delone.git?path=Packages/triangulation-delone",

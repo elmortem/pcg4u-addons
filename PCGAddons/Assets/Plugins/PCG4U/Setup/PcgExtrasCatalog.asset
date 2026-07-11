@@ -23,15 +23,15 @@ MonoBehaviour:
     PackageName: com.elmortem.pcg.spriteshapes
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.SpriteShapes
     OpenUpmVersion: 
-  - DisplayName: PCG Mazes
-    Description: 
-    PackageName: com.elmortem.pcg.mazes
-    GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Mazes
-    OpenUpmVersion: 
   - DisplayName: PCG Polygons
     Description: 
     PackageName: com.elmortem.pcg.polygons
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Polygons
+    OpenUpmVersion: 
+  - DisplayName: PCG Mazes
+    Description: 
+    PackageName: com.elmortem.pcg.mazes
+    GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Mazes
     OpenUpmVersion: 
   - DisplayName: PCG Octree
     Description: 

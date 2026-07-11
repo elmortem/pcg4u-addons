@@ -4,12 +4,26 @@ using PCG.GraphModel;
 
 namespace PCG.Splines
 {
+	[PcgNodeInfo("Smooths splines with Laplacian relaxation.",
+		DisplayName = "Smooth Splines",
+		Category = "Splines",
+		Tags = new[] { "spline", "smooth", "relax" })]
 	public class SmoothSplinesNode : PcgPreviewNode
 	{
-		[Input] public List<Spline> Splines = new();
-		[Input] public int Iterations = 1;
-		[Input] public float Strength = 0.5f;
+		[Input]
+		[PcgMemberInfo("Splines to smooth.", Tags = new[] { "spline", "source" })]
+		public List<Spline> Splines = new();
 
-		[Output] public List<Spline> Results => default;
+		[Input]
+		[PcgMemberInfo("Number of smoothing iterations.", Tags = new[] { "iterations", "count" })]
+		public int Iterations = 1;
+
+		[Input]
+		[PcgMemberInfo("Smoothing strength per iteration.", Tags = new[] { "strength", "amount" })]
+		public float Strength = 0.5f;
+
+		[Output]
+		[PcgMemberInfo("Smoothed splines.", Tags = new[] { "spline", "results" })]
+		public List<Spline> Results => default;
 	}
 }

@@ -4,11 +4,22 @@ using PCG.GraphModel;
 
 namespace PCG.Splines
 {
+	[PcgNodeInfo("Joins open splines whose ends are close together.",
+		DisplayName = "Join Splines",
+		Category = "Splines",
+		Tags = new[] { "spline", "join", "merge" })]
 	public class JoinSplinesNode : PcgPreviewNode
 	{
-		[Input] public List<Spline> Splines = new();
-		[Input] public float Threshold = 0.5f;
+		[Input]
+		[PcgMemberInfo("Splines to join by their endpoints.", Tags = new[] { "spline", "source" })]
+		public List<Spline> Splines = new();
 
-		[Output] public List<Spline> Results => default;
+		[Input]
+		[PcgMemberInfo("Maximum distance between endpoints to join.", Tags = new[] { "threshold", "distance" })]
+		public float Threshold = 0.5f;
+
+		[Output]
+		[PcgMemberInfo("Joined splines.", Tags = new[] { "spline", "results" })]
+		public List<Spline> Results => default;
 	}
 }

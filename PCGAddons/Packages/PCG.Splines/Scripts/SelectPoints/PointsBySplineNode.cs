@@ -5,12 +5,26 @@ using PCG.GraphModel;
 
 namespace PCG.SelectPoints
 {
+	[PcgNodeInfo("Selects points that fall inside closed splines.",
+		DisplayName = "Points By Spline",
+		Category = "Select Points/Spline",
+		Tags = new[] { "points", "spline", "select", "inside" })]
 	public class PointsBySplineNode : PcgPreviewNode
 	{
-		[Output] public List<PointData> Results => default;
-		[Output] public List<PointData> Outsides => default;
+		[Output]
+		[PcgMemberInfo("Points inside the closed splines.", Tags = new[] { "points", "inside", "results" })]
+		public List<PointData> Results => default;
 
-		[Input] public List<PointData> Points = new();
-		[Input] public List<Spline> Splines;
+		[Output]
+		[PcgMemberInfo("Points outside the closed splines.", Tags = new[] { "points", "outside" })]
+		public List<PointData> Outsides => default;
+
+		[Input]
+		[PcgMemberInfo("Points to test against the splines.", Tags = new[] { "points", "source" })]
+		public List<PointData> Points = new();
+
+		[Input]
+		[PcgMemberInfo("Closed splines used as the selection region.", Tags = new[] { "spline", "region" })]
+		public List<Spline> Splines;
 	}
 }
