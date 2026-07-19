@@ -11,35 +11,63 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 24d3f69ba7a1991458bf562f11acd63b, type: 3}
   m_Name: PcgExtrasCatalog
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   Packages:
   - DisplayName: PCG Splines
-    Description: 
+    Description:
     PackageName: com.elmortem.pcg.splines
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Splines
-    OpenUpmVersion: 
+    OpenUpmVersion:
+    GitDependencies: []
+    AddonDependencies: []
   - DisplayName: PCG Sprite Shapes
-    Description: 
+    Description:
     PackageName: com.elmortem.pcg.spriteshapes
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.SpriteShapes
-    OpenUpmVersion: 
+    OpenUpmVersion:
+    GitDependencies: []
+    AddonDependencies:
+    - com.elmortem.pcg.splines
   - DisplayName: PCG Polygons
-    Description: 
+    Description:
     PackageName: com.elmortem.pcg.polygons
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Polygons
-    OpenUpmVersion: 
+    OpenUpmVersion:
+    GitDependencies: []
+    AddonDependencies:
+    - com.elmortem.pcg.splines
   - DisplayName: PCG Mazes
-    Description: 
+    Description:
     PackageName: com.elmortem.pcg.mazes
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Mazes
-    OpenUpmVersion: 
+    OpenUpmVersion:
+    GitDependencies:
+    - PackageName: com.elmortem.delone
+      GitUrl: https://github.com/elmortem/triangulation-delone.git?path=Packages/triangulation-delone
+    AddonDependencies:
+    - com.elmortem.pcg.splines
   - DisplayName: PCG Octree
-    Description: 
+    Description:
     PackageName: com.elmortem.pcg.octree
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Octree
-    OpenUpmVersion: 
+    OpenUpmVersion:
+    GitDependencies:
+    - PackageName: com.elmortem.octree
+      GitUrl: https://github.com/elmortem/octree.git?path=Packages/Octree
+    AddonDependencies: []
   - DisplayName: PCG BRG
-    Description: 
+    Description:
     PackageName: com.elmortem.pcg.brg
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.BRG
-    OpenUpmVersion: 
+    OpenUpmVersion:
+    GitDependencies:
+    - PackageName: com.elmortem.brg
+      GitUrl: https://github.com/elmortem/brg.git?path=Packages/BRG
+    AddonDependencies: []
+  - DisplayName: PCG MCP
+    Description:
+    PackageName: com.elmortem.pcg.mcp
+    GitUrl: https://github.com/elmortem/pcg4u-mcp.git?path=PCG4UMCPUnity/Packages/PCG.Mcp
+    OpenUpmVersion:
+    GitDependencies: []
+    AddonDependencies: []

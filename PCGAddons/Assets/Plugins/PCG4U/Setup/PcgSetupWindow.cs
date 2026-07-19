@@ -36,7 +36,8 @@ namespace PCG.Setup
 
 		private void OnInstallCompleted()
 		{
-			if (PcgPackageUtility.IsInstalled(PcgSetupConstants.UniTaskPackageName))
+			if (PcgPackageUtility.IsInstalled(PcgSetupConstants.UniTaskPackageName)
+				&& PcgPackageUtility.IsInstalled(PcgSetupConstants.CollectionsPackageName))
 			{
 				PcgSetupFlow.TryContinue();
 				return;
@@ -68,8 +69,8 @@ namespace PCG.Setup
 
 		private void DrawUniTaskPage()
 		{
-			EditorGUILayout.LabelField("PCG4U requires the UniTask package (MIT license).", EditorStyles.wordWrappedLabel);
-			EditorGUILayout.LabelField("Choose installation source:", EditorStyles.wordWrappedLabel);
+			EditorGUILayout.LabelField("PCG4U requires the UniTask package (MIT license) and the Unity Collections package.", EditorStyles.wordWrappedLabel);
+			EditorGUILayout.LabelField("Choose UniTask installation source:", EditorStyles.wordWrappedLabel);
 			GUILayout.Space(2f);
 			EditorGUILayout.LabelField(PcgPackageInstaller.IsBusy ? "Installing..." : " ", EditorStyles.miniLabel);
 			using (new EditorGUI.DisabledScope(PcgPackageInstaller.IsBusy))
@@ -77,13 +78,14 @@ namespace PCG.Setup
 				if (GUILayout.Button("Install via Git", GUILayout.Height(26f)))
 				{
 					SessionState.SetBool(PcgSetupConstants.SetupPendingExtrasKey, true);
-					PcgPackageInstaller.InstallFromGit(PcgSetupConstants.UniTaskGitUrl);
+					PcgPackageInstaller.Install(new[] { PcgSetupConstants.UniTaskGitUrl, PcgSetupConstants.CollectionsPackageName });
 				}
 				GUILayout.Space(4f);
 				if (GUILayout.Button("Install via OpenUPM", GUILayout.Height(26f)))
 				{
 					SessionState.SetBool(PcgSetupConstants.SetupPendingExtrasKey, true);
-					PcgPackageInstaller.InstallFromOpenUpm(PcgSetupConstants.UniTaskPackageName, PcgSetupConstants.UniTaskOpenUpmVersion);
+					PcgManifestRegistryUtility.EnsureOpenUpmScope(PcgSetupConstants.UniTaskPackageName);
+					PcgPackageInstaller.Install(new[] { PcgSetupConstants.UniTaskPackageName + "@" + PcgSetupConstants.UniTaskOpenUpmVersion, PcgSetupConstants.CollectionsPackageName });
 				}
 			}
 		}

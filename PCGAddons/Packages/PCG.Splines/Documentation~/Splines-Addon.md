@@ -15,6 +15,8 @@ Addon for working with Unity Splines. Provides nodes for creating, modifying, an
 * [[Smooth Splines Node|PCG.Splines/Splines/Smooth-Splines-Node]]
 * [[Offset Splines Node|PCG.Splines/Splines/Offset-Splines-Node]]
 * [[Join Splines Node|PCG.Splines/Splines/Join-Splines-Node]]
+* [[Spline Intersection Node|PCG.Splines/Splines/Spline-Intersection-Node]]
+* [[Split Splines Node|PCG.Splines/Splines/Split-Splines-Node]]
 
 ### Transform Points
 * [[Density By Distance To Splines Node|PCG.Splines/TransformPoints/Density-By-Distance-To-Splines-Node]]

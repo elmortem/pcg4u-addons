@@ -9,6 +9,8 @@ namespace PCG.Setup
 		{
 			if (!PcgPackageUtility.IsInstalled(PcgSetupConstants.UniTaskPackageName))
 				return;
+			if (!PcgPackageUtility.IsInstalled(PcgSetupConstants.CollectionsPackageName))
+				return;
 			if (PcgRenderPipelineCleanup.IsCleanupNeeded())
 			{
 				PcgSetupWindow.Open(PcgSetupPage.RenderPipeline);

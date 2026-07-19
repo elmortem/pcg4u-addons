@@ -12,7 +12,7 @@ namespace PCG.Splines
 
 		protected override List<Spline> Convert(List<GameObject> value, PcgNodeExecutor consumer)
 		{
-			var consumerId = consumer.Node.Id;
+			var consumerId = consumer.Node.NodeId;
 			if (_issued.TryGetValue(consumerId, out var previous))
 			{
 				foreach (var spline in previous)

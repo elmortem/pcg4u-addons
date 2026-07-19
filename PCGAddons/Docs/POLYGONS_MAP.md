@@ -1,0 +1,73 @@
+# PCG.Polygons — 2D-полигоны и регионы
+
+> Аддон PCG4U. Базовые контракты ядра, раскладку папок и чек-лист новой ноды см. в [`PROJECT_MAP.md`](PROJECT_MAP.md).
+
+**Структура аддона:** `Scripts/` — рантайм-ноды и опорные типы (asmdef `PCG.Polygons`); `Editor/` — исполнители и редакторские адаптеры (asmdef `PCG.Polygons.Editor`); `Documentation~/` — справка.
+
+2D-полигональный тип данных с именованными атрибутами (на регион **и на ребро**), геом-бэкенд Clipper2, заливка точками, конверсии со сплайнами, подсистема городских нод (`Scripts/City/`) и отбор точек по близости к регионам (`Scripts/SelectPoints/`, namespace `PCG.SelectPoints`). Плоскость XZ (`float2 = (x, z)`), высота набора — `RegionSet.PlaneY`. Зависит от `PCG`, `PCG.Splines`, `Unity.Splines`, `Unity.Mathematics`, `UniTask`.
+
+Пайплайн города: `SplineToRegion` → `SubdivideRegion` (кварталы, рёбра-резы помечаются классом глубины `cutDepth`) → `AssignRoadClassByDepth` (ширина ребру по классу) → `BlocksToRoads` (ленты дорог); ветки `InsetRegion` / `LotsFromBlock` / `RegionToPoints` для участков и точек; `RegionToMesh` кладёт любой регион (ленты дорог) мешем на террейн с адаптивной тесселяцией по рельефу.
+
+**Мультивход RegionSet.** Все `RegionSet`-входы полигональных/городских нод — мультивходовые (поля объявлены `[Input]` без `Override`): исполнители читают их через `RegionSetInput.ReadCombinedAsync` (`Editor/Scripts/Exec/`), несколько связей конкатенируются в один набор (`RegionSet.Append`; при 2+ связях клон+слияние в пуле потоков). Контракт выхода не меняется — всегда один `RegionSet`. Входы террейна (`RegionToMeshNode.Terrain`/`Offset`) не затронуты.
+
+**Clipper2ZLib (`USINGZ`).** Рантайм-asmdef `PCG.Polygons` объявляет символ `USINGZ` через `versionDefines` (привязан к пакету `com.elmortem.pcg.polygons`, expression пустой → всегда активен). Под `USINGZ` вендоренный Clipper2 переезжает из namespace `Clipper2Lib` в `Clipper2ZLib` (upstream-дизайн) и добавляет поле `Point64.Z`, поэтому потребители (`PolygonClipper`, `PolygonEdgeClip`) подключают `Clipper2ZLib`. **Само `Point64.Z`/`ZCallback` для проброса рёберных атрибутов больше не используется** — классификация рёбер геометрическая (см. `PolygonEdgeClip`); `USINGZ` сохранён только ради стабильного namespace вендоренной библиотеки.
+
+## Ноды
+
+| Нода | Назначение | Input → Output |
+|---|---|---|
+| `SplineToRegionNode` | замкнутые сплайны → регионы (с ресемплом) | `Splines, MaxSegmentLength` → `Result: RegionSet` |
+| `RegionToSplineNode` | регионы → замкнутые сплайны (контур + дырки) | `Region` → `Splines: List<Spline>` |
+| `PointsNearRegionsNode` | категория SelectPoints (`Scripts/SelectPoints/`, namespace `PCG.SelectPoints`); делит точки на близкие/далёкие от регионов: точка = диск радиуса `Radius` в XZ, рядом если центр внутри (`Contains`) или дистанция до границы `<= Radius` (`DistanceToBoundarySq`); 2D, `UseScale` масштабирует радиус; AABB-отсев регионов | `Points, Regions, Radius` → `Results, NearPoints` |
+
+## Городские ноды (`Scripts/City/`, namespace `PCG.Polygons.City`)
+Пайплайн «регион → кварталы → дороги/участки/точки». Оперируют рёберными атрибутами (`CityAttributes`).
+
+| Нода | Назначение | Input → Output |
+|---|---|---|
+| `SubdivideRegionNode` | BSP-нарезка регионов на кварталы (рекурсивный сплит по длинной оси с jitter); рёбра-резы → `cutDepth>=1`, регион → `depth` | `Region, MinSize, MaxDepth, SplitJitter, Seed` → `Blocks: RegionSet` |
+| `AssignRoadClassByDepthNode` | ширина ребру по классу глубины реза (`cutDepth`) через кривую `WidthByDepth` (нормировка `cutDepth/MaxDepth`); ширину получают только рёбра в диапазоне `MinDepth..MaxDepth`. Граница — класс `0`: `MinDepth=1` (дефолт) её исключает, `MinDepth=0` делает периметральной дорогой | `Blocks, WidthByDepth, MaxWidth, MinDepth, MaxDepth` → `Result: RegionSet` |
+| `BlocksToRoadsNode` | рёбра с атрибутом `Width` группирует по классам глубины, связывает в ломаные (`RoadPolylineBuilder`), оффсетит в ленты (`PolygonClipper.InflatePolylines`, join/cap по `Join`/`Cap`/`MiterLimit`) и сливает (`Union`) | `Blocks, Join, Cap, MiterLimit` → `Roads: RegionSet` |
+| `InsetRegionNode` | inset/outset каждого региона (`Inflate(Delta)`), переносит строку атрибутов региона | `Region, Delta` → `Result: RegionSet` |
+| `LotsFromBlockNode` | нарезка квартала на участки полосами вдоль длинной грани, пишет `lotId` | `Blocks, LotWidth` → `Lots: RegionSet` |
+| `PolygonBooleanNode` | булева операция над двумя наборами (Union/Intersection/Difference), новые рёбра помечает `boundary` | `A, B, Mode` → `Result: RegionSet` |
+| `RegionToPointsNode` | точки из регионов: Centroid (центроид площади) / Random / Grid, с отступом `Margin` (inset через `Inflate`); ориентация по ближайшему ребру дорог | `Region, Roads, Mode, Count, Spacing, Margin, Seed` → `Results: List<PointData>` |
+| `RegionToMeshNode` | объединяет регионы (`Union`) и строит crack-free меш, задрапированный на террейн: restricted (2:1) quadtree по `MaxHeightError`/`MinCellSize`/`MaxCellSize`/`MaxDepth`, внутренние листы — transition-фаны, граничные — `Intersection`+CDT; без террейна (или `MaxCellSize<=0`) — один CDT на `PlaneY`. Материализуется через `MeshInstanceMaker` | `Region, Terrain, Offset, MaxHeightError, MinCellSize, MaxCellSize, MaxDepth, HeightOffset, UvScale, Name` → `Results: List<MeshInstanceData>` |
+
+## Пресеты (`Presets/`)
+Поставляемые сабграфы-пресеты (`PcgSubGraph`), биндятся в чистом проекте с задекларированными зависимостями (`com.elmortem.pcg.splines` в `package.json`). Вход сплайнов — блекборд-переменная `SplinesValue` (`IsArray` → мультипорт `vSplines` на `SubGraphNode`); выходы — `SubGraphOutputNode` (`InstanceDatasValue`), материализуются `GameObjectInstanceMaker` + `MeshInstanceMaker` на объекте-хосте.
+
+- `CityBlocks.asset` — кварталы города из замкнутого сплайна. Дороги: `SplineToRegion`(`MaxSegmentLength=2`) → `SubdivideRegion`(`MinSize=25,MaxDepth=6,Jitter=0.15`) → `AssignRoadClassByDepth`(`MaxWidth=8,MinDepth=1,MaxDepth=4`) → `BlocksToRoads`(Round/Butt) → `RegionToMesh`(`Name=Roads,HeightOffset=0.15`, `Terrain`/`Material`←пилюли) → выход `Roads`. Дома: `AssignRoadClass.Result` → `InsetRegion`(`Delta=-6`) → `LotsFromBlock`(`LotWidth=14`) → `RegionToPoints`(Centroid, `Margin=1`, `Roads`←`BlocksToRoads`) → `PointToTerrain`(Surface, `ProjectNormal=false`) → `GameObjectWeights`(`Houses`) → выход `Houses`. Переменные: `Splines, Terrain, Houses, RoadMaterial, Seed`.
+
+## Опорные типы City (`Scripts/City/`)
+- `CityAttributes` (static) — имена атрибутов: `cutDepth` (класс глубины реза, `0` = граница), `width` (ширина дороги ребра), `boundary` (флаг ребра-границы из `PolygonBoolean`), `depth` (глубина рекурсии региона), `lotId`.
+- `RegionToPointsMode` (enum) — Centroid / Random / Grid. `PolygonBooleanMode` (enum) — Union / Intersection / Difference.
+- `RoadJoinType` (enum) — Round / Miter / Square. `RoadCapType` (enum) — Butt / Square / Round. Маппятся на `JoinType` / `EndType` Clipper2 в `BlocksToRoadsNodeExecutor`.
+
+## Опорные типы (`Scripts/`)
+- `Polygon2D` — контур `Outer` + дырки `Holes` + геометрия (Contains/GetBounds/Clone/Hash). `partial`: рёберные атрибуты вынесены в `Polygon/Polygon2DEdges.cs`, расстояние до границы — в `Polygon/Polygon2DDistance.cs` (`DistanceToBoundarySq(float2)` — квадрат дистанции до ближайшего ребра среди `Outer` и `Holes`).
+- `Polygon2D` рёберные атрибуты (`Polygon2DEdges.cs`) — `PcgAttributeSet EdgeAttributes` + индексация рёбер (плоская: рёбра `Outer` `[0..N)`, затем рёбра дырок по порядку). `EdgeCount`, `HoleEdgeOffset(hole)`, `HasEdgeData()`, `GetEdge<T>/SetEdge<T>`. Длина `EdgeAttributes` — либо `0` (данных нет → чтение даёт `default`), либо ровно `EdgeCount`.
+- `RegionSet` (`IPcgAttributeData`) — `List<Polygon2D>` + `PlaneY` + `PcgAttributeSet Attributes` (один регион = одна строка атрибутов). **Value-тип, передаваемый между нодами.** `Append(other)` — конкатенация наборов (клон полигонов + построчное слияние атрибутов через `Attributes.Append`); используется мультивходом `RegionSetInput`.
+- `RegionSetValue` (`PcgValue`) — регистрация типа `RegionSet` в пикере/блекборде (инлайн пустой). `IsArray=true` → переменная регионов в сабграфе принимает несколько связей.
+- `PolygonClipper` (static) — обёртка Clipper2 (`Clipper2ZLib`): Union/Intersection/Difference/Inflate, `InflatePolylines` (оффсет открытых/замкнутых ломаных одной полуширины через `ClipperOffset` — ленты дорог); `SplitByLine` (half-plane) идёт через `PolygonEdgeClip.Intersection` с `Action<PcgAttributeSet,int> newEdgeWriter` (старые рёбра наследуют атрибуты, рез помечается). Масштаб метры×1000 → `Int64`; нормализация винтинга (внешний CCW, дырки CW; `NormalizeWinding` — `internal`).
+- `PolygonEdgeClip` (static) — булевы операции с **пробросом рёберных атрибутов** через **геометрическую классификацию**: каждое ребро субъекта кладётся в `table` (A/B/Polygon/LocalEdge); выходное ребро наследует атрибуты того ребра субъекта, на отрезок которого ложится его середина (`GeometricSource`/`OnSegment`), иначе считается новым и отдаётся `newEdgeWriter`. `Difference/Intersection/Union(subject, clip, newEdgeWriter)` + `BuildStrip(a, b, width)` (прямоугольная полоса вдоль ребра; дорогами больше не используется — оставлена про запас).
+- `RegionFill` (static) — заливка точками набора полигонов (`IList<Polygon2D>`, трактуется как один регион — например куски inset): `FillRandom` (rejection, локальный счётчик добавленных), `FillGrid`, `ContainsAny`.
+- `RoadSegment` (struct) — отрезок дороги: `A` / `B` / `Depth` / `Width`.
+- `RoadPolylineBuilder` (static) — сборка дорог из рёбер: `CollectByDepth` (рёбра с `Width`, сгруппированные по классу `cutDepth`, дедуп по квантованному ключу `int4`) + `Chain` (связь рёбер в открытые ломаные и замкнутые петли для оффсета).
+- `RegionMeshData` (`Scripts/Geometry/`, struct) — результат меширования: `Vertices` / `Uvs` / `Triangles`.
+- `RegionMeshBuilder` (`Scripts/Geometry/`, static) — `Build`: `Union` регионов → ветка без террейна (`PolygonClipper.Triangulate` на `PlaneY`) либо `MeshQuadtree` → триангуляция листов (`AppendInterior` — 2 треуг. или transition-фан с серединами рёбер у мелких соседей; `AppendBoundary` — `Intersection` ячейки с регионом + CDT) → сварка вершин по квантованной XZ (1 мм) + драпировка (`Vertex`/`SampleHeight`).
+- `MeshQuadtree` (`Scripts/Geometry/`) — выровненный по мировым осям restricted (2:1) quadtree: `Build` (классификация ячеек Inside/Outside/Boundary через рёбра региона, дробление `Inside` по ошибке высоты от билинейной аппроксимации углов, `Boundary` форсируется до `MinCellSize`, затем `Balance` 2:1), `TryFindLeaf`, `HasFinerNeighbor`. `QuadLeaf` (struct) — лист `(Depth, Ix, Iz, Boundary)`. `CellClass` (internal enum) — Inside / Outside / Boundary.
+- `MeshInstanceData` / `MeshInstanceMaker` — **перенесены в ядро** (`PCG.Instances`, `PCG.dll`), чтобы меши могли спавнить любые аддоны. `RegionToMeshNode` собирает ядровый `MeshInstanceData` (`Name` / `Material` / `Vertices` / `Uvs` / `Triangles`) через `using PCG.Instances`; материализует его ядровый `MeshInstanceMaker` (`InstanceMakerBase`).
+- `SplineRegionConvert` (static) — конверсии spline↔region (ресемпл по длине дуги).
+- `Clipper2/` — вендоренный Clipper2 (Boost License), входит в asmdef `PCG.Polygons`. Namespace `Clipper2ZLib` под `USINGZ` (иначе `Clipper2Lib`).
+
+## Editor (`Editor/Scripts/Exec/`)
+- `SplineToRegionNodeExecutor` / `RegionToSplineNodeExecutor` — исполнители (превью через `RegionGizmoUtility` / `SplinesGizmoUtility`).
+- Исполнители городских нод: `SubdivideRegionNodeExecutor`, `AssignRoadClassByDepthNodeExecutor`, `BlocksToRoadsNodeExecutor`, `InsetRegionNodeExecutor`, `LotsFromBlockNodeExecutor`, `PolygonBooleanNodeExecutor`, `RegionToPointsNodeExecutor` (все в namespace `PCG.Polygons.City`, превью через `RegionGizmoUtility` / `GizmosUtility.DrawPoints`).
+- `RegionToMeshNodeExecutor` (namespace `PCG.Polygons.City`, `INodeInfo`/`IInstancesNode`) — строит меш через `RegionMeshBuilder.Build` и материализует его через host instance maker (`MeshInstanceMaker`); превью пустое, `NodeInfo` = число треугольников.
+- `PointsNearRegionsNodeExecutor` (namespace `PCG.SelectPoints`, `IPointsCount`/`IShowResults`) — сплит точек по близости к регионам; ленивый кэш AABB регионов (`_boundsMin`/`_boundsMax`) как ранний отсев; превью точек выбранного выхода через `GizmosUtility.DrawPoints`.
+- `RegionSetInput` (static, `Editor/Scripts/Exec/`) — чтение мультивхода `RegionSet`: `ReadCombinedAsync(executor, field, ct)` поверх `GetInputValues<RegionSet>`; 0 валидных связей → `null`, 1 → набор как есть (без клона), 2+ → новый `RegionSet` + `Append` каждого в пуле потоков (`UniTask.SwitchToThreadPool` → `UniTaskEditor.SwitchToEditorThread`), `PlaneY` от первого.
+- `SplinesToRegionAdapter` (`PcgPortAdapter`) — `List<Spline>` → `RegionSet` (автоконверсия с дефолтным разрешением).
+- `RegionSetSerializer` (`IPcgCacheSerializer`, `TypeId=2`) — value-cache регионов (блобы `float2[]` чанками + `PcgAttributeSetCacheIO`). Порядок: по региону геометрия → его `EdgeAttributes`; затем регион-уровневые `set.Attributes`.
+- `PcgPolygonsBootstrap` (`InitializeOnLoadMethod`) — регистрирует сериализатор в `PcgCacheSerializerRegistry`.
+- `RegionGizmoUtility` — отрисовка регионов (контуры + дырки) на высоте `PlaneY`.

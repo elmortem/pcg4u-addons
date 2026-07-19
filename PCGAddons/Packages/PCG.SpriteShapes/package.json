@@ -2,7 +2,7 @@
   "displayName": "PCG SpriteShapes",
   "name": "com.elmortem.pcg.spriteshapes",
   "author": "Makar Osokin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "unity": "2022.3",
   "description": "SpriteShapes addon for PCG.",
   "keywords": [
@@ -22,6 +22,8 @@
   ],
   "category": "Utility",
   "dependencies": {
-    "com.unity.mathematics": "1.2.6"
+    "com.unity.mathematics": "1.2.6",
+    "com.unity.splines": "2.8.2",
+    "com.unity.2d.spriteshape": "9.1.0"
   }
 }

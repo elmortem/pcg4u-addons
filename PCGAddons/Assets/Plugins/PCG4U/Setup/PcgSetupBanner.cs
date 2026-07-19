@@ -11,6 +11,7 @@ namespace PCG.Setup
 		private const float IconSize = 120f;
 		private const float TextLeft = 130f;
 
+		private const string IconGuid = "65c65d4bf95d9034cb25efdbbb8a3df3";
 		private const string IconPath = "Packages/com.elmortem.pcg4u/PCG/Icons/PcgIcon.png";
 		private const string Title = "PCG4U";
 		private const string Slogan = "Procedural. Controllable. Yours.";
@@ -52,7 +53,12 @@ namespace PCG.Setup
 				_gradient.Apply();
 			}
 			if (_icon == null)
-				_icon = AssetDatabase.LoadAssetAtPath<Texture2D>(IconPath);
+			{
+				var iconPath = AssetDatabase.GUIDToAssetPath(IconGuid);
+				if (string.IsNullOrEmpty(iconPath))
+					iconPath = IconPath;
+				_icon = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
+			}
 			if (_titleStyle == null)
 			{
 				_titleStyle = new GUIStyle(EditorStyles.boldLabel)

@@ -2,7 +2,7 @@
   "displayName": "PCG Splines",
   "name": "com.elmortem.pcg.splines",
   "author": "Makar Osokin",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "unity": "2022.3",
   "description": "Splines addon for PCG.",
   "keywords": [
@@ -21,6 +21,7 @@
   ],
   "category": "Utility",
   "dependencies": {
-    "com.unity.mathematics": "1.2.6"
+    "com.unity.mathematics": "1.2.6",
+    "com.unity.splines": "2.8.2"
   }
 }

@@ -154424,6 +154424,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GraphId: dacf990f735146cd973f444565c8fb0a
+  AutoGenerate: 0
+  SubGraph: {fileID: 0}
+  SubGraphSyncedVersion: 0
   GraphData:
     Nodes:
     - rid: 7906782975558942720
@@ -154461,7 +154464,6 @@ MonoBehaviour:
     - rid: 7906783217557176333
     - rid: 7906783217557176334
     - rid: 7906783217557176335
-    - rid: 7906783217557176336
     - rid: -2
     - rid: 7906783217557176342
     - rid: 7906783217557176343
@@ -154470,6 +154472,10 @@ MonoBehaviour:
     - rid: 7906783217557176358
     - rid: 7906783217557176364
     - rid: 7906783217557176365
+    - rid: 1664906200045322240
+    - rid: 1664906200045322242
+    - rid: 1664906200045322243
+    - rid: 1664906200045322244
     Edges:
     - FromNodeId: 3
       FromPort: Value
@@ -154637,10 +154643,6 @@ MonoBehaviour:
       ToPort: Region
     - FromNodeId: 28
       FromPort: Result
-      ToNodeId: 41
-      ToPort: A
-    - FromNodeId: 28
-      FromPort: Result
       ToNodeId: 29
       ToPort: Region
     - FromNodeId: 33
@@ -154707,7 +154709,23 @@ MonoBehaviour:
       FromPort: o17
       ToNodeId: 15
       ToPort: vRegionSet
-    NextNodeId: 55
+    - FromNodeId: 55
+      FromPort: Results
+      ToNodeId: 57
+      ToPort: Splines
+    - FromNodeId: 57
+      FromPort: Results
+      ToNodeId: 58
+      ToPort: Points
+    - FromNodeId: 59
+      FromPort: Terrain
+      ToNodeId: 58
+      ToPort: Terrain
+    - FromNodeId: 59
+      FromPort: Offset
+      ToNodeId: 58
+      ToPort: Offset
+    NextNodeId: 60
     Variables:
     - Id: Int
       Name: Seed
@@ -154833,6 +154851,279 @@ MonoBehaviour:
     - rid: 1664906043532771331
       type: {class: RegionSetValue, ns: PCG.Polygons, asm: PCG.Polygons}
       data: 
+    - rid: 1664906200045322240
+      type: {class: SplineNode, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        Id: 55
+        Position: {x: -1575.4968, y: 3464.7146}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Splines:
+        - m_EditModeType: 1
+          m_Knots:
+          - Position:
+              x: 197.08
+              y: 58.87
+              z: 209.5
+            TangentIn:
+              x: -0
+              y: -0
+              z: -1.6497703
+            TangentOut:
+              x: 0
+              y: 0
+              z: 1.5610971
+            Rotation:
+              value:
+                x: -0.02815467
+                y: 0.23974262
+                z: 0.07762325
+                w: 0.9673187
+          - Position:
+              x: 194.23
+              y: 59.07
+              z: 216.12
+            TangentIn:
+              x: -0
+              y: -0
+              z: -0.89524627
+            TangentOut:
+              x: 0
+              y: 0
+              z: 0.74165785
+            Rotation:
+              value:
+                x: 0.025195213
+                y: 0.36088258
+                z: 0.057220776
+                w: 0.93051314
+          - Position:
+              x: 198.93
+              y: 58.91
+              z: 214.58
+            TangentIn:
+              x: 0.0000006556511
+              y: 0.000004261732
+              z: -0.852362
+            TangentOut:
+              x: 0.00000023841858
+              y: 0
+              z: 0.8968067
+            Rotation:
+              value:
+                x: 0.23513807
+                y: 0.25331914
+                z: 0.6770725
+                w: 0.64970183
+          - Position:
+              x: 199.64
+              y: 59.1
+              z: 218.85
+            TangentIn:
+              x: -0
+              y: -0
+              z: -0.7654885
+            TangentOut:
+              x: 0
+              y: 0
+              z: 0.98067623
+            Rotation:
+              value:
+                x: 0.5835504
+                y: 0.01306197
+                z: 0.8110088
+                w: -0.039534368
+          - Position:
+              x: 204.82
+              y: 59.24
+              z: 213.98
+            TangentIn:
+              x: -0
+              y: -0
+              z: -1.8172323
+            TangentOut:
+              x: 0
+              y: 0
+              z: 1.7919433
+            Rotation:
+              value:
+                x: 0.7292734
+                y: 0.03457366
+                z: 0.683323
+                w: -0.0058855675
+          - Position:
+              x: 210.42
+              y: 59.7
+              z: 218.01
+            TangentIn:
+              x: -0
+              y: -0
+              z: -1.8025937
+            TangentOut:
+              x: 0
+              y: 0
+              z: 2.604532
+            Rotation:
+              value:
+                x: 0.046918876
+                y: 0.026025161
+                z: 0.99462914
+                w: 0.08851066
+          - Position:
+              x: 200.6
+              y: 59.57
+              z: 228.59
+            TangentIn:
+              x: -0
+              y: -0
+              z: -2.4203088
+            TangentOut:
+              x: 0
+              y: 0
+              z: 2.1153517
+            Rotation:
+              value:
+                x: 0.016573502
+                y: 0.76704633
+                z: -0.043934103
+                w: -0.63987106
+          - Position:
+              x: 196.41
+              y: 59.12
+              z: 218.4
+            TangentIn:
+              x: -0
+              y: -0
+              z: -2.8143082
+            TangentOut:
+              x: 0
+              y: 0
+              z: 2.8505647
+            Rotation:
+              value:
+                x: 0.06085061
+                y: 0.8511396
+                z: -0.054533713
+                w: -0.51854104
+          - Position:
+              x: 185.4
+              y: 59.07
+              z: 221
+            TangentIn:
+              x: -0
+              y: -0
+              z: -1.9911674
+            TangentOut:
+              x: 0
+              y: 0
+              z: 2.1892638
+            Rotation:
+              value:
+                x: 0.92133856
+                y: 0.11037128
+                z: -0.37270886
+                w: -0.0064550037
+          - Position:
+              x: 189.22
+              y: 58.16
+              z: 207.9
+            TangentIn:
+              x: -0
+              y: -0
+              z: -2.9041228
+            TangentOut:
+              x: 0
+              y: 0
+              z: 2.228454
+            Rotation:
+              value:
+                x: 0.8523883
+                y: 0.179284
+                z: 0.48236677
+                w: 0.09280945
+          m_MetaData:
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 4
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          - Mode: 0
+            Tension: 0.5
+          m_Closed: 1
+          m_IntData:
+            m_Data: []
+          m_FloatData:
+            m_Data: []
+          m_Float4Data:
+            m_Data: []
+          m_ObjectData:
+            m_Data: []
+        Links:
+          m_KnotsLink: []
+    - rid: 1664906200045322242
+      type: {class: SplinesSurfaceNode, ns: PCG.CreatePoints, asm: PCG.Splines}
+      data:
+        Id: 57
+        Position: {x: -1302.627, y: 3464.104}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 1
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 0.1
+        IsPreviewLocal: 0
+        Splines: []
+        Offset: {x: 0, y: 0, z: 0}
+        PointMode: 3
+        Count: 1000
+        Seed: 584273471
+    - rid: 1664906200045322243
+      type: {class: PointToTerrainNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        Id: 58
+        Position: {x: -1006.14813, y: 3511.5667}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        GizmosOptions:
+          Override: 1
+          Color: {r: 0.7735849, g: 0.13501246, b: 0.13501246, a: 1}
+          PointSize: 0.2
+        IsPreviewLocal: 1
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Points: []
+        ProjectionMode: 2
+        ProjectNormal: 1
+    - rid: 1664906200045322244
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        Id: 59
+        Position: {x: -1143.61, y: 3368.2305}
+        Collapsed: 0
+        Width: 220
+        Title: 
+        VariableId: TerrainObject
     - rid: 7906782975558942720
       type: {class: ResultNode, ns: PCG, asm: PCG}
       data:
@@ -155658,20 +155949,6 @@ MonoBehaviour:
         Spacing: 7
         Margin: 5
         Seed: 0
-    - rid: 7906783217557176336
-      type: {class: PolygonBooleanNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
-      data:
-        Id: 41
-        Position: {x: -1183.2219, y: 2769.7168}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Mode: 2
     - rid: 7906783217557176342
       type: {class: RegionToMeshNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
       data:

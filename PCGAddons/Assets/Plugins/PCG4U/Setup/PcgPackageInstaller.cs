@@ -9,26 +9,15 @@ namespace PCG.Setup
 	{
 		public static event Action Completed;
 
-		private static AddRequest _request;
+		private static AddAndRemoveRequest _request;
 
 		public static bool IsBusy => _request != null && !_request.IsCompleted;
 
-		public static void InstallFromGit(string gitUrl)
-		{
-			Start(gitUrl);
-		}
-
-		public static void InstallFromOpenUpm(string packageName, string version)
-		{
-			PcgManifestRegistryUtility.EnsureOpenUpmScope(packageName);
-			Start(packageName + "@" + version);
-		}
-
-		private static void Start(string identifier)
+		public static void Install(string[] identifiers)
 		{
 			if (IsBusy)
 				return;
-			_request = Client.Add(identifier);
+			_request = Client.AddAndRemove(identifiers);
 			EditorApplication.update += OnUpdate;
 		}
 

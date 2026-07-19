@@ -21,3 +21,12 @@ City pipeline: Spline To Region -> Subdivide Region (blocks, cut edges tagged wi
 
 ### Select Points
 * [[Points Near Regions Node|PCG.Polygons/SelectPoints/Points-Near-Regions-Node]]
+
+## Presets
+
+`Presets/CityBlocks.asset` is a ready-to-use `PcgSubGraph` that grows a block city from one closed spline. Drop a `Sub Graph` node referencing it onto a `PcgComponent`, connect a closed `Spline` node into the `Splines` port, and fill the blackboard pills.
+
+* **Inputs (pills):** `Splines` (closed), `Terrain`, `Houses` (GameObject weights), `RoadMaterial`, `Seed`.
+* **Outputs:** `Roads` (the road mesh draped on the terrain) and `Houses` (prefab instances placed one per lot, oriented to the nearest road).
+* **Required makers:** the host object must carry **both** `GameObjectInstanceMaker` (houses) and `MeshInstanceMaker` (road mesh) in `Instance Maker Components` — without the mesh maker the roads are not materialized.
+* **Package dependency:** the preset uses `SplinesValue`, so `com.elmortem.pcg.splines` is declared in `package.json`.

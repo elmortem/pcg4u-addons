@@ -1,6 +1,8 @@
-using System.Collections.Generic;
 using PCG.Editors;
+using PCG.Splines.Tools;
 using UnityEditor;
+using UnityEditor.EditorTools;
+using UnityEditor.Splines;
 using UnityEngine;
 using UnityEngine.Splines;
 
@@ -9,48 +11,66 @@ namespace PCG.Splines
 	[CustomPcgNodeRenderer(typeof(SplineNodeExecutor))]
 	public sealed class SplineNodeRenderer : PcgNodeRenderer
 	{
-		private GameObject _editContainerObject;
-
 		public override void DrawExtras()
 		{
 			var executor = (SplineNodeExecutor)Node;
+			var key = SplineEditSessions.KeyFor(executor);
+			var session = SplineEditSessions.Find(key);
 
-			if (_editContainerObject == null)
+			if (session != null && session.Container != null)
 			{
-				if (GUILayout.Button("Start Edit"))
-					StartEdit(executor);
+				if (session.Executor != executor)
+					SplineEditSessions.Rebind(key, executor);
+
+				if (GUILayout.Button("Stop Edit"))
+					SplineEditSessions.Stop(session);
 			}
 			else
 			{
-				if (GUILayout.Button("Stop Edit"))
-					StopEdit(executor);
+				if (GUILayout.Button("Start Edit"))
+					StartEdit(executor);
 			}
 		}
 
 		private void StartEdit(SplineNodeExecutor executor)
 		{
-			_editContainerObject = new GameObject("Spline Edit");
-			_editContainerObject.AddComponent<SplineContainer>();
-			executor.SetEditContainer(_editContainerObject.transform);
-			Selection.activeGameObject = _editContainerObject;
-		}
+			var graphId = executor.Graph != null ? executor.Graph.GraphId : string.Empty;
+			var addressKey = executor.Address.ToKey();
 
-		private void StopEdit(SplineNodeExecutor executor)
-		{
-			if (_editContainerObject != null)
+			var marker = SplineEditSessions.FindOrphan(graphId, addressKey);
+			SplineContainer container;
+
+			if (marker != null && marker.Container != null)
 			{
-				var container = _editContainerObject.GetComponent<SplineContainer>();
-				if (container != null)
-				{
-					var splines = new List<Spline>(container.Splines);
-					executor.SetData(splines);
-				}
+				container = marker.Container;
+			}
+			else
+			{
+				if (marker != null)
+					Object.DestroyImmediate(marker.gameObject);
 
-				Object.DestroyImmediate(_editContainerObject);
-				_editContainerObject = null;
+				var go = new GameObject("Spline Edit");
+				container = go.AddComponent<SplineContainer>();
+				marker = go.AddComponent<PcgSplineEditContainer>();
+				marker.Container = container;
+				marker.GraphId = graphId;
+				marker.AddressKey = addressKey;
+				executor.PopulateContainer(container);
 			}
 
-			executor.SetEditContainer(null);
+			executor.SetEditContainer(container);
+			SplineEditSessions.Begin(executor, marker, container);
+			Selection.activeGameObject = marker.gameObject;
+			EditorApplication.delayCall += ActivateSplineDrawTool;
+		}
+
+		private static void ActivateSplineDrawTool()
+		{
+			ToolManager.SetActiveContext<SplineToolContext>();
+
+			var drawTool = typeof(SplineToolContext).Assembly.GetType("UnityEditor.Splines.CreateSplineTool");
+			if (drawTool != null)
+				ToolManager.SetActiveTool(drawTool);
 		}
 	}
 }

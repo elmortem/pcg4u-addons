@@ -1,0 +1,436 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -524942693, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: CityBlocks
+  m_EditorClassIdentifier: 
+  GraphData:
+    Nodes:
+    - rid: 1664906219765891100
+    - rid: 1664906219765891101
+    - rid: 1664906219765891102
+    - rid: 1664906219765891103
+    - rid: 1664906219765891104
+    - rid: 1664906219765891105
+    - rid: 1664906219765891106
+    - rid: 1664906219765891107
+    - rid: 1664906219765891108
+    - rid: 1664906219765891109
+    - rid: 1664906219765891110
+    - rid: 1664906219765891111
+    - rid: 1664906219765891112
+    - rid: 1664906219765891113
+    - rid: 1664906219765891114
+    - rid: 1664906219765891115
+    - rid: 1664906219765891116
+    Edges:
+    - FromNodeId: 1
+      FromPort: Value
+      ToNodeId: 2
+      ToPort: Splines
+    - FromNodeId: 2
+      FromPort: Result
+      ToNodeId: 7
+      ToPort: Region
+    - FromNodeId: 3
+      FromPort: Value
+      ToNodeId: 7
+      ToPort: Seed
+    - FromNodeId: 7
+      FromPort: Blocks
+      ToNodeId: 8
+      ToPort: Blocks
+    - FromNodeId: 8
+      FromPort: Result
+      ToNodeId: 9
+      ToPort: Blocks
+    - FromNodeId: 9
+      FromPort: Roads
+      ToNodeId: 10
+      ToPort: Region
+    - FromNodeId: 4
+      FromPort: Terrain
+      ToNodeId: 10
+      ToPort: Terrain
+    - FromNodeId: 4
+      FromPort: Offset
+      ToNodeId: 10
+      ToPort: Offset
+    - FromNodeId: 5
+      FromPort: Value
+      ToNodeId: 10
+      ToPort: Material
+    - FromNodeId: 10
+      FromPort: Results
+      ToNodeId: 11
+      ToPort: Value
+    - FromNodeId: 8
+      FromPort: Result
+      ToNodeId: 12
+      ToPort: Region
+    - FromNodeId: 12
+      FromPort: Result
+      ToNodeId: 13
+      ToPort: Blocks
+    - FromNodeId: 13
+      FromPort: Lots
+      ToNodeId: 14
+      ToPort: Region
+    - FromNodeId: 9
+      FromPort: Roads
+      ToNodeId: 14
+      ToPort: Roads
+    - FromNodeId: 3
+      FromPort: Value
+      ToNodeId: 14
+      ToPort: Seed
+    - FromNodeId: 14
+      FromPort: Results
+      ToNodeId: 15
+      ToPort: Points
+    - FromNodeId: 4
+      FromPort: Terrain
+      ToNodeId: 15
+      ToPort: Terrain
+    - FromNodeId: 4
+      FromPort: Offset
+      ToNodeId: 15
+      ToPort: Offset
+    - FromNodeId: 15
+      FromPort: Results
+      ToNodeId: 16
+      ToPort: Points
+    - FromNodeId: 6
+      FromPort: Value
+      ToNodeId: 16
+      ToPort: Weights
+    - FromNodeId: 3
+      FromPort: Value
+      ToNodeId: 16
+      ToPort: Seed
+    - FromNodeId: 16
+      FromPort: Results
+      ToNodeId: 17
+      ToPort: Value
+    NextNodeId: 18
+    Variables:
+    - Id: Splines
+      Name: Splines
+      Default:
+        rid: 1664906219765891117
+    - Id: Terrain
+      Name: Terrain
+      Default:
+        rid: 1664906219765891118
+    - Id: Houses
+      Name: Houses
+      Default:
+        rid: 1664906219765891119
+    - Id: RoadMaterial
+      Name: RoadMaterial
+      Default:
+        rid: 1664906219765891120
+    - Id: Seed
+      Name: Seed
+      Default:
+        rid: 1664906219765891121
+  ContentVersion: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1664906219765891100
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 1
+        NodePosition: {x: -600, y: 340}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Splines
+    - rid: 1664906219765891101
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 3
+        NodePosition: {x: -600, y: 520}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Seed
+    - rid: 1664906219765891102
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 4
+        NodePosition: {x: -600, y: 620}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Terrain
+    - rid: 1664906219765891103
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 5
+        NodePosition: {x: -600, y: 720}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: RoadMaterial
+    - rid: 1664906219765891104
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 6
+        NodePosition: {x: -600, y: 820}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Houses
+    - rid: 1664906219765891105
+      type: {class: SplineToRegionNode, ns: PCG.Polygons, asm: PCG.Polygons}
+      data:
+        NodeId: 2
+        NodePosition: {x: -320, y: 340}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Splines: []
+        MaxSegmentLength: 2
+    - rid: 1664906219765891106
+      type: {class: SubdivideRegionNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        NodeId: 7
+        NodePosition: {x: -40, y: 340}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        MinSize: 25
+        MaxDepth: 6
+        SplitJitter: 0.15
+        Seed: 0
+    - rid: 1664906219765891107
+      type: {class: AssignRoadClassByDepthNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        NodeId: 8
+        NodePosition: {x: 240, y: 340}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        WidthByDepth:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 1
+            inSlope: 0
+            outSlope: -0.8
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.2
+            inSlope: -0.8
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        MaxWidth: 8
+        MinDepth: 1
+        MaxDepth: 4
+    - rid: 1664906219765891108
+      type: {class: BlocksToRoadsNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        NodeId: 9
+        NodePosition: {x: 520, y: 340}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Join: 0
+        Cap: 0
+        MiterLimit: 2
+    - rid: 1664906219765891109
+      type: {class: RegionToMeshNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        NodeId: 10
+        NodePosition: {x: 800, y: 240}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        MaxHeightError: 0.25
+        MinCellSize: 1
+        MaxCellSize: 16
+        MaxDepth: 6
+        HeightOffset: 0.15
+        UvScale: 0.1
+        Name: Roads
+        Material: {fileID: 0}
+    - rid: 1664906219765891110
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        NodeId: 11
+        NodePosition: {x: 1080, y: 240}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Name: Roads
+        Value:
+          rid: 1664906219765891122
+    - rid: 1664906219765891111
+      type: {class: InsetRegionNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        NodeId: 12
+        NodePosition: {x: 520, y: 560}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Delta: -6
+    - rid: 1664906219765891112
+      type: {class: LotsFromBlockNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        NodeId: 13
+        NodePosition: {x: 800, y: 560}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        LotWidth: 14
+    - rid: 1664906219765891113
+      type: {class: RegionToPointsNode, ns: PCG.Polygons.City, asm: PCG.Polygons}
+      data:
+        NodeId: 14
+        NodePosition: {x: 1080, y: 560}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Mode: 0
+        Count: 1
+        Spacing: 5
+        Margin: 1
+        Seed: 0
+    - rid: 1664906219765891114
+      type: {class: PointToTerrainNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 15
+        NodePosition: {x: 1360, y: 560}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Points: []
+        ProjectionMode: 2
+        ProjectNormal: 0
+    - rid: 1664906219765891115
+      type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
+      data:
+        NodeId: 16
+        NodePosition: {x: 1640, y: 560}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Points: []
+        Seed: -1
+        Weights: []
+    - rid: 1664906219765891116
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        NodeId: 17
+        NodePosition: {x: 1920, y: 560}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Name: Houses
+        Value:
+          rid: 1664906219765891123
+    - rid: 1664906219765891117
+      type: {class: SplinesValue, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        Containers: []
+    - rid: 1664906219765891118
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 0}
+    - rid: 1664906219765891119
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []
+    - rid: 1664906219765891120
+      type: {class: MaterialValue, ns: PCG.Values, asm: PCG}
+      data:
+        Material: {fileID: 0}
+    - rid: 1664906219765891121
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1
+    - rid: 1664906219765891122
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []
+    - rid: 1664906219765891123
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []
