@@ -53,17 +53,18 @@ namespace PCG.Sweep
 				int next = math.min(total - 1, q + 1);
 				float3 tangent = spline.EvaluateTangent(ts[q]);
 				float3 up = spline.EvaluateUpVector(ts[q]);
-				float2 planRight = SweepRibbonSampling.PlanRight(tangent, up, positions[prev], positions[next]);
+				float3 right3 = SweepRibbonSampling.Right3D(tangent, up, positions[prev], positions[next]);
 				float halfWidth = profileHalf * SampleLut(source.WidthLut, ts[q]);
 
-				float2 centerPlan = new float2(positions[q].x, positions[q].z);
-				float2 lp = centerPlan + planRight * halfWidth;
-				float2 rp = centerPlan - planRight * halfWidth;
+				float3 lw = positions[q] + right3 * halfWidth;
+				float3 rw = positions[q] - right3 * halfWidth;
+				float2 lp = new float2(lw.x, lw.z);
+				float2 rp = new float2(rw.x, rw.z);
 
 				leftPlan[q] = lp;
 				rightPlan[q] = rp;
-				left[q] = Elevate(lp, positions[q].y, source, ref outOfBounds);
-				right[q] = Elevate(rp, positions[q].y, source, ref outOfBounds);
+				left[q] = Elevate(lp, lw.y, source, ref outOfBounds);
+				right[q] = Elevate(rp, rw.y, source, ref outOfBounds);
 			}
 
 			bool innerLeft;

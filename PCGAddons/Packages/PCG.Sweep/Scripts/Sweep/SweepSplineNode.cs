@@ -75,6 +75,10 @@ namespace PCG.Sweep
 		[PcgMemberInfo("Whether splines are split by ribbon width at intersections, leaving free pieces apart.", Tags = new[] { "merge", "intersection", "split" })]
 		public bool MergeIntersections;
 
+		[Input]
+		[PcgMemberInfo("Vertical tolerance for a ribbon touch; splines farther apart in height than this pass over each other without intersecting (bridges, overpasses).", Tags = new[] { "merge", "thickness", "3d" })]
+		public float MergeThickness = 1f;
+
 		[PcgMemberInfo("Whether split pieces, edge intersection points and cut chords are drawn as gizmos.", Tags = new[] { "preview", "gizmos", "debug", "intersection" })]
 		public bool ShowIntersections = true;
 

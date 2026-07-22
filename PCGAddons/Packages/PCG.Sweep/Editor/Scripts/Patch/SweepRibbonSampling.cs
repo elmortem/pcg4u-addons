@@ -9,15 +9,19 @@ namespace PCG.Sweep
 		private const float MaxTurnPerSampleDeg = 8f;
 		private const int MaxSubdivisions = 64;
 
-		internal static float2 PlanRight(float3 tangent, float3 up, float3 prevPos, float3 nextPos)
+		internal static float3 Right3D(float3 tangent, float3 up, float3 prevPos, float3 nextPos)
 		{
 			float3 right = math.cross(up, tangent);
-			float2 planRight = new float2(right.x, right.z);
-			if (math.lengthsq(planRight) > 1e-10f)
-				return math.normalize(planRight);
+			if (math.lengthsq(right) > 1e-10f)
+				return math.normalize(right);
 
-			float2 planTangent = math.normalizesafe(new float2(nextPos.x - prevPos.x, nextPos.z - prevPos.z), new float2(0f, 1f));
-			return new float2(planTangent.y, -planTangent.x);
+			float3 fallbackTangent = nextPos - prevPos;
+			right = math.cross(up, fallbackTangent);
+			if (math.lengthsq(right) > 1e-10f)
+				return math.normalize(right);
+
+			float2 planTangent = math.normalizesafe(new float2(fallbackTangent.x, fallbackTangent.z), new float2(0f, 1f));
+			return new float3(planTangent.y, 0f, -planTangent.x);
 		}
 
 		internal static List<float> AdaptiveStations(Spline spline, float start, float end, float baseStep)

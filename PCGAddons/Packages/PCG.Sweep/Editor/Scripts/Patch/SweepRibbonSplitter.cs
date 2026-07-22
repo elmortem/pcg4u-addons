@@ -36,6 +36,10 @@ namespace PCG.Sweep
 			public float2 B;
 			public float2 C;
 			public float2 D;
+			public float YA;
+			public float YB;
+			public float YC;
+			public float YD;
 		}
 
 		internal static bool CanBuild(SweepSnapshot snapshot, out string failure)
@@ -60,13 +64,14 @@ namespace PCG.Sweep
 			return true;
 		}
 
-		internal static SweepRibbonSplitResult Split(SweepSnapshot full, List<Spline> splines, float step, CancellationToken ct, Action reportProgress)
+		internal static SweepRibbonSplitResult Split(SweepSnapshot full, List<Spline> splines, float step, float thickness, CancellationToken ct, Action reportProgress)
 		{
 			int splineCount = splines.Count;
 			var result = new SweepRibbonSplitResult();
 
 			float profileHalf = math.max(math.abs(full.ProfilePoints[0].x), math.abs(full.ProfilePoints[1].x));
 			float planWidth = math.max(1e-3f, profileHalf * 2f * MaxLut(full.WidthLut));
+			float verticalTolerance = math.max(0f, thickness);
 
 			var samples = new Sample[splineCount][];
 			for (int i = 0; i < splineCount; i++)
@@ -90,7 +95,11 @@ namespace PCG.Sweep
 						A = arr[r].LeftPlan,
 						B = arr[r + 1].LeftPlan,
 						C = arr[r + 1].RightPlan,
-						D = arr[r].RightPlan
+						D = arr[r].RightPlan,
+						YA = arr[r].LeftWorld.y,
+						YB = arr[r + 1].LeftWorld.y,
+						YC = arr[r + 1].RightWorld.y,
+						YD = arr[r].RightWorld.y
 					};
 
 					float2 min = math.min(math.min(quad.A, quad.B), math.min(quad.C, quad.D));
@@ -124,7 +133,7 @@ namespace PCG.Sweep
 				for (int r = 0; r < count; r++)
 				{
 					pieceId[i][r] = -1;
-					touches[i][r] = FindTouches(arr[r], i, r, grid, quads, candidates, cellSize, GuardSamples);
+					touches[i][r] = FindTouches(arr[r], i, r, grid, quads, candidates, cellSize, GuardSamples, verticalTolerance);
 					dirty[i][r] = touches[i][r].Count > 0;
 				}
 			}
@@ -257,7 +266,7 @@ namespace PCG.Sweep
 			return result;
 		}
 
-		private static List<int> FindTouches(Sample sample, int splineIndex, int sampleIndex, Dictionary<long, List<int>> grid, List<Quad> quads, List<int> candidates, float cellSize, int guardSamples)
+		private static List<int> FindTouches(Sample sample, int splineIndex, int sampleIndex, Dictionary<long, List<int>> grid, List<Quad> quads, List<int> candidates, float cellSize, int guardSamples, float verticalTolerance)
 		{
 			var hits = new List<int>();
 			CollectCandidates(grid, sample.LeftPlan, sample.RightPlan, cellSize, candidates);
@@ -274,8 +283,12 @@ namespace PCG.Sweep
 				{
 					float f = s / (float)(CrossSamples - 1);
 					float2 point = math.lerp(sample.LeftPlan, sample.RightPlan, f);
-					if (PointInQuad(point, quad))
-						inside = true;
+					if (PointInQuad(point, quad, out float quadY))
+					{
+						float cutY = math.lerp(sample.LeftWorld.y, sample.RightWorld.y, f);
+						if (math.abs(cutY - quadY) <= verticalTolerance)
+							inside = true;
+					}
 				}
 
 				if (inside && !hits.Contains(qi))
@@ -310,21 +323,20 @@ namespace PCG.Sweep
 				int next = math.min(total - 1, q + 1);
 				float3 tangent = spline.EvaluateTangent(ts[q]);
 				float3 up = spline.EvaluateUpVector(ts[q]);
-				float2 planRight = SweepRibbonSampling.PlanRight(tangent, up, positions[prev], positions[next]);
+				float3 right3 = SweepRibbonSampling.Right3D(tangent, up, positions[prev], positions[next]);
 				float halfWidth = profileHalf * SampleLut(widthLut, ts[q]);
 
 				float3 center = positions[q];
-				float2 centerPlan = new float2(center.x, center.z);
-				float2 leftPlan = centerPlan + planRight * halfWidth;
-				float2 rightPlan = centerPlan - planRight * halfWidth;
+				float3 leftWorld = center + right3 * halfWidth;
+				float3 rightWorld = center - right3 * halfWidth;
 
 				samples[q] = new Sample
 				{
 					Center = center,
-					LeftPlan = leftPlan,
-					RightPlan = rightPlan,
-					LeftWorld = new float3(leftPlan.x, center.y, leftPlan.y),
-					RightWorld = new float3(rightPlan.x, center.y, rightPlan.y),
+					LeftPlan = new float2(leftWorld.x, leftWorld.z),
+					RightPlan = new float2(rightWorld.x, rightWorld.z),
+					LeftWorld = leftWorld,
+					RightWorld = rightWorld,
 					Station = dists[q]
 				};
 			}
@@ -416,24 +428,33 @@ namespace PCG.Sweep
 			}
 		}
 
-		private static bool PointInQuad(float2 p, Quad quad)
+		private static bool PointInQuad(float2 p, Quad quad, out float y)
 		{
-			return PointInTriangle(p, quad.A, quad.B, quad.C) || PointInTriangle(p, quad.A, quad.C, quad.D);
+			if (PointInTriangle(p, quad.A, quad.B, quad.C, quad.YA, quad.YB, quad.YC, out y))
+				return true;
+
+			return PointInTriangle(p, quad.A, quad.C, quad.D, quad.YA, quad.YC, quad.YD, out y);
 		}
 
-		private static bool PointInTriangle(float2 p, float2 a, float2 b, float2 c)
+		private static bool PointInTriangle(float2 p, float2 a, float2 b, float2 c, float ya, float yb, float yc, out float y)
 		{
-			float d1 = Cross(b - a, p - a);
-			float d2 = Cross(c - b, p - b);
-			float d3 = Cross(a - c, p - c);
-			bool hasNegative = d1 < 0f || d2 < 0f || d3 < 0f;
-			bool hasPositive = d1 > 0f || d2 > 0f || d3 > 0f;
-			return !(hasNegative && hasPositive);
-		}
+			y = 0f;
 
-		private static float Cross(float2 a, float2 b)
-		{
-			return a.x * b.y - a.y * b.x;
+			float2 v0 = b - a;
+			float2 v1 = c - a;
+			float2 v2 = p - a;
+			float den = v0.x * v1.y - v1.x * v0.y;
+			if (math.abs(den) < 1e-12f)
+				return false;
+
+			float v = (v2.x * v1.y - v1.x * v2.y) / den;
+			float w = (v0.x * v2.y - v2.x * v0.y) / den;
+			float u = 1f - v - w;
+			if (u < -1e-4f || v < -1e-4f || w < -1e-4f)
+				return false;
+
+			y = u * ya + v * yb + w * yc;
+			return true;
 		}
 
 		private static float SampleLut(float[] lut, float t)

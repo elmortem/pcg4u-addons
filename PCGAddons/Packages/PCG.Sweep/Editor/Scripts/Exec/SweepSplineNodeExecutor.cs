@@ -69,11 +69,13 @@ namespace PCG.Sweep
 			SweepSnapshot snapshot = null;
 			var splines = new List<Spline>();
 			float step = 0f;
+			float thickness = 0f;
 
 			using (var scope = OperationScope.Start(this))
 			{
 				snapshot = BuildSnapshot(ct, splines);
 				step = math.max(0.05f, GetInputValue(nameof(Data.Step), Data.Step));
+				thickness = math.max(0f, GetInputValue(nameof(Data.MergeThickness), Data.MergeThickness));
 
 				await scope.Step(ct: ct);
 			}
@@ -97,7 +99,7 @@ namespace PCG.Sweep
 
 			await UniTask.RunOnThreadPool(() =>
 			{
-				split = SweepRibbonSplitter.Split(snapshot, splines, step, ct, reportProgress);
+				split = SweepRibbonSplitter.Split(snapshot, splines, step, thickness, ct, reportProgress);
 			}, true, ct);
 
 			await UniTaskEditor.SwitchToEditorThread();
