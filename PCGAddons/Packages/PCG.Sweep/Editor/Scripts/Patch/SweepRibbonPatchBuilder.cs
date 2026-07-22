@@ -2,12 +2,25 @@ using System;
 using System.Collections.Generic;
 using PCG.Polygons;
 using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.Splines;
 
 namespace PCG.Sweep
 {
 	internal static class SweepRibbonPatchBuilder
 	{
+		private struct HeightQuad
+		{
+			public float2 A;
+			public float2 B;
+			public float2 C;
+			public float2 D;
+			public float YA;
+			public float YB;
+			public float YC;
+			public float YD;
+		}
+
 		internal static List<SweepMeshData> Build(List<SweepRibbonPiece> pieces, List<Spline> splines, SweepSnapshot source, float baseStep)
 		{
 			var result = new List<SweepMeshData>();
@@ -17,6 +30,8 @@ namespace PCG.Sweep
 			var polygons = new List<Polygon2D>();
 			var centroids = new List<float2>();
 			var levels = new List<float>();
+			var quads = new List<HeightQuad>();
+			var heightPoints = new List<float3>();
 
 			for (int p = 0; p < pieces.Count; p++)
 			{
@@ -45,8 +60,8 @@ namespace PCG.Sweep
 					positions[q] = spline.EvaluatePosition(t);
 				}
 
-				var leftPlan = new float2[n];
-				var rightPlan = new float2[n];
+				var left = new float3[n];
+				var right = new float3[n];
 				float2 centroid = float2.zero;
 				float levelSum = 0f;
 				for (int q = 0; q < n; q++)
@@ -58,19 +73,35 @@ namespace PCG.Sweep
 					float3 right3 = SweepRibbonSampling.Right3D(tangent, up, positions[prev], positions[next]);
 					float halfWidth = profileHalf * SampleLut(source.WidthLut, ts[q]);
 
-					float3 lw = positions[q] + right3 * halfWidth;
-					float3 rw = positions[q] - right3 * halfWidth;
-					leftPlan[q] = new float2(lw.x, lw.z);
-					rightPlan[q] = new float2(rw.x, rw.z);
+					left[q] = positions[q] + right3 * halfWidth;
+					right[q] = positions[q] - right3 * halfWidth;
 					centroid += new float2(positions[q].x, positions[q].z);
 					levelSum += positions[q].y;
+
+					heightPoints.Add(left[q]);
+					heightPoints.Add(right[q]);
+				}
+
+				for (int q = 0; q + 1 < n; q++)
+				{
+					quads.Add(new HeightQuad
+					{
+						A = new float2(left[q].x, left[q].z),
+						B = new float2(left[q + 1].x, left[q + 1].z),
+						C = new float2(right[q + 1].x, right[q + 1].z),
+						D = new float2(right[q].x, right[q].z),
+						YA = left[q].y,
+						YB = left[q + 1].y,
+						YC = right[q + 1].y,
+						YD = right[q].y
+					});
 				}
 
 				var outer = new float2[n * 2];
 				for (int q = 0; q < n; q++)
-					outer[q] = leftPlan[q];
+					outer[q] = new float2(left[q].x, left[q].z);
 				for (int q = 0; q < n; q++)
-					outer[n + q] = rightPlan[n - 1 - q];
+					outer[n + q] = new float2(right[n - 1 - q].x, right[n - 1 - q].z);
 
 				polygons.Add(new Polygon2D { Outer = outer });
 				centroids.Add(centroid / n);
@@ -111,6 +142,13 @@ namespace PCG.Sweep
 				if (mesh.Vertices == null || mesh.Vertices.Length < 3 || mesh.Triangles == null || mesh.Triangles.Length < 3)
 					continue;
 
+				for (int v = 0; v < mesh.Vertices.Length; v++)
+				{
+					var vertex = mesh.Vertices[v];
+					vertex.y = SampleSurfaceY(new float2(vertex.x, vertex.z), quads, heightPoints, planeY);
+					mesh.Vertices[v] = vertex;
+				}
+
 				result.Add(new SweepMeshData
 				{
 					Vertices = mesh.Vertices,
@@ -120,6 +158,53 @@ namespace PCG.Sweep
 			}
 
 			return result;
+		}
+
+		private static float SampleSurfaceY(float2 point, List<HeightQuad> quads, List<float3> heightPoints, float fallback)
+		{
+			for (int i = 0; i < quads.Count; i++)
+			{
+				var quad = quads[i];
+				if (PointInTriangle(point, quad.A, quad.B, quad.C, quad.YA, quad.YB, quad.YC, out float y))
+					return y;
+				if (PointInTriangle(point, quad.A, quad.C, quad.D, quad.YA, quad.YC, quad.YD, out y))
+					return y;
+			}
+
+			float best = fallback;
+			float bestDist = float.MaxValue;
+			for (int i = 0; i < heightPoints.Count; i++)
+			{
+				float d = math.distancesq(point, new float2(heightPoints[i].x, heightPoints[i].z));
+				if (d < bestDist)
+				{
+					bestDist = d;
+					best = heightPoints[i].y;
+				}
+			}
+
+			return best;
+		}
+
+		private static bool PointInTriangle(float2 p, float2 a, float2 b, float2 c, float ya, float yb, float yc, out float y)
+		{
+			y = 0f;
+
+			float2 v0 = b - a;
+			float2 v1 = c - a;
+			float2 v2 = p - a;
+			float den = v0.x * v1.y - v1.x * v0.y;
+			if (math.abs(den) < 1e-12f)
+				return false;
+
+			float v = (v2.x * v1.y - v1.x * v2.y) / den;
+			float w = (v0.x * v2.y - v2.x * v0.y) / den;
+			float u = 1f - v - w;
+			if (u < -1e-3f || v < -1e-3f || w < -1e-3f)
+				return false;
+
+			y = u * ya + v * yb + w * yc;
+			return true;
 		}
 
 		private static float SampleLut(float[] lut, float t)

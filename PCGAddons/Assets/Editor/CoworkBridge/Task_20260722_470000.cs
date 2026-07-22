@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Splines;
 
-public static class Task_20260722_370000
+public static class Task_20260722_470000
 {
 	private const int Layer = 31;
 	private const int RenderSize = 1200;
@@ -18,7 +18,7 @@ public static class Task_20260722_370000
 	private const int MaxVerts = 2000000;
 	private const float Step = 1f;
 	private const float MaxStep = 8f;
-	private const float HeightOffset = 0.5f;
+	private const float Thickness = 3f;
 
 	public static async Task<string> Run()
 	{
@@ -26,18 +26,21 @@ public static class Task_20260722_370000
 		Directory.CreateDirectory(Folder);
 		var report = new List<string>();
 
-		report.Add(Render("C_SharpV", new[] { Corner(new float3(-40, 0, 20), new float3(-2, 0, -30), new float3(40, 0, 20)) }, 4f, true));
-		report.Add(Render("C_SlopedV", new[] { Corner(new float3(-40, 8, 20), new float3(-2, 0, -30), new float3(40, 8, 20)) }, 4f, true));
-		report.Add(Render("C_Cross", new[]
+		report.Add(Render("Q_SlopeCross", new[]
 		{
-			Line(new float3(-30, 0, 0), new float3(30, 0, 0)),
+			Line(new float3(-30, 6, 0), new float3(30, -6, 0)),
 			Line(new float3(0, 0, -30), new float3(0, 0, 30))
-		}, 4f, false));
+		}, 6f));
+		report.Add(Render("Q_BankCross", new[]
+		{
+			BankedLine(),
+			Line(new float3(0, 0, -30), new float3(0, 0, 30))
+		}, 6f));
 
 		return string.Join(" ;; ", report);
 	}
 
-	private static string Render(string label, Spline[] splines, float width, bool angled)
+	private static string Render(string label, Spline[] splines, float width)
 	{
 		var temp = new List<UnityEngine.Object>();
 		try
@@ -51,43 +54,30 @@ public static class Task_20260722_370000
 			Type splitterT = FindType("PCG.Sweep.SweepRibbonSplitter");
 			MethodInfo split = splitterT.GetMethod("Split", BindingFlags.NonPublic | BindingFlags.Static);
 			MethodInfo buildFrames = FindType("PCG.Sweep.SweepNetworkFrames").GetMethod("BuildRangeFrames", BindingFlags.NonPublic | BindingFlags.Static);
-			MethodInfo fanBuild = FindType("PCG.Sweep.SweepRibbonCornerFanBuilder").GetMethod("Build", BindingFlags.NonPublic | BindingFlags.Static);
+			MethodInfo patchBuild = FindType("PCG.Sweep.SweepRibbonPatchBuilder").GetMethod("Build", BindingFlags.NonPublic | BindingFlags.Static);
 
-			object result = split.Invoke(null, new object[] { snap, list, Step, CancellationToken.None, (Action)(() => { }) });
-			var pieces = (System.Collections.IEnumerable)Field(result, "Pieces");
+			object result = split.Invoke(null, new object[] { snap, list, Step, Thickness, CancellationToken.None, (Action)(() => { }) });
+			object piecesObj = Field(result, "Pieces");
 			var pieceList = new List<object>();
-			foreach (var p in pieces) pieceList.Add(p);
+			foreach (var p in (System.Collections.IEnumerable)piecesObj) pieceList.Add(p);
 
 			Shader sh = Shader.Find("HDRP/Unlit");
 			Material greenMat = Mat(sh, new Color(0.78f, 0.72f, 0.55f));
-			Material blueMat = Mat(sh, new Color(0.42f, 0.60f, 0.92f));
+			Material patchMat = Mat(sh, new Color(0.92f, 0.5f, 0.18f));
 			Material wire = Mat(sh, new Color(0.05f, 0.05f, 0.06f));
-			Material splineMat = Mat(sh, new Color(0.95f, 0.2f, 0.85f));
-			temp.Add(greenMat); temp.Add(blueMat); temp.Add(wire); temp.Add(splineMat);
+			temp.Add(greenMat); temp.Add(patchMat); temp.Add(wire);
 
 			Bounds b0 = default; bool found = false;
-			int greenMeshes = 0, blueMeshes = 0, blueFan = 0, redPieces = 0, triCount = 0;
+			int greenMeshes = 0, redPieces = 0, patchMeshes = 0;
 
 			foreach (var pc in pieceList)
 			{
 				int st = (int)Field(pc, "State");
+				if (st == 1) { redPieces++; continue; }
+				if (st == 2) continue;
 				int spl = (int)Field(pc, "Spline");
 				float a = (float)Field(pc, "StartStation");
 				float b = (float)Field(pc, "EndStation");
-
-				if (st == 1) { redPieces++; continue; }
-
-				if (st == 2)
-				{
-					object fan = fanBuild.Invoke(null, new object[] { list[spl], a, b, snap, Step, CancellationToken.None, (Action)(() => { }) });
-					SweepMeshData blueMesh = (SweepMeshData)fan;
-					if (blueMesh.Vertices != null) blueFan++;
-					if (blueMesh.Vertices == null) continue;
-					blueMeshes++; triCount += blueMesh.Triangles.Length / 3;
-					Spawn(blueMesh, blueMat, wire, temp, ref b0, ref found);
-					continue;
-				}
-
 				float length = list[spl].GetLength();
 				object frames = buildFrames.Invoke(null, new object[] { list[spl], a, b, length, a, Step, MaxStep, maxAngleRad, vpr, MaxVerts });
 				if (frames == null) continue;
@@ -95,37 +85,29 @@ public static class Task_20260722_370000
 				if (framesArr.Length < 2) continue;
 				SweepMeshData mesh = SweepMeshBuilder.Build(PieceSnapshot(snap, framesArr), 0, CancellationToken.None, () => { });
 				if (mesh.Vertices == null) continue;
-				greenMeshes++; triCount += mesh.Triangles.Length / 3;
-				Spawn(mesh, greenMat, wire, temp, ref b0, ref found);
+				greenMeshes++; Spawn(mesh, greenMat, wire, temp, ref b0, ref found);
 			}
 
-			for (int s = 0; s < list.Count; s++) SplineLine(list[s], splineMat, temp, ref b0, ref found);
+			object patchesObj = patchBuild.Invoke(null, new object[] { piecesObj, list, snap, Step });
+			var patches = (List<SweepMeshData>)patchesObj;
+			for (int i = 0; i < patches.Count; i++) { patchMeshes++; Spawn(patches[i], patchMat, wire, temp, ref b0, ref found); }
 
-			string stats = "g=" + greenMeshes + " b=" + blueMeshes + "(fan=" + blueFan + ") r=" + redPieces;
+			string stats = "g=" + greenMeshes + " r=" + redPieces + " patch=" + patchMeshes;
 			if (!found) return label + ": NO MESH " + stats;
 
 			GameObject camObj = new GameObject("C"); camObj.hideFlags = HideFlags.HideAndDontSave; temp.Add(camObj);
 			Camera cam = camObj.AddComponent<Camera>();
 			cam.cullingMask = 1 << Layer; cam.clearFlags = CameraClearFlags.SolidColor;
-			cam.backgroundColor = new Color(0.30f, 0.30f, 0.32f);
-			float ext = Mathf.Max(b0.size.x, b0.size.z);
-			if (angled)
-			{
-				cam.orthographic = false; cam.fieldOfView = 35f;
-				Vector3 dir = new Vector3(0.15f, 0.75f, -0.64f).normalized;
-				cam.transform.position = b0.center + dir * ext * 2.2f;
-				cam.transform.rotation = Quaternion.LookRotation(b0.center - cam.transform.position, Vector3.up);
-			}
-			else
-			{
-				cam.orthographic = true; cam.orthographicSize = Mathf.Max(ext * 0.58f, 5f);
-				cam.transform.position = b0.center + Vector3.up * 200f;
-				cam.transform.rotation = Quaternion.LookRotation(Vector3.down, Vector3.forward);
-			}
+			cam.backgroundColor = new Color(0.28f, 0.28f, 0.30f);
+			float ext = Mathf.Max(b0.size.x, b0.size.z, b0.size.y);
+			cam.orthographic = false; cam.fieldOfView = 30f;
+			Vector3 camPos = b0.center + new Vector3(0.35f, 0.5f, -1f).normalized * ext * 2.3f;
+			cam.transform.position = camPos;
+			cam.transform.rotation = Quaternion.LookRotation(b0.center - camPos, Vector3.up);
 			cam.nearClipPlane = 0.01f; cam.farClipPlane = 900f;
 			string path = Folder + "/" + label + ".png";
 			Capture(cam, path);
-			return label + ": " + stats + " tris=" + triCount + " -> " + path;
+			return label + ": " + stats + " -> " + path;
 		}
 		catch (Exception e)
 		{
@@ -148,20 +130,6 @@ public static class Task_20260722_370000
 			Terrain = src.Terrain, MaxLateralExtent = src.MaxLateralExtent, UvScale = src.UvScale, HeightOffset = src.HeightOffset,
 			CapStartFlags = new[] { false }, CapEndFlags = new[] { false }, Collider = false, Name = "T"
 		};
-	}
-
-	private static void SplineLine(Spline spline, Material m, List<UnityEngine.Object> temp, ref Bounds b, ref bool found)
-	{
-		float length = spline.GetLength(); int n = Mathf.Max(2, Mathf.CeilToInt(length / 0.5f));
-		var pts = new Vector3[n + 1];
-		for (int q = 0; q <= n; q++) { float t = Mathf.Clamp01(spline.ConvertIndexUnit(length * q / n, PathIndexUnit.Distance, PathIndexUnit.Normalized)); pts[q] = (Vector3)spline.EvaluatePosition(t) + Vector3.up * 0.15f; }
-		var wm = new Mesh { hideFlags = HideFlags.HideAndDontSave };
-		var idx = new int[n * 2]; int d = 0;
-		for (int q = 0; q < n; q++) { idx[d++] = q; idx[d++] = q + 1; }
-		wm.vertices = pts; wm.SetIndices(idx, MeshTopology.Lines, 0); temp.Add(wm);
-		GameObject g = new GameObject("SP"); g.hideFlags = HideFlags.HideAndDontSave; g.layer = Layer;
-		g.AddComponent<MeshFilter>().sharedMesh = wm; g.AddComponent<MeshRenderer>().sharedMaterial = m; temp.Add(g);
-		for (int q = 0; q <= n; q++) { if (!found) { b = new Bounds(pts[q], Vector3.zero); found = true; } else b.Encapsulate(pts[q]); }
 	}
 
 	private static void Spawn(SweepMeshData data, Material surface, Material wireMat, List<UnityEngine.Object> temp, ref Bounds b, ref bool found)
@@ -194,7 +162,14 @@ public static class Task_20260722_370000
 		finally { cam.targetTexture = null; RenderTexture.active = prev; UnityEngine.Object.DestroyImmediate(tex); UnityEngine.Object.DestroyImmediate(img); }
 	}
 	private static Spline Line(float3 a, float3 b) { var s = new Spline(); s.Add(new BezierKnot(a), TangentMode.Linear); s.Add(new BezierKnot(b), TangentMode.Linear); return s; }
-	private static Spline Corner(float3 a, float3 b, float3 c) { var s = new Spline(); s.Add(new BezierKnot(a), TangentMode.Linear); s.Add(new BezierKnot(b), TangentMode.Linear); s.Add(new BezierKnot(c), TangentMode.Linear); return s; }
+	private static Spline BankedLine()
+	{
+		var s = new Spline();
+		var k0 = new BezierKnot(new float3(-30, 0, 0)); k0.Rotation = quaternion.AxisAngle(new float3(1, 0, 0), math.radians(-35f));
+		var k1 = new BezierKnot(new float3(30, 0, 0)); k1.Rotation = quaternion.AxisAngle(new float3(1, 0, 0), math.radians(35f));
+		s.Add(k0, TangentMode.Linear); s.Add(k1, TangentMode.Linear);
+		return s;
+	}
 	private static SweepSnapshot BuildSnapshot(List<Spline> splines, float halfWidth, float step)
 	{
 		var frames = new SweepFrame[splines.Count][]; var closed = new bool[splines.Count];
@@ -205,7 +180,7 @@ public static class Task_20260722_370000
 			ProfilePoints = new[] { new float2(-halfWidth, 0), new float2(halfWidth, 0) },
 			ProfileUs = new[] { 0f, 1f }, ProfileSegments = new[] { 0, 1 }, ProfileClosed = false,
 			Frames = frames, SplineClosed = closed, WidthLut = w, HeightLut = h, TwistLut = tw,
-			Terrain = null, MaxLateralExtent = halfWidth, UvScale = 0.25f, HeightOffset = HeightOffset,
+			Terrain = null, MaxLateralExtent = halfWidth, UvScale = 0.25f, HeightOffset = 0f,
 			CapStartFlags = new bool[splines.Count], CapEndFlags = new bool[splines.Count], Collider = false, Name = "T" };
 	}
 	private static SweepFrame[] BuildFrames(Spline spline, float step)
