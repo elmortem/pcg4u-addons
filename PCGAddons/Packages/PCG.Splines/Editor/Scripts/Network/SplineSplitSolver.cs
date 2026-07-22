@@ -17,7 +17,8 @@ namespace PCG.Splines
 		{
 			var result = new SplineSplitResult
 			{
-				Pieces = new List<List<KnotInstruction>>[snapshots.Length]
+				Pieces = new List<List<KnotInstruction>>[snapshots.Length],
+				PieceIncidence = new List<SplinePieceIncidence>[snapshots.Length]
 			};
 
 			for (int i = 0; i < snapshots.Length; i++)
@@ -49,14 +50,18 @@ namespace PCG.Splines
 					continue;
 				}
 
-				var normalized = snap.Closed ? NormalizeClosed(snap, cuts) : NormalizeOpen(snap, cuts);
+				var normalized = snap.Closed ? NormalizeClosed(snap, cuts, ref invalid) : NormalizeOpen(snap, cuts, ref invalid);
+				if (invalid)
+					result.InvalidValues = true;
 				if (normalized.Count == 0)
 				{
 					result.Pieces[i] = null;
 					continue;
 				}
 
-				result.Pieces[i] = snap.Closed ? BuildClosedPieces(snap, normalized) : BuildOpenPieces(snap, normalized);
+				List<SplinePieceIncidence> incidence;
+				result.Pieces[i] = snap.Closed ? BuildClosedPieces(snap, normalized, out incidence) : BuildOpenPieces(snap, normalized, out incidence);
+				result.PieceIncidence[i] = incidence;
 			}
 
 			return result;
@@ -83,7 +88,7 @@ namespace PCG.Splines
 
 					var t = math.clamp(cut.CurveT, 0f, 1f);
 					var distance = snap.PrefixLengths[cut.CurveIndex] + SplineNetworkMath.PartialLength(snap.Curves[cut.CurveIndex], t);
-					cuts.Add(new CutParam { CurveIndex = cut.CurveIndex, T = t, Distance = distance });
+					cuts.Add(new CutParam { CurveIndex = cut.CurveIndex, T = t, Distance = distance, JunctionIndex = cut.JunctionIndex });
 				}
 			}
 
@@ -104,7 +109,7 @@ namespace PCG.Splines
 						continue;
 
 					var distance = snap.PrefixLengths[curveIndex] + SplineNetworkMath.PartialLength(snap.Curves[curveIndex], t);
-					cuts.Add(new CutParam { CurveIndex = curveIndex, T = t, Distance = distance });
+					cuts.Add(new CutParam { CurveIndex = curveIndex, T = t, Distance = distance, JunctionIndex = -1 });
 				}
 			}
 
@@ -156,7 +161,7 @@ namespace PCG.Splines
 			distSq = math.distancesq(CurveUtility.EvaluatePosition(best, t), point);
 		}
 
-		private static List<CutParam> NormalizeOpen(SplineSnapshot snap, List<CutParam> cuts)
+		private static List<CutParam> NormalizeOpen(SplineSnapshot snap, List<CutParam> cuts, ref bool invalid)
 		{
 			var length = snap.Length;
 			var filtered = new List<CutParam>(cuts.Count);
@@ -194,7 +199,8 @@ namespace PCG.Splines
 				{
 					var avg = sum / count;
 					MapDistance(snap, avg, out var ci, out var t);
-					result.Add(new CutParam { CurveIndex = ci, T = t, Distance = avg });
+					var junction = ResolveJunction(filtered, i2, k, ref invalid);
+					result.Add(new CutParam { CurveIndex = ci, T = t, Distance = avg, JunctionIndex = junction });
 				}
 
 				i2 = k;
@@ -203,7 +209,7 @@ namespace PCG.Splines
 			return result;
 		}
 
-		private static List<CutParam> NormalizeClosed(SplineSnapshot snap, List<CutParam> cuts)
+		private static List<CutParam> NormalizeClosed(SplineSnapshot snap, List<CutParam> cuts, ref bool invalid)
 		{
 			var length = snap.Length;
 			var sorted = new List<CutParam>(cuts.Count);
@@ -259,6 +265,7 @@ namespace PCG.Splines
 					if (cluster[m].Distance < canonical.Distance)
 						canonical = cluster[m];
 				}
+				canonical.JunctionIndex = ResolveJunction(cluster, 0, cluster.Count, ref invalid);
 				result.Add(canonical);
 			}
 
@@ -266,14 +273,36 @@ namespace PCG.Splines
 			return result;
 		}
 
-		private static List<List<KnotInstruction>> BuildOpenPieces(SplineSnapshot snap, List<CutParam> cuts)
+		private static int ResolveJunction(List<CutParam> cuts, int start, int end, ref bool invalid)
+		{
+			int junction = -1;
+			for (int index = start; index < end; index++)
+			{
+				int candidate = cuts[index].JunctionIndex;
+				if (candidate < 0)
+					continue;
+				if (junction < 0)
+				{
+					junction = candidate;
+					continue;
+				}
+				if (junction != candidate)
+				{
+					invalid = true;
+					return -1;
+				}
+			}
+			return junction;
+		}
+
+		private static List<List<KnotInstruction>> BuildOpenPieces(SplineSnapshot snap, List<CutParam> cuts, out List<SplinePieceIncidence> incidence)
 		{
 			var curveCount = snap.CurveCount;
 			var vertices = new List<SplitVertex>(curveCount + 1 + cuts.Count);
 
 			for (int j = 0; j <= curveCount; j++)
 			{
-				vertices.Add(new SplitVertex { G = j, IsKnot = true, KnotIndex = j, IsCut = false });
+				vertices.Add(new SplitVertex { G = j, IsKnot = true, KnotIndex = j, IsCut = false, JunctionIndex = -1 });
 			}
 
 			for (int c = 0; c < cuts.Count; c++)
@@ -284,26 +313,27 @@ namespace PCG.Splines
 				{
 					var v = vertices[ji];
 					v.IsCut = true;
+					v.JunctionIndex = cuts[c].JunctionIndex;
 					vertices[ji] = v;
 				}
 				else
 				{
-					vertices.Add(new SplitVertex { G = g, IsKnot = false, KnotIndex = -1, IsCut = true });
+					vertices.Add(new SplitVertex { G = g, IsKnot = false, KnotIndex = -1, IsCut = true, JunctionIndex = cuts[c].JunctionIndex });
 				}
 			}
 
 			vertices.Sort((a, b) => a.G.CompareTo(b.G));
-			return BuildPieces(snap, vertices, false);
+			return BuildPieces(snap, vertices, false, out incidence);
 		}
 
-		private static List<List<KnotInstruction>> BuildClosedPieces(SplineSnapshot snap, List<CutParam> cuts)
+		private static List<List<KnotInstruction>> BuildClosedPieces(SplineSnapshot snap, List<CutParam> cuts, out List<SplinePieceIncidence> incidence)
 		{
 			var curveCount = snap.CurveCount;
 			var vertices = new List<SplitVertex>(curveCount + cuts.Count);
 
 			for (int j = 0; j < curveCount; j++)
 			{
-				vertices.Add(new SplitVertex { G = j, IsKnot = true, KnotIndex = j, IsCut = false });
+				vertices.Add(new SplitVertex { G = j, IsKnot = true, KnotIndex = j, IsCut = false, JunctionIndex = -1 });
 			}
 
 			for (int c = 0; c < cuts.Count; c++)
@@ -314,11 +344,12 @@ namespace PCG.Splines
 				{
 					var v = vertices[ji];
 					v.IsCut = true;
+					v.JunctionIndex = cuts[c].JunctionIndex;
 					vertices[ji] = v;
 				}
 				else
 				{
-					vertices.Add(new SplitVertex { G = g, IsKnot = false, KnotIndex = -1, IsCut = true });
+					vertices.Add(new SplitVertex { G = g, IsKnot = false, KnotIndex = -1, IsCut = true, JunctionIndex = cuts[c].JunctionIndex });
 				}
 			}
 
@@ -335,7 +366,10 @@ namespace PCG.Splines
 			}
 
 			if (firstCut < 0)
+			{
+				incidence = new List<SplinePieceIncidence>();
 				return new List<List<KnotInstruction>>();
+			}
 
 			var count = vertices.Count;
 			var walk = new List<SplitVertex>(count + 1);
@@ -348,13 +382,14 @@ namespace PCG.Splines
 				walk.Add(v);
 			}
 
-			return BuildPieces(snap, walk, true);
+			return BuildPieces(snap, walk, true, out incidence);
 		}
 
-		private static List<List<KnotInstruction>> BuildPieces(SplineSnapshot snap, List<SplitVertex> vertices, bool closed)
+		private static List<List<KnotInstruction>> BuildPieces(SplineSnapshot snap, List<SplitVertex> vertices, bool closed, out List<SplinePieceIncidence> incidence)
 		{
 			var curveCount = snap.CurveCount;
 			var pieces = new List<List<KnotInstruction>>();
+			incidence = new List<SplinePieceIncidence>();
 
 			var pieceVerts = new List<SplitVertex> { vertices[0] };
 			var pieceSpans = new List<(BezierCurve curve, bool intact)>();
@@ -378,7 +413,10 @@ namespace PCG.Splines
 				{
 					var built = BuildPieceKnots(snap, pieceVerts, pieceSpans);
 					if (built != null)
+					{
 						pieces.Add(built);
+						incidence.Add(PieceEnds(pieceVerts));
+					}
 
 					pieceVerts = new List<SplitVertex> { vb };
 					pieceSpans = new List<(BezierCurve curve, bool intact)>();
@@ -389,10 +427,24 @@ namespace PCG.Splines
 			{
 				var built = BuildPieceKnots(snap, pieceVerts, pieceSpans);
 				if (built != null)
+				{
 					pieces.Add(built);
+					incidence.Add(PieceEnds(pieceVerts));
+				}
 			}
 
 			return pieces;
+		}
+
+		private static SplinePieceIncidence PieceEnds(List<SplitVertex> pieceVerts)
+		{
+			var start = pieceVerts[0];
+			var end = pieceVerts[pieceVerts.Count - 1];
+			return new SplinePieceIncidence
+			{
+				StartJunction = start.IsCut ? start.JunctionIndex : -1,
+				EndJunction = end.IsCut ? end.JunctionIndex : -1
+			};
 		}
 
 		private static List<KnotInstruction> BuildPieceKnots(SplineSnapshot snap, List<SplitVertex> verts, List<(BezierCurve curve, bool intact)> spans)

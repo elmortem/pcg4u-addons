@@ -1,0 +1,557 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -524942693, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: ForestDemo
+  m_EditorClassIdentifier: 
+  GraphData:
+    Nodes:
+    - rid: 1664906078027251764
+    - rid: 1664906078027251765
+    - rid: 1664906078027251766
+    - rid: 1664906078027251767
+    - rid: 1664906078027251768
+    - rid: 1664906078027251769
+    - rid: 1664906078027251770
+    - rid: 1664906078027251771
+    - rid: 1664906078027251772
+    - rid: 1664906078027251773
+    - rid: 1664906078027251774
+    - rid: 1664906078027251786
+    - rid: 1664906078027251787
+    - rid: 1664906078027251788
+    - rid: 1664906078027251789
+    - rid: 1664906078027251790
+    - rid: 1664906078027251791
+    - rid: 1664906078027251792
+    - rid: 1664906078027251793
+    - rid: 1664906078027251794
+    - rid: 1664906078027251795
+    - rid: 1664906078027251796
+    - rid: 1664906078027251797
+    - rid: 1664906078027251798
+    Edges:
+    - FromNodeId: 1
+      FromPort: Terrain
+      ToNodeId: 12
+      ToPort: Terrain
+    - FromNodeId: 1
+      FromPort: Offset
+      ToNodeId: 12
+      ToPort: Offset
+    - FromNodeId: 1
+      FromPort: Offset
+      ToNodeId: 16
+      ToPort: Offset
+    - FromNodeId: 5
+      FromPort: Value
+      ToNodeId: 12
+      ToPort: Count
+    - FromNodeId: 6
+      FromPort: Value
+      ToNodeId: 12
+      ToPort: Seed
+    - FromNodeId: 6
+      FromPort: Value
+      ToNodeId: 21
+      ToPort: Seed
+    - FromNodeId: 6
+      FromPort: Value
+      ToNodeId: 22
+      ToPort: Seed
+    - FromNodeId: 6
+      FromPort: Value
+      ToNodeId: 23
+      ToPort: Seed
+    - FromNodeId: 2
+      FromPort: Value
+      ToNodeId: 16
+      ToPort: Mask
+    - FromNodeId: 3
+      FromPort: Value
+      ToNodeId: 16
+      ToPort: Size
+    - FromNodeId: 7
+      FromPort: Value
+      ToNodeId: 18
+      ToPort: MinAngle
+    - FromNodeId: 8
+      FromPort: Value
+      ToNodeId: 18
+      ToPort: MaxAngle
+    - FromNodeId: 9
+      FromPort: Value
+      ToNodeId: 20
+      ToPort: MinDistance
+    - FromNodeId: 10
+      FromPort: Value
+      ToNodeId: 21
+      ToPort: Min
+    - FromNodeId: 11
+      FromPort: Value
+      ToNodeId: 21
+      ToPort: Max
+    - FromNodeId: 4
+      FromPort: Value
+      ToNodeId: 23
+      ToPort: Weights
+    - FromNodeId: 12
+      FromPort: Results
+      ToNodeId: 15
+      ToPort: Points
+    - FromNodeId: 13
+      FromPort: Result
+      ToNodeId: 14
+      ToPort: Source
+    - FromNodeId: 14
+      FromPort: Result
+      ToNodeId: 15
+      ToPort: Noise
+    - FromNodeId: 15
+      FromPort: Results
+      ToNodeId: 16
+      ToPort: Points
+    - FromNodeId: 16
+      FromPort: Results
+      ToNodeId: 17
+      ToPort: Points
+    - FromNodeId: 17
+      FromPort: Results
+      ToNodeId: 18
+      ToPort: Points
+    - FromNodeId: 18
+      FromPort: Results
+      ToNodeId: 19
+      ToPort: Points
+    - FromNodeId: 19
+      FromPort: Outsides
+      ToNodeId: 20
+      ToPort: Points
+    - FromNodeId: 20
+      FromPort: Results
+      ToNodeId: 21
+      ToPort: Points
+    - FromNodeId: 21
+      FromPort: Results
+      ToNodeId: 22
+      ToPort: Points
+    - FromNodeId: 22
+      FromPort: Results
+      ToNodeId: 23
+      ToPort: Points
+    - FromNodeId: 23
+      FromPort: Results
+      ToNodeId: 24
+      ToPort: Value
+    NextNodeId: 25
+    Variables:
+    - Id: Terrain
+      Name: Terrain
+      Default:
+        rid: 1664906078027251775
+    - Id: Mask
+      Name: Mask
+      Default:
+        rid: 1664906078027251776
+    - Id: MaskSize
+      Name: MaskSize
+      Default:
+        rid: 1664906078027251777
+    - Id: Trees
+      Name: Trees
+      Default:
+        rid: 1664906078027251778
+    - Id: CandidateCount
+      Name: CandidateCount
+      Default:
+        rid: 1664906078027251779
+    - Id: Seed
+      Name: Seed
+      Default:
+        rid: 1664906078027251780
+    - Id: SlopeMin
+      Name: SlopeMin
+      Default:
+        rid: 1664906078027251781
+    - Id: SlopeMax
+      Name: SlopeMax
+      Default:
+        rid: 1664906078027251782
+    - Id: Spacing
+      Name: Spacing
+      Default:
+        rid: 1664906078027251783
+    - Id: ScaleMin
+      Name: ScaleMin
+      Default:
+        rid: 1664906078027251784
+    - Id: ScaleMax
+      Name: ScaleMax
+      Default:
+        rid: 1664906078027251785
+  ContentVersion: 61
+  references:
+    version: 2
+    RefIds:
+    - rid: 1664906078027251764
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 1
+        NodePosition: {x: 0, y: 0}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Terrain
+    - rid: 1664906078027251765
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 2
+        NodePosition: {x: 0, y: 110}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Mask
+    - rid: 1664906078027251766
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 3
+        NodePosition: {x: 0, y: 176}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: MaskSize
+    - rid: 1664906078027251767
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 4
+        NodePosition: {x: 0, y: 242}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Trees
+    - rid: 1664906078027251768
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 5
+        NodePosition: {x: 0, y: 308}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: CandidateCount
+    - rid: 1664906078027251769
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 6
+        NodePosition: {x: 0, y: 374}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Seed
+    - rid: 1664906078027251770
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 7
+        NodePosition: {x: 0, y: 440}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: SlopeMin
+    - rid: 1664906078027251771
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 8
+        NodePosition: {x: 0, y: 506}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: SlopeMax
+    - rid: 1664906078027251772
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 9
+        NodePosition: {x: 0, y: 572}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Spacing
+    - rid: 1664906078027251773
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 10
+        NodePosition: {x: 0, y: 638}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: ScaleMin
+    - rid: 1664906078027251774
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 11
+        NodePosition: {x: 0, y: 704}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: ScaleMax
+    - rid: 1664906078027251775
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 0}
+    - rid: 1664906078027251776
+      type: {class: PaintMaskValue, ns: PCG.Masks, asm: PCG}
+      data:
+        Mask: {fileID: 0}
+    - rid: 1664906078027251777
+      type: {class: Vector2Value, ns: PCG.Values, asm: PCG}
+      data:
+        Value: {x: 500, y: 500}
+    - rid: 1664906078027251778
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []
+    - rid: 1664906078027251779
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 20000
+    - rid: 1664906078027251780
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1
+    - rid: 1664906078027251781
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 0
+    - rid: 1664906078027251782
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 35
+    - rid: 1664906078027251783
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 3
+    - rid: 1664906078027251784
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 0.8
+    - rid: 1664906078027251785
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1.3
+    - rid: 1664906078027251786
+      type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
+      data:
+        NodeId: 12
+        NodePosition: {x: 320, y: 214}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Count: 100
+        Seed: 536382744
+        ShuffleRegularPoints: 0
+        PointMode: 1
+    - rid: 1664906078027251787
+      type: {class: PerlineNoiseNode, ns: PCG.Noises, asm: PCG}
+      data:
+        NodeId: 13
+        NodePosition: {x: 0, y: 770}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Noise:
+          Offset: {x: 0, y: 0}
+          Scale: 50
+    - rid: 1664906078027251788
+      type: {class: FbmNoiseNode, ns: PCG.Noises, asm: PCG}
+      data:
+        NodeId: 14
+        NodePosition: {x: 320, y: 472}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Octaves: 4
+        Lacunarity: 2
+        Persistence: 0.5
+    - rid: 1664906078027251789
+      type: {class: DestinyByNoiseNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 15
+        NodePosition: {x: 640, y: 343}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        NoiseAxes: 0
+    - rid: 1664906078027251790
+      type: {class: DensityByPaintMaskNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 16
+        NodePosition: {x: 960, y: 313}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: Density By Paint Mask
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Mask: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Size: {x: 100, y: 100}
+        Points: []
+        Invert: 0
+        Mode: 2
+    - rid: 1664906078027251791
+      type: {class: PointsByDensityNode, ns: PCG.SelectPoints, asm: PCG}
+      data:
+        NodeId: 17
+        NodePosition: {x: 1280, y: 333}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        From: 0.5
+        To: 1
+    - rid: 1664906078027251792
+      type: {class: PointsBySlopeNode, ns: PCG.SelectPoints, asm: PCG}
+      data:
+        NodeId: 18
+        NodePosition: {x: 1600, y: 323}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        MinAngle: 0
+        MaxAngle: 45
+        Up: {x: 0, y: 1, z: 0}
+    - rid: 1664906078027251793
+      type: {class: PointsByVolumesNode, ns: PCG.SelectPoints, asm: PCG}
+      data:
+        NodeId: 19
+        NodePosition: {x: 1920, y: 353}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Volumes:
+        - Shape: 0
+          Center: {x: 110, y: 20, z: 385}
+          Rotation: {x: 0, y: 0, z: 0}
+          Size: {x: 35, y: 40, z: 25}
+          Radius: 15
+    - rid: 1664906078027251794
+      type: {class: PoissonPointsNode, ns: PCG.SelectPoints, asm: PCG}
+      data:
+        NodeId: 20
+        NodePosition: {x: 2240, y: 353}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        MinDistance: 1
+    - rid: 1664906078027251795
+      type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 21
+        NodePosition: {x: 2560, y: 323}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0.5
+        Max: 2
+        Seed: 1080188547
+        Mode: 2
+    - rid: 1664906078027251796
+      type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 22
+        NodePosition: {x: 2880, y: 323}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0
+        Max: 360
+        Seed: 1503610927
+        Mode: 2
+    - rid: 1664906078027251797
+      type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
+      data:
+        NodeId: 23
+        NodePosition: {x: 3200, y: 333}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Points: []
+        Seed: 1677714460
+        Weights: []
+    - rid: 1664906078027251798
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        NodeId: 24
+        NodePosition: {x: 3520, y: 364}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Name: Trees
+        Value:
+          rid: 1664906078027251799
+    - rid: 1664906078027251799
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []

@@ -5,5 +5,6 @@ namespace PCG.Splines
 		public int CurveIndex;
 		public float T;
 		public float Distance;
+		public int JunctionIndex;
 	}
 }

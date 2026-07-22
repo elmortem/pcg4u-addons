@@ -23,7 +23,7 @@
       "dependencies": {
         "com.unity.test-framework": "1.1.33"
       },
-      "hash": "f2e25cb5e04c7ef1872b2d5e897400ee7418ff1b"
+      "hash": "b3c0fd115d0cbfb0e616ed163ef356158b9d3db2"
     },
     "com.elmortem.delone": {
       "version": "https://github.com/elmortem/triangulation-delone.git?path=Packages/triangulation-delone",
@@ -102,7 +102,8 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
-        "com.elmortem.pcg.splines": "0.0.3"
+        "com.elmortem.pcg.splines": "0.0.3",
+        "com.elmortem.pcg.polygons": "0.0.2"
       }
     },
     "com.unity.2d.common": {

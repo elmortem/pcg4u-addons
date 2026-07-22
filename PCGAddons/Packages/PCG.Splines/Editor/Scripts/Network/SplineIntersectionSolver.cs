@@ -33,8 +33,8 @@ namespace PCG.Splines
 			if (cuts.Count == 0)
 				return result;
 
-			var uniqueCuts = DedupCuts(cuts, mergeDistance);
-			ClusterJunctions(snapshots, uniqueCuts, mergeDistance, tolerance, result);
+			var uniqueCuts = DedupCuts(snapshots, cuts, mergeDistance);
+			ClusterJunctions(snapshots, uniqueCuts, mergeDistance, tolerance, maxHeight, result);
 
 			return result;
 		}
@@ -438,7 +438,7 @@ namespace PCG.Splines
 			return math.max(0f, overlap);
 		}
 
-		private static List<SplineCut> DedupCuts(List<SplineCut> cuts, float mergeDistance)
+		private static List<SplineCut> DedupCuts(SplineSnapshot[] snapshots, List<SplineCut> cuts, float mergeDistance)
 		{
 			cuts.Sort(CompareCutByDistance);
 
@@ -447,26 +447,107 @@ namespace PCG.Splines
 			while (i < cuts.Count)
 			{
 				var splineIndex = cuts[i].SplineIndex;
-				var canonical = cuts[i];
-				var sum = cuts[i].Position;
-				var count = 1;
-				var lastDistance = cuts[i].Distance;
+				var j = i;
+				while (j < cuts.Count && cuts[j].SplineIndex == splineIndex)
+					j++;
 
-				var k = i + 1;
-				while (k < cuts.Count && cuts[k].SplineIndex == splineIndex && cuts[k].Distance - lastDistance <= mergeDistance)
-				{
-					sum += cuts[k].Position;
-					lastDistance = cuts[k].Distance;
-					count++;
-					k++;
-				}
+				var snap = splineIndex >= 0 && splineIndex < snapshots.Length ? snapshots[splineIndex] : null;
+				var closed = snap != null && snap.Closed;
+				var length = snap != null ? snap.Length : 0f;
 
-				canonical.Position = sum / count;
-				result.Add(canonical);
-				i = k;
+				DedupGroup(cuts, i, j, closed, length, mergeDistance, result);
+				i = j;
 			}
 
 			return result;
+		}
+
+		private static void DedupGroup(List<SplineCut> cuts, int start, int end, bool closed, float length, float mergeDistance, List<SplineCut> result)
+		{
+			var count = end - start;
+			if (count <= 0)
+				return;
+			if (count == 1)
+			{
+				result.Add(cuts[start]);
+				return;
+			}
+
+			var clusters = new List<List<int>>();
+			var current = new List<int> { start };
+			for (int k = start + 1; k < end; k++)
+			{
+				if (cuts[k].Distance - cuts[k - 1].Distance <= mergeDistance)
+				{
+					current.Add(k);
+				}
+				else
+				{
+					clusters.Add(current);
+					current = new List<int> { k };
+				}
+			}
+			clusters.Add(current);
+
+			if (closed && clusters.Count > 1 && length > 0f)
+			{
+				var first = clusters[0];
+				var last = clusters[clusters.Count - 1];
+				var wrap = (length - cuts[last[last.Count - 1]].Distance) + cuts[first[0]].Distance;
+				if (wrap <= mergeDistance)
+				{
+					first.InsertRange(0, last);
+					clusters.RemoveAt(clusters.Count - 1);
+				}
+			}
+
+			for (int c = 0; c < clusters.Count; c++)
+				result.Add(Representative(cuts, clusters[c], closed, length));
+		}
+
+		private static SplineCut Representative(List<SplineCut> cuts, List<int> cluster, bool closed, float length)
+		{
+			if (cluster.Count == 1)
+				return cuts[cluster[0]];
+
+			var best = -1;
+			var bestSum = 0f;
+			for (int a = 0; a < cluster.Count; a++)
+			{
+				var sum = 0f;
+				var da = cuts[cluster[a]].Distance;
+				for (int b = 0; b < cluster.Count; b++)
+				{
+					if (a == b)
+						continue;
+					sum += CircularDist(da, cuts[cluster[b]].Distance, closed, length);
+				}
+
+				if (best < 0 || sum < bestSum - 1e-6f || (math.abs(sum - bestSum) <= 1e-6f && LessCut(cuts[cluster[a]], cuts[best])))
+				{
+					best = cluster[a];
+					bestSum = sum;
+				}
+			}
+
+			return cuts[best];
+		}
+
+		private static float CircularDist(float a, float b, bool closed, float length)
+		{
+			var d = math.abs(a - b);
+			if (closed && length > 0f)
+				return math.min(d, length - d);
+			return d;
+		}
+
+		private static bool LessCut(SplineCut x, SplineCut y)
+		{
+			if (x.Distance != y.Distance)
+				return x.Distance < y.Distance;
+			if (x.CurveIndex != y.CurveIndex)
+				return x.CurveIndex < y.CurveIndex;
+			return x.CurveT < y.CurveT;
 		}
 
 		private static int CompareCutByDistance(SplineCut a, SplineCut b)
@@ -476,12 +557,18 @@ namespace PCG.Splines
 			return a.Distance.CompareTo(b.Distance);
 		}
 
-		private static void ClusterJunctions(SplineSnapshot[] snapshots, List<SplineCut> uniqueCuts, float mergeDistance, float tolerance, SplineIntersectionResult result)
+		private static void ClusterJunctions(SplineSnapshot[] snapshots, List<SplineCut> uniqueCuts, float mergeDistance, float tolerance, float maxHeight, SplineIntersectionResult result)
 		{
 			var n = uniqueCuts.Count;
 			var parent = new int[n];
+			var minimumY = new float[n];
+			var maximumY = new float[n];
 			for (int i = 0; i < n; i++)
+			{
 				parent[i] = i;
+				minimumY[i] = uniqueCuts[i].Position.y;
+				maximumY[i] = uniqueCuts[i].Position.y;
+			}
 
 			var cellSize = math.max(mergeDistance, 1e-4f);
 			var grid = new Dictionary<long, List<int>>();
@@ -534,7 +621,7 @@ namespace PCG.Splines
 			{
 				var i = (int)(unions[u] >> 32);
 				var j = (int)(unions[u] & 0xffffffff);
-				Union(parent, i, j);
+				Union(parent, minimumY, maximumY, i, j, maxHeight);
 			}
 
 			var rootToJunction = new Dictionary<int, int>();
@@ -618,6 +705,8 @@ namespace PCG.Splines
 				return a.Position.x.CompareTo(b.Position.x);
 			if (a.Position.z != b.Position.z)
 				return a.Position.z.CompareTo(b.Position.z);
+			if (a.Position.y != b.Position.y)
+				return a.Position.y.CompareTo(b.Position.y);
 			return a.Valency.CompareTo(b.Valency);
 		}
 
@@ -631,17 +720,29 @@ namespace PCG.Splines
 			return i;
 		}
 
-		private static void Union(int[] parent, int a, int b)
+		private static void Union(int[] parent, float[] minimumY, float[] maximumY, int a, int b, float maxHeight)
 		{
 			var ra = Find(parent, a);
 			var rb = Find(parent, b);
 			if (ra == rb)
 				return;
+			var combinedMinimum = math.min(minimumY[ra], minimumY[rb]);
+			var combinedMaximum = math.max(maximumY[ra], maximumY[rb]);
+			if (maxHeight > 0f && combinedMaximum - combinedMinimum > maxHeight)
+				return;
 
 			if (ra < rb)
+			{
 				parent[rb] = ra;
+				minimumY[ra] = combinedMinimum;
+				maximumY[ra] = combinedMaximum;
+			}
 			else
+			{
 				parent[ra] = rb;
+				minimumY[rb] = combinedMinimum;
+				maximumY[rb] = combinedMaximum;
+			}
 		}
 
 		private static long CellKey(int x, int z)

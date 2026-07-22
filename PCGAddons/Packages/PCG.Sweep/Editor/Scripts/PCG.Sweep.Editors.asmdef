@@ -1,0 +1,26 @@
+{
+    "name": "PCG.Sweep.Editor",
+    "rootNamespace": "PCG.Sweep.Editors",
+    "references": [
+        "PCG",
+        "PCG.Editors",
+        "PCG.Sweep",
+        "PCG.Splines",
+        "PCG.Splines.Editor",
+        "PCG.Polygons",
+        "Unity.Splines",
+        "Unity.Mathematics",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

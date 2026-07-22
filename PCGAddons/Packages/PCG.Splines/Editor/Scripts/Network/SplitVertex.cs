@@ -6,5 +6,6 @@ namespace PCG.Splines
 		public bool IsKnot;
 		public int KnotIndex;
 		public bool IsCut;
+		public int JunctionIndex;
 	}
 }

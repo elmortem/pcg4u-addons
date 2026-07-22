@@ -1,0 +1,8 @@
+{
+    "id": "Task_20260722_370000",
+    "status": "success",
+    "logs": [],
+    "return_value": "C_SharpV: g=2 b=1(fan=1) r=0 tris=55 -> Temp/PatchDiag/C_SharpV.png ;; C_SlopedV: g=2 b=1(fan=1) r=0 tris=57 -> Temp/PatchDiag/C_SlopedV.png ;; C_Cross: g=4 b=0(fan=0) r=2 tris=36 -> Temp/PatchDiag/C_Cross.png",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

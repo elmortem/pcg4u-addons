@@ -1,0 +1,463 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -524942693, guid: 945a04bd8b3a341448b9280f17af8dc4, type: 3}
+  m_Name: StonePath
+  m_EditorClassIdentifier: 
+  GraphData:
+    Nodes:
+    - rid: 1664906219765891148
+    - rid: 1664906219765891149
+    - rid: 1664906219765891150
+    - rid: 1664906219765891151
+    - rid: 1664906219765891152
+    - rid: 1664906219765891153
+    - rid: 1664906219765891154
+    - rid: 1664906219765891155
+    - rid: 1664906219765891156
+    - rid: 1664906219765891157
+    - rid: 1664906219765891158
+    - rid: 1664906219765891159
+    - rid: 1664906219765891160
+    - rid: 1664906219765891161
+    - rid: 1664906219765891162
+    Edges:
+    - FromNodeId: 1
+      FromPort: Value
+      ToNodeId: 8
+      ToPort: Splines
+    - FromNodeId: 5
+      FromPort: Value
+      ToNodeId: 8
+      ToPort: Width
+    - FromNodeId: 2
+      FromPort: Terrain
+      ToNodeId: 8
+      ToPort: Terrain
+    - FromNodeId: 2
+      FromPort: Offset
+      ToNodeId: 8
+      ToPort: TerrainOffset
+    - FromNodeId: 3
+      FromPort: Value
+      ToNodeId: 8
+      ToPort: Material
+    - FromNodeId: 8
+      FromPort: Results
+      ToNodeId: 9
+      ToPort: Value
+    - FromNodeId: 1
+      FromPort: Value
+      ToNodeId: 10
+      ToPort: Splines
+    - FromNodeId: 6
+      FromPort: Value
+      ToNodeId: 10
+      ToPort: Offset
+    - FromNodeId: 10
+      FromPort: Results
+      ToNodeId: 11
+      ToPort: Points
+    - FromNodeId: 2
+      FromPort: Terrain
+      ToNodeId: 11
+      ToPort: Terrain
+    - FromNodeId: 2
+      FromPort: Offset
+      ToNodeId: 11
+      ToPort: Offset
+    - FromNodeId: 11
+      FromPort: Results
+      ToNodeId: 12
+      ToPort: Points
+    - FromNodeId: 7
+      FromPort: Value
+      ToNodeId: 12
+      ToPort: Seed
+    - FromNodeId: 12
+      FromPort: Results
+      ToNodeId: 13
+      ToPort: Points
+    - FromNodeId: 7
+      FromPort: Value
+      ToNodeId: 13
+      ToPort: Seed
+    - FromNodeId: 13
+      FromPort: Results
+      ToNodeId: 14
+      ToPort: Points
+    - FromNodeId: 4
+      FromPort: Value
+      ToNodeId: 14
+      ToPort: Weights
+    - FromNodeId: 7
+      FromPort: Value
+      ToNodeId: 14
+      ToPort: Seed
+    - FromNodeId: 14
+      FromPort: Results
+      ToNodeId: 15
+      ToPort: Value
+    NextNodeId: 16
+    Variables:
+    - Id: Splines
+      Name: Splines
+      Default:
+        rid: 1664906219765891163
+    - Id: Terrain
+      Name: Terrain
+      Default:
+        rid: 1664906219765891164
+    - Id: PathMaterial
+      Name: PathMaterial
+      Default:
+        rid: 1664906219765891165
+    - Id: Stones
+      Name: Stones
+      Default:
+        rid: 1664906219765891166
+    - Id: Width
+      Name: Width
+      Default:
+        rid: 1664906219765891167
+    - Id: StoneOffset
+      Name: StoneOffset
+      Default:
+        rid: 1664906219765891168
+    - Id: Seed
+      Name: Seed
+      Default:
+        rid: 1664906219765891169
+  ContentVersion: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1664906219765891148
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 1
+        NodePosition: {x: -600, y: 200}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Splines
+    - rid: 1664906219765891149
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 2
+        NodePosition: {x: -600, y: 300}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Terrain
+    - rid: 1664906219765891150
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 3
+        NodePosition: {x: -600, y: 400}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: PathMaterial
+    - rid: 1664906219765891151
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 4
+        NodePosition: {x: -600, y: 500}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Stones
+    - rid: 1664906219765891152
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 5
+        NodePosition: {x: -600, y: 600}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Width
+    - rid: 1664906219765891153
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 6
+        NodePosition: {x: -600, y: 700}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: StoneOffset
+    - rid: 1664906219765891154
+      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
+      data:
+        NodeId: 7
+        NodePosition: {x: -600, y: 800}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        VariableId: Seed
+    - rid: 1664906219765891155
+      type: {class: SweepSplineNode, ns: PCG.Sweep, asm: PCG.Sweep}
+      data:
+        NodeId: 8
+        NodePosition: {x: -260, y: 200}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Splines: []
+        Topology:
+          Junctions: []
+          Cuts: []
+        Shape: 0
+        Width: 4
+        Height: 0.5
+        CustomPoints: []
+        CustomClosed: 0
+        Step: 1
+        MaxStep: 8
+        MaxAngle: 5
+        WidthByT:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        HeightByT:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        TwistByT:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        CapEnds: 0
+        SetbackScale: 1
+        UvScale: 0.5
+        Terrain: {fileID: 0}
+        TerrainOffset: {x: 0, y: 0, z: 0}
+        HeightOffset: 0.08
+        Name: Path
+        Material: {fileID: 0}
+        JunctionMaterial: {fileID: 0}
+        Collider: 1
+    - rid: 1664906219765891156
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        NodeId: 9
+        NodePosition: {x: 20, y: 200}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Name: Path
+        Value:
+          rid: 1664906219765891170
+    - rid: 1664906219765891157
+      type: {class: PointsOffsetSplinesNode, ns: PCG.CreatePoints, asm: PCG.Splines}
+      data:
+        NodeId: 10
+        NodePosition: {x: -260, y: 520}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Splines: []
+        Offset: 5
+        Distance: 1.2
+        Count: 10
+        Spacing: 0
+        BothSides: 1
+        UpNormal: 0
+        NoRotation: 0
+    - rid: 1664906219765891158
+      type: {class: PointToTerrainNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 11
+        NodePosition: {x: 20, y: 520}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Points: []
+        ProjectionMode: 2
+        ProjectNormal: 1
+    - rid: 1664906219765891159
+      type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 12
+        NodePosition: {x: 300, y: 520}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0.3
+        Max: 0.9
+        Seed: -1
+        Mode: 2
+    - rid: 1664906219765891160
+      type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 13
+        NodePosition: {x: 580, y: 520}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0
+        Max: 360
+        Seed: -1
+        Mode: 2
+    - rid: 1664906219765891161
+      type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
+      data:
+        NodeId: 14
+        NodePosition: {x: 860, y: 520}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Points: []
+        Seed: -1
+        Weights: []
+    - rid: 1664906219765891162
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        NodeId: 15
+        NodePosition: {x: 1140, y: 520}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Name: Stones
+        Value:
+          rid: 1664906219765891171
+    - rid: 1664906219765891163
+      type: {class: SplinesValue, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        Containers: []
+    - rid: 1664906219765891164
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 0}
+    - rid: 1664906219765891165
+      type: {class: MaterialValue, ns: PCG.Values, asm: PCG}
+      data:
+        Material: {fileID: 0}
+    - rid: 1664906219765891166
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []
+    - rid: 1664906219765891167
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 3
+    - rid: 1664906219765891168
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1.8
+    - rid: 1664906219765891169
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1
+    - rid: 1664906219765891170
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []
+    - rid: 1664906219765891171
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []

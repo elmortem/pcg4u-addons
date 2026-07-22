@@ -1,0 +1,15 @@
+{
+    "id": "Task_20260722_310000",
+    "status": "compiler_error",
+    "logs": [],
+    "return_value": "",
+    "compiler_errors": [
+        {
+            "type": "Error",
+            "message": "",
+            "file": "",
+            "line": 0
+        }
+    ],
+    "foreign_errors": false
+}
