@@ -1,0 +1,12 @@
+{
+    "id": "Task_20260722_237000",
+    "status": "success",
+    "logs": [
+        "Operations: 0,43 op/ms (3 op, 7 ms)",
+        "Operations: 7,75 op/ms (31 op, 4 ms)",
+        "Operations: 6,00 op/ms (24 op, 4 ms)"
+    ],
+    "return_value": "generated=True",
+    "compiler_errors": [],
+    "foreign_errors": false
+}
