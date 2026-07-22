@@ -5,6 +5,7 @@ namespace PCG.Sweep
 		Ribbon,
 		Rectangle,
 		HalfPipe,
-		Custom
+		Custom,
+		Pipe
 	}
 }

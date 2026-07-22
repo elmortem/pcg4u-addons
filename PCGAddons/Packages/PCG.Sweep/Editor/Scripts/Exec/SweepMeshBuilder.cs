@@ -177,7 +177,7 @@ namespace PCG.Sweep
 
 			var rights = new float3[ringCount];
 			var ups = new float3[ringCount];
-			BuildBasis(frames, rights, ups);
+			BuildBasis(frames, rights, ups, snapshot.PreservePlanWidth);
 
 			var terrain = snapshot.Terrain;
 			bool hasTerrain = terrain != null;
@@ -229,7 +229,8 @@ namespace PCG.Sweep
 				}
 			}
 
-			TrimColumns(frames, ups, positions, vpr, splineClosed, snapshot.MaxLateralExtent, ct, reportProgress);
+			if (vpr == 2)
+				TrimColumns(frames, ups, positions, vpr, splineClosed, snapshot.MaxLateralExtent, ct, reportProgress);
 
 			outOfBounds = false;
 			if (hasTerrain)
@@ -535,7 +536,7 @@ namespace PCG.Sweep
 			return compact[welded];
 		}
 
-		internal static void BuildBasis(SweepFrame[] frames, float3[] rights, float3[] ups)
+		internal static void BuildBasis(SweepFrame[] frames, float3[] rights, float3[] ups, bool preservePlanWidth = false)
 		{
 			float3 prevRight = float3.zero;
 			float3 prevTangent = float3.zero;
@@ -548,10 +549,25 @@ namespace PCG.Sweep
 				float3 tangent = math.normalizesafe(rawTangent, new float3(0f, 0f, 1f));
 				prevTangent = tangent;
 				float3 up = frames[i].Up;
-				float3 right = math.normalizesafe(math.cross(up, tangent), new float3(1f, 0f, 0f));
-				up = math.cross(tangent, right);
+				float3 right;
+				if (preservePlanWidth)
+				{
+					int prev = math.max(0, i - 1);
+					int next = math.min(frames.Length - 1, i + 1);
+					right = SweepRibbonSampling.Right3D(rawTangent, up, frames[prev].Position, frames[next].Position);
+					float3 unitRight = math.normalizesafe(right, new float3(1f, 0f, 0f));
+					up = math.normalizesafe(math.cross(tangent, unitRight), new float3(0f, 1f, 0f));
+				}
+				else
+				{
+					right = math.normalizesafe(math.cross(up, tangent), new float3(1f, 0f, 0f));
+					up = math.cross(tangent, right);
+				}
 
-				if (i > 0 && math.dot(right, prevRight) < 0f)
+				float continuity = preservePlanWidth
+					? right.x * prevRight.x + right.z * prevRight.z
+					: math.dot(right, prevRight);
+				if (i > 0 && continuity < 0f)
 				{
 					right = -right;
 					up = -up;

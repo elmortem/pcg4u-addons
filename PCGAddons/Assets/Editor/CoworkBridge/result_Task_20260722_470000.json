@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260722_470000",
-    "status": "success",
-    "logs": [],
-    "return_value": "Q_SlopeCross: g=4 r=2 patch=1 -> Temp/PatchDiag/Q_SlopeCross.png ;; Q_BankCross: g=4 r=2 patch=1 -> Temp/PatchDiag/Q_BankCross.png",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

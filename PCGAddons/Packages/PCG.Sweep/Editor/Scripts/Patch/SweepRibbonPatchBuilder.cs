@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using PCG.Polygons;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Splines;
 
 namespace PCG.Sweep
 {
@@ -21,7 +21,7 @@ namespace PCG.Sweep
 			public float YD;
 		}
 
-		internal static List<SweepMeshData> Build(List<SweepRibbonPiece> pieces, List<Spline> splines, SweepSnapshot source, float baseStep)
+		internal static List<SweepMeshData> Build(List<SweepRibbonPiece> pieces, IReadOnlyList<SweepRibbonPath> paths, SweepSnapshot source, CancellationToken ct, Action reportProgress)
 		{
 			var result = new List<SweepMeshData>();
 
@@ -35,30 +35,18 @@ namespace PCG.Sweep
 
 			for (int p = 0; p < pieces.Count; p++)
 			{
+				ct.ThrowIfCancellationRequested();
 				var piece = pieces[p];
 				if (piece.State != SweepRibbonPiece.Red)
 					continue;
 
-				var spline = splines[piece.Spline];
-				float length = spline.GetLength();
-				if (!(length > 1e-4f))
+				SweepRibbonPath path = paths[p];
+				if (path == null || path.Count < 2 || !(path.Length > 1e-4f))
 					continue;
 
-				float rangeStart = math.clamp(piece.StartStation, 0f, length);
-				float rangeEnd = math.clamp(piece.EndStation, 0f, length);
-				var dists = SweepRibbonSampling.AdaptiveStations(spline, rangeStart, rangeEnd, baseStep);
-				int n = dists.Count;
-				if (n < 2)
-					continue;
-
-				var positions = new float3[n];
-				var ts = new float[n];
-				for (int q = 0; q < n; q++)
-				{
-					float t = math.saturate(spline.ConvertIndexUnit(dists[q], PathIndexUnit.Distance, PathIndexUnit.Normalized));
-					ts[q] = t;
-					positions[q] = spline.EvaluatePosition(t);
-				}
+				int n = path.Count;
+				float3[] positions = path.Positions;
+				float[] ts = path.NormalizedTs;
 
 				var left = new float3[n];
 				var right = new float3[n];
@@ -68,8 +56,8 @@ namespace PCG.Sweep
 				{
 					int prev = math.max(0, q - 1);
 					int next = math.min(n - 1, q + 1);
-					float3 tangent = spline.EvaluateTangent(ts[q]);
-					float3 up = spline.EvaluateUpVector(ts[q]);
+					float3 tangent = path.Tangents[q];
+					float3 up = path.Ups[q];
 					float3 right3 = SweepRibbonSampling.Right3D(tangent, up, positions[prev], positions[next]);
 					float halfWidth = profileHalf * SampleLut(source.WidthLut, ts[q]);
 
@@ -106,6 +94,7 @@ namespace PCG.Sweep
 				polygons.Add(new Polygon2D { Outer = outer });
 				centroids.Add(centroid / n);
 				levels.Add(levelSum / n);
+				reportProgress();
 			}
 
 			if (polygons.Count == 0)
@@ -116,10 +105,13 @@ namespace PCG.Sweep
 				overallLevel += levels[i];
 			overallLevel /= levels.Count;
 
+			ct.ThrowIfCancellationRequested();
 			var merged = PolygonClipper.Union(polygons, Array.Empty<Polygon2D>());
+			ct.ThrowIfCancellationRequested();
 
 			for (int m = 0; m < merged.Count; m++)
 			{
+				ct.ThrowIfCancellationRequested();
 				var region = merged[m];
 
 				float sum = 0f;
@@ -139,11 +131,14 @@ namespace PCG.Sweep
 				set.Regions.Add(region);
 
 				var mesh = RegionMeshBuilder.Build(set, null, default, 0f, 0f, 0f, 0, 0f, source.UvScale);
+				ct.ThrowIfCancellationRequested();
 				if (mesh.Vertices == null || mesh.Vertices.Length < 3 || mesh.Triangles == null || mesh.Triangles.Length < 3)
 					continue;
 
 				for (int v = 0; v < mesh.Vertices.Length; v++)
 				{
+					if ((v & 255) == 0)
+						ct.ThrowIfCancellationRequested();
 					var vertex = mesh.Vertices[v];
 					vertex.y = SampleSurfaceY(new float2(vertex.x, vertex.z), quads, heightPoints, planeY);
 					mesh.Vertices[v] = vertex;
@@ -155,6 +150,7 @@ namespace PCG.Sweep
 					Uvs = mesh.Uvs,
 					Triangles = mesh.Triangles
 				});
+				reportProgress();
 			}
 
 			return result;

@@ -64,8 +64,10 @@ namespace PCG.Sweep
 
 			SweepSnapshot snapshot = null;
 			var splines = new List<Spline>();
+			SweepRibbonPath[] fullPaths = null;
 			float step = 0f;
 			float thickness = 0f;
+			float extrudeHeight = 0f;
 
 			using (var scope = OperationScope.Start(this))
 			{
@@ -73,10 +75,31 @@ namespace PCG.Sweep
 				step = math.max(0.05f, GetInputValue(nameof(Data.Step), Data.Step));
 				thickness = math.max(0f, GetInputValue(nameof(Data.MergeThickness), Data.MergeThickness));
 
+				if (snapshot != null && Data.Shape == ProfileShape.Rectangle)
+				{
+					float half = math.max(0.01f, GetInputValue(nameof(Data.Width), Data.Width)) * 0.5f;
+					snapshot.ProfilePoints = new[] { new float2(-half, 0f), new float2(half, 0f) };
+					snapshot.ProfileUs = new[] { 0f, 1f };
+					snapshot.ProfileSegments = new[] { 0, 1 };
+					snapshot.ProfileClosed = false;
+					snapshot.MaxLateralExtent = half * MaxLut(snapshot.WidthLut);
+					extrudeHeight = math.max(0.01f, GetInputValue(nameof(Data.Height), Data.Height));
+				}
+
 				await scope.Step(ct: ct);
+				if (snapshot != null && splines.Count == snapshot.Frames.Length)
+				{
+					fullPaths = new SweepRibbonPath[splines.Count];
+					for (int i = 0; i < splines.Count; i++)
+					{
+						float length = splines[i].GetLength();
+						fullPaths[i] = SweepRibbonSampling.Capture(splines[i], 0f, length, step, 2, ct);
+						await scope.Step(ct: ct);
+					}
+				}
 			}
 
-			if (snapshot == null || snapshot.Frames.Length == 0 || splines.Count != snapshot.Frames.Length)
+			if (snapshot == null || snapshot.Frames.Length == 0 || splines.Count != snapshot.Frames.Length || fullPaths == null)
 			{
 				Results.Value = new List<MeshInstanceData>();
 				await SyncSceneAsync(Results.Value, ct);
@@ -85,7 +108,6 @@ namespace PCG.Sweep
 
 			if (!SweepRibbonSplitter.CanBuild(snapshot, out string profileFailure))
 			{
-				Debug.LogWarning($"[Sweep Spline] Merge Intersections needs a Ribbon profile: node {Address}, code {profileFailure}; the sweep was built normally.");
 				await ComputeSingleAsync(ct);
 				return;
 			}
@@ -93,12 +115,15 @@ namespace PCG.Sweep
 			Action reportProgress = () => PcgComputeSystem.ReportProgress(this);
 			SweepRibbonSplitResult split = null;
 
-			await UniTask.RunOnThreadPool(() =>
+			await UniTask.SwitchToThreadPool();
+			try
 			{
-				split = SweepRibbonSplitter.Split(snapshot, splines, step, thickness, ct, reportProgress);
-			}, true, ct);
-
-			await UniTaskEditor.SwitchToEditorThread();
+				split = SweepRibbonSplitter.Split(snapshot, fullPaths, thickness, ct, reportProgress);
+			}
+			finally
+			{
+				await UniTaskEditor.SwitchToEditorThread();
+			}
 
 			_previewBlackPoints = split.BlackPoints.ToArray();
 			_previewCutChords = split.CutChords.ToArray();
@@ -115,46 +140,58 @@ namespace PCG.Sweep
 			int vpr = snapshot.ProfilePoints.Length;
 
 			var greenSnaps = new List<SweepSnapshot>();
-			var bluePieces = new List<SweepRibbonPiece>();
+			var bluePaths = new List<SweepRibbonPath>();
 			var blueFallback = new List<SweepSnapshot>();
-			for (int p = 0; p < split.Pieces.Count; p++)
+			var piecePaths = new SweepRibbonPath[split.Pieces.Count];
+			using (var scope = OperationScope.Start(this))
 			{
-				var piece = split.Pieces[p];
-				if (piece.State == SweepRibbonPiece.Green)
+				for (int p = 0; p < split.Pieces.Count; p++)
 				{
-					var pieceSnap = BuildPieceSnapshot(piece, splines, snapshot, step, maxStep, maxAngleRad, vpr);
-					if (pieceSnap != null)
-						greenSnaps.Add(pieceSnap);
-				}
-				else if (piece.State == SweepRibbonPiece.Blue)
-				{
-					bluePieces.Add(piece);
-					blueFallback.Add(BuildPieceSnapshot(piece, splines, snapshot, step, maxStep, maxAngleRad, vpr));
+					var piece = split.Pieces[p];
+					if (piece.State == SweepRibbonPiece.Green)
+					{
+						var pieceSnap = BuildPieceSnapshot(piece, splines, snapshot, step, maxStep, maxAngleRad, vpr);
+						if (pieceSnap != null)
+							greenSnaps.Add(pieceSnap);
+					}
+					else
+					{
+						int minSamples = piece.State == SweepRibbonPiece.Blue ? 8 : 2;
+						piecePaths[p] = SweepRibbonSampling.Capture(splines[piece.Spline], piece.StartStation, piece.EndStation, step, minSamples, ct);
+						if (piece.State == SweepRibbonPiece.Blue)
+						{
+							bluePaths.Add(piecePaths[p]);
+							blueFallback.Add(BuildPieceSnapshot(piece, splines, snapshot, step, maxStep, maxAngleRad, vpr));
+						}
+					}
+					await scope.Step(ct: ct);
 				}
 			}
 
 			var greenMeshes = new SweepMeshData[greenSnaps.Count];
-			var blueMeshes = new SweepMeshData[bluePieces.Count];
+			var blueMeshes = new SweepMeshData[bluePaths.Count];
 			List<SweepMeshData> patchMeshes = null;
-			await UniTask.RunOnThreadPool(() =>
+			await UniTask.SwitchToThreadPool();
+			try
 			{
 				for (int k = 0; k < greenSnaps.Count; k++)
 					greenMeshes[k] = SweepMeshBuilder.Build(greenSnaps[k], 0, ct, reportProgress);
 
-				for (int k = 0; k < bluePieces.Count; k++)
+				for (int k = 0; k < bluePaths.Count; k++)
 				{
-					var piece = bluePieces[k];
-					var fan = SweepRibbonCornerFanBuilder.Build(splines[piece.Spline], piece.StartStation, piece.EndStation, snapshot, step, ct, reportProgress);
+					var fan = SweepRibbonCornerFanBuilder.Build(bluePaths[k], snapshot, thickness, ct, reportProgress);
 					if (fan.Vertices != null)
 						blueMeshes[k] = fan;
 					else if (blueFallback[k] != null)
 						blueMeshes[k] = SweepMeshBuilder.Build(blueFallback[k], 0, ct, reportProgress);
 				}
 
-				patchMeshes = SweepRibbonPatchBuilder.Build(split.Pieces, splines, snapshot, step);
-			}, true, ct);
-
-			await UniTaskEditor.SwitchToEditorThread();
+				patchMeshes = SweepRibbonPatchBuilder.Build(split.Pieces, piecePaths, snapshot, ct, reportProgress);
+			}
+			finally
+			{
+				await UniTaskEditor.SwitchToEditorThread();
+			}
 
 			var results = new List<MeshInstanceData>();
 			bool outOfBounds = split.TerrainOutOfBounds;
@@ -179,6 +216,8 @@ namespace PCG.Sweep
 					continue;
 
 				outOfBounds |= mesh.TerrainOutOfBounds;
+				if (extrudeHeight > 0f)
+					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight);
 				results.Add(new MeshInstanceData
 				{
 					Name = built > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,
@@ -197,6 +236,8 @@ namespace PCG.Sweep
 					continue;
 
 				outOfBounds |= mesh.TerrainOutOfBounds;
+				if (extrudeHeight > 0f)
+					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight);
 				results.Add(new MeshInstanceData
 				{
 					Name = built > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,
@@ -213,6 +254,8 @@ namespace PCG.Sweep
 				for (int k = 0; k < patchMeshes.Count; k++)
 				{
 					var mesh = patchMeshes[k];
+					if (extrudeHeight > 0f)
+						mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight);
 					results.Add(new MeshInstanceData
 					{
 						Name = built > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,
@@ -260,6 +303,7 @@ namespace PCG.Sweep
 				TwistLut = source.TwistLut,
 				Terrain = source.Terrain,
 				MaxLateralExtent = source.MaxLateralExtent,
+				PreservePlanWidth = true,
 				UvScale = source.UvScale,
 				HeightOffset = source.HeightOffset,
 				CapStartFlags = new[] { capStart },
@@ -527,7 +571,7 @@ namespace PCG.Sweep
 
 			float width = GetInputValue(nameof(Data.Width), Data.Width);
 			float height = GetInputValue(nameof(Data.Height), Data.Height);
-			return SweepProfileBuilder.Build(Data.Shape, width, height, Data.CustomPoints, Data.CustomClosed, warn);
+			return SweepProfileBuilder.Build(Data.Shape, width, height, Data.Sides, Data.CustomPoints, Data.CustomClosed, warn);
 		}
 
 		private float[] BuildLut(AnimationCurve curve, bool clampPositive)
@@ -589,6 +633,7 @@ namespace PCG.Sweep
 			unchecked
 			{
 				int hash = 17;
+				hash = (hash * 397) ^ unchecked((int)0x57555001);
 
 				var profile = ResolveProfile(null);
 				if (profile != null)
@@ -597,6 +642,12 @@ namespace PCG.Sweep
 				hash = (hash * 397) ^ CurveHash(Data.WidthByT);
 				hash = (hash * 397) ^ CurveHash(Data.HeightByT);
 				hash = (hash * 397) ^ CurveHash(Data.TwistByT);
+				hash = (hash * 397) ^ Data.Step.GetHashCode();
+				hash = (hash * 397) ^ Data.MaxStep.GetHashCode();
+				hash = (hash * 397) ^ Data.MaxAngle.GetHashCode();
+				hash = (hash * 397) ^ Data.MergeThickness.GetHashCode();
+				hash = (hash * 397) ^ (Data.MergeIntersections ? 1 : 0);
+				hash = (hash * 397) ^ Data.Sides;
 				return hash;
 			}
 		}

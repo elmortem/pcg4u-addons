@@ -7,7 +7,7 @@ namespace PCG.Sweep
 {
 	public static class SweepProfileBuilder
 	{
-		public static SweepProfile Build(ProfileShape shape, float width, float height, IReadOnlyList<Vector2> customPoints, bool customClosed, Action<string> warn)
+		public static SweepProfile Build(ProfileShape shape, float width, float height, int sides, IReadOnlyList<Vector2> customPoints, bool customClosed, Action<string> warn)
 		{
 			width = math.max(0.01f, width);
 			float half = width * 0.5f;
@@ -18,11 +18,42 @@ namespace PCG.Sweep
 					return BuildRectangle(half, math.max(0.01f, height));
 				case ProfileShape.HalfPipe:
 					return BuildHalfPipe(half, math.max(0.01f, height));
+				case ProfileShape.Pipe:
+					return BuildPipe(half, math.max(0.01f, height) * 0.5f, sides);
 				case ProfileShape.Custom:
 					return BuildCustom(customPoints, customClosed, half, warn);
 				default:
 					return BuildRibbon(half);
 			}
+		}
+
+		private static SweepProfile BuildPipe(float halfWidth, float halfHeight, int sides)
+		{
+			sides = math.max(3, sides);
+
+			var points = new float2[sides + 1];
+			var us = new float[sides + 1];
+			for (int j = 0; j <= sides; j++)
+			{
+				float a = 2f * math.PI * j / sides;
+				points[j] = new float2(math.cos(a) * halfWidth, -math.sin(a) * halfHeight);
+				us[j] = j / (float)sides;
+			}
+
+			var segments = new int[sides * 2];
+			for (int j = 0; j < sides; j++)
+			{
+				segments[j * 2] = j;
+				segments[j * 2 + 1] = j + 1;
+			}
+
+			return new SweepProfile
+			{
+				Points = points,
+				Us = us,
+				Segments = segments,
+				Closed = true
+			};
 		}
 
 		private static SweepProfile BuildRibbon(float half)

@@ -21,8 +21,12 @@ namespace PCG.Sweep
 		public float Width = 4f;
 
 		[Input]
-		[PcgMemberInfo("Height of the profile for Rectangle and HalfPipe shapes.", Tags = new[] { "height" })]
+		[PcgMemberInfo("Height of the profile for Rectangle, HalfPipe and Pipe shapes.", Tags = new[] { "height" })]
 		public float Height = 0.5f;
+
+		[Input]
+		[PcgMemberInfo("Number of segments around the Pipe cross-section.", Tags = new[] { "pipe", "sides", "segments" })]
+		public int Sides = 16;
 
 		[PcgMemberInfo("Points of the Custom profile in profile space.", Tags = new[] { "custom", "points" })]
 		public List<Vector2> CustomPoints = new();

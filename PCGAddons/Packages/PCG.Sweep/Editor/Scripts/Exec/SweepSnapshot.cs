@@ -19,6 +19,7 @@ namespace PCG.Sweep
 		public SweepTerrainWindow Terrain;
 
 		public float MaxLateralExtent;
+		public bool PreservePlanWidth;
 		public float UvScale;
 		public float HeightOffset;
 		public bool[] CapStartFlags;

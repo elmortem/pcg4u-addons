@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Splines;
 
 namespace PCG.Sweep
 {
@@ -61,12 +60,23 @@ namespace PCG.Sweep
 				return false;
 			}
 
+			if (snapshot.TwistLut != null)
+			{
+				for (int i = 0; i < snapshot.TwistLut.Length; i++)
+				{
+					if (math.abs(snapshot.TwistLut[i]) <= 1e-4f)
+						continue;
+					failure = "SplitRibbonTwistUnsupported";
+					return false;
+				}
+			}
+
 			return true;
 		}
 
-		internal static SweepRibbonSplitResult Split(SweepSnapshot full, List<Spline> splines, float step, float thickness, CancellationToken ct, Action reportProgress)
+		internal static SweepRibbonSplitResult Split(SweepSnapshot full, IReadOnlyList<SweepRibbonPath> paths, float thickness, CancellationToken ct, Action reportProgress)
 		{
-			int splineCount = splines.Count;
+			int splineCount = paths.Count;
 			var result = new SweepRibbonSplitResult();
 
 			float profileHalf = math.max(math.abs(full.ProfilePoints[0].x), math.abs(full.ProfilePoints[1].x));
@@ -78,7 +88,7 @@ namespace PCG.Sweep
 			{
 				ct.ThrowIfCancellationRequested();
 				reportProgress();
-				samples[i] = SampleSpline(splines[i], step, profileHalf, full.WidthLut);
+				samples[i] = SampleSpline(paths[i], profileHalf, full.WidthLut);
 			}
 
 			var quads = new List<Quad>();
@@ -298,31 +308,22 @@ namespace PCG.Sweep
 			return hits;
 		}
 
-		private static Sample[] SampleSpline(Spline spline, float baseStep, float profileHalf, float[] widthLut)
+		private static Sample[] SampleSpline(SweepRibbonPath path, float profileHalf, float[] widthLut)
 		{
-			float length = spline.GetLength();
-			if (!(length > 1e-4f))
+			if (path == null || path.Count < 2 || !(path.Length > 1e-4f))
 				return Array.Empty<Sample>();
 
-			var dists = SweepRibbonSampling.AdaptiveStations(spline, 0f, length, baseStep);
-			int total = dists.Count;
-
-			var positions = new float3[total];
-			var ts = new float[total];
-			for (int q = 0; q < total; q++)
-			{
-				float t = math.saturate(spline.ConvertIndexUnit(dists[q], PathIndexUnit.Distance, PathIndexUnit.Normalized));
-				ts[q] = t;
-				positions[q] = spline.EvaluatePosition(t);
-			}
+			int total = path.Count;
+			float3[] positions = path.Positions;
+			float[] ts = path.NormalizedTs;
 
 			var samples = new Sample[total];
 			for (int q = 0; q < total; q++)
 			{
 				int prev = math.max(0, q - 1);
 				int next = math.min(total - 1, q + 1);
-				float3 tangent = spline.EvaluateTangent(ts[q]);
-				float3 up = spline.EvaluateUpVector(ts[q]);
+				float3 tangent = path.Tangents[q];
+				float3 up = path.Ups[q];
 				float3 right3 = SweepRibbonSampling.Right3D(tangent, up, positions[prev], positions[next]);
 				float halfWidth = profileHalf * SampleLut(widthLut, ts[q]);
 
@@ -337,7 +338,7 @@ namespace PCG.Sweep
 					RightPlan = new float2(rightWorld.x, rightWorld.z),
 					LeftWorld = leftWorld,
 					RightWorld = rightWorld,
-					Station = dists[q]
+					Station = path.Stations[q]
 				};
 			}
 

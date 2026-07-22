@@ -13,7 +13,7 @@ namespace PCG.Sweep
 		{
 			var width = GetInputValue(nameof(Data.Width), Data.Width);
 			var height = GetInputValue(nameof(Data.Height), Data.Height);
-			Profile.Value = SweepProfileBuilder.Build(Data.Shape, width, height, Data.CustomPoints, Data.CustomClosed, Warn);
+			Profile.Value = SweepProfileBuilder.Build(Data.Shape, width, height, Data.Sides, Data.CustomPoints, Data.CustomClosed, Warn);
 		}
 
 		private void Warn(string message)
