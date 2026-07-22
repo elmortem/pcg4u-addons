@@ -67,8 +67,10 @@ namespace PCG.Sweep
 				float3 right3 = SweepRibbonSampling.Right3D(tangent, up, positions[prev], positions[next]);
 				float halfWidth = profileHalf * SampleLut(source.WidthLut, ts[q]);
 
-				float3 lw = positions[q] + right3 * halfWidth;
-				float3 rw = positions[q] - right3 * halfWidth;
+				float3 center = positions[q];
+				center.y += source.HeightOffset;
+				float3 lw = center + right3 * halfWidth;
+				float3 rw = center - right3 * halfWidth;
 				float2 lp = new float2(lw.x, lw.z);
 				float2 rp = new float2(rw.x, rw.z);
 

@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260722_235000",
-    "status": "success",
-    "logs": [],
-    "return_value": "UnityEngine.Transform: | PCG.PcgComponent: GetGeneratedVersion(String):Int32 SetGeneratedVersion(String,Int32):Void | PCG.Instances.MeshInstanceMaker: | ",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260722_236000",
-    "status": "success",
-    "logs": [],
-    "return_value": "PCG.Editors.PcgAutoGenerateWatcher: | PCG.Exec.PcgGraphRunner: static ClearAll():System.Void static Generate(PCG.PcgComponent):System.Void static GenerateAsync(PCG.PcgComponent):Cysharp.Threading.Tasks.UniTask`1[[System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]] | Unity.VisualScripting.EmptyGraphWindow: ClearPersistentViewData():System.Void | Unity.VisualScripting.GraphWindow: Clear():System.Void ClearPersistentViewData():System.Void | ",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

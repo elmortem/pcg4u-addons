@@ -5,7 +5,9 @@ namespace PCG.Sweep
 {
 	internal static class SweepPrismBuilder
 	{
-		internal static SweepMeshData Extrude(SweepMeshData top, float height)
+		private const float SmoothWallCos = 0.70710678f;
+
+		internal static SweepMeshData Extrude(SweepMeshData top, float height, float uvScale)
 		{
 			if (top.Vertices == null || top.Vertices.Length < 3 || top.Triangles == null || top.Triangles.Length < 3)
 				return top;
@@ -14,28 +16,89 @@ namespace PCG.Sweep
 			var down = Vector3.up * height;
 
 			var directed = new HashSet<long>();
+			var innerByEdge = new Dictionary<long, int>();
 			for (int t = 0; t + 2 < top.Triangles.Length; t += 3)
 			{
 				int a = top.Triangles[t];
 				int b = top.Triangles[t + 1];
 				int c = top.Triangles[t + 2];
-				directed.Add(Key(a, b));
-				directed.Add(Key(b, c));
-				directed.Add(Key(c, a));
+				long ab = Key(a, b);
+				long bc = Key(b, c);
+				long ca = Key(c, a);
+				directed.Add(ab);
+				directed.Add(bc);
+				directed.Add(ca);
+				innerByEdge[ab] = c;
+				innerByEdge[bc] = a;
+				innerByEdge[ca] = b;
 			}
 
-			var boundaryVertices = new HashSet<int>();
+			var boundaryEdges = new List<long>();
 			foreach (long edge in directed)
 			{
 				int a = (int)(edge >> 32);
 				int b = (int)(uint)edge;
 				if (directed.Contains(Key(b, a)))
 					continue;
-				boundaryVertices.Add(a);
-				boundaryVertices.Add(b);
+				boundaryEdges.Add(edge);
+			}
+			boundaryEdges.Sort();
+
+			int cornerCount = boundaryEdges.Count * 2;
+			var cornerParents = new int[cornerCount];
+			var edgeNormals = new Vector3[boundaryEdges.Count];
+			var incoming = new Dictionary<int, List<int>>();
+			var outgoing = new Dictionary<int, List<int>>();
+			for (int i = 0; i < boundaryEdges.Count; i++)
+			{
+				cornerParents[i * 2] = i * 2;
+				cornerParents[i * 2 + 1] = i * 2 + 1;
+				int a = (int)(boundaryEdges[i] >> 32);
+				int b = (int)(uint)boundaryEdges[i];
+				Vector3 normal = Vector3.Cross(top.Vertices[b] - top.Vertices[a], down);
+				normal.Normalize();
+				edgeNormals[i] = normal;
+				AddEdge(outgoing, a, i);
+				AddEdge(incoming, b, i);
+			}
+			var seamVertices = FindSeamVertices(boundaryEdges, edgeNormals, outgoing);
+
+			foreach (var pair in outgoing)
+			{
+				if (seamVertices.Contains(pair.Key))
+					continue;
+				if (!incoming.TryGetValue(pair.Key, out var previousEdges))
+					continue;
+
+				for (int p = 0; p < previousEdges.Count; p++)
+				{
+					int previous = previousEdges[p];
+					for (int q = 0; q < pair.Value.Count; q++)
+					{
+						int next = pair.Value[q];
+						if (Vector3.Dot(edgeNormals[previous], edgeNormals[next]) >= SmoothWallCos)
+							Union(cornerParents, previous * 2 + 1, next * 2);
+					}
+				}
 			}
 
-			var vertices = new Vector3[n * 2 + boundaryVertices.Count * 2];
+			var cornerUs = BuildCornerUs(boundaryEdges, top.Vertices, cornerParents, incoming, outgoing, uvScale);
+
+			var wallIndexByRoot = new Dictionary<int, int>();
+			var cornerTop = new int[cornerCount];
+			var cornerBottom = new int[cornerCount];
+			int wallGroupCount = 0;
+			for (int i = 0; i < cornerCount; i++)
+			{
+				int root = Find(cornerParents, i);
+				if (!wallIndexByRoot.ContainsKey(root))
+				{
+					wallIndexByRoot.Add(root, wallGroupCount);
+					wallGroupCount++;
+				}
+			}
+
+			var vertices = new Vector3[n * 2 + wallGroupCount * 2];
 			var uvs = new Vector2[vertices.Length];
 			for (int i = 0; i < n; i++)
 			{
@@ -45,27 +108,25 @@ namespace PCG.Sweep
 				uvs[i + n] = top.Uvs[i];
 			}
 
-			var wallTop = new int[n];
-			var wallBottom = new int[n];
-			for (int i = 0; i < n; i++)
+			foreach (var pair in wallIndexByRoot)
 			{
-				wallTop[i] = -1;
-				wallBottom[i] = -1;
+				int corner = pair.Key;
+				int edge = corner / 2;
+				int vertex = corner % 2 == 0
+					? (int)(boundaryEdges[edge] >> 32)
+					: (int)(uint)boundaryEdges[edge];
+				int wallVertex = n * 2 + pair.Value * 2;
+				vertices[wallVertex] = top.Vertices[vertex];
+				vertices[wallVertex + 1] = top.Vertices[vertex] - down;
+				uvs[wallVertex] = new Vector2(cornerUs[corner], 0f);
+				uvs[wallVertex + 1] = new Vector2(cornerUs[corner], height * uvScale);
 			}
 
-			int wallVertex = n * 2;
-			for (int i = 0; i < n; i++)
+			for (int i = 0; i < cornerCount; i++)
 			{
-				if (!boundaryVertices.Contains(i))
-					continue;
-
-				wallTop[i] = wallVertex;
-				wallBottom[i] = wallVertex + 1;
-				vertices[wallVertex] = top.Vertices[i];
-				vertices[wallVertex + 1] = top.Vertices[i] - down;
-				uvs[wallVertex] = top.Uvs[i];
-				uvs[wallVertex + 1] = top.Uvs[i];
-				wallVertex += 2;
+				int wallVertex = n * 2 + wallIndexByRoot[Find(cornerParents, i)] * 2;
+				cornerTop[i] = wallVertex;
+				cornerBottom[i] = wallVertex + 1;
 			}
 
 			var triangles = new List<int>(top.Triangles.Length * 3);
@@ -85,15 +146,9 @@ namespace PCG.Sweep
 				triangles.Add(b + n);
 			}
 
-			for (int t = 0; t + 2 < top.Triangles.Length; t += 3)
+			for (int i = 0; i < boundaryEdges.Count; i++)
 			{
-				int a = top.Triangles[t];
-				int b = top.Triangles[t + 1];
-				int c = top.Triangles[t + 2];
-
-				AddWall(triangles, directed, vertices, wallTop, wallBottom, a, b, c);
-				AddWall(triangles, directed, vertices, wallTop, wallBottom, b, c, a);
-				AddWall(triangles, directed, vertices, wallTop, wallBottom, c, a, b);
+				AddWall(triangles, vertices, cornerTop[i * 2], cornerTop[i * 2 + 1], cornerBottom[i * 2], cornerBottom[i * 2 + 1], innerByEdge[boundaryEdges[i]]);
 			}
 
 			return new SweepMeshData
@@ -104,19 +159,12 @@ namespace PCG.Sweep
 			};
 		}
 
-		private static void AddWall(List<int> triangles, HashSet<long> directed, Vector3[] vertices, int[] wallTop, int[] wallBottom, int a, int b, int inner)
+		private static void AddWall(List<int> triangles, Vector3[] vertices, int topA, int topB, int bottomA, int bottomB, int inner)
 		{
-			if (directed.Contains(Key(b, a)))
-				return;
-
-			Vector3 mid = (vertices[a] + vertices[b]) * 0.5f;
+			Vector3 mid = (vertices[topA] + vertices[topB]) * 0.5f;
 			Vector3 outward = mid - vertices[inner];
 			outward.y = 0f;
 
-			int topA = wallTop[a];
-			int topB = wallTop[b];
-			int bottomA = wallBottom[a];
-			int bottomB = wallBottom[b];
 			Vector3 normal = Vector3.Cross(vertices[topB] - vertices[topA], vertices[bottomB] - vertices[topA]);
 
 			if (Vector3.Dot(normal, outward) >= 0f)
@@ -139,6 +187,140 @@ namespace PCG.Sweep
 				triangles.Add(bottomA);
 				triangles.Add(bottomB);
 			}
+		}
+
+		private static void AddEdge(Dictionary<int, List<int>> edges, int vertex, int edge)
+		{
+			if (!edges.TryGetValue(vertex, out var list))
+			{
+				list = new List<int>();
+				edges.Add(vertex, list);
+			}
+			list.Add(edge);
+		}
+
+		private static HashSet<int> FindSeamVertices(List<long> boundaryEdges, Vector3[] edgeNormals, Dictionary<int, List<int>> outgoing)
+		{
+			var seams = new HashSet<int>();
+			var visited = new bool[boundaryEdges.Count];
+			for (int start = 0; start < boundaryEdges.Count; start++)
+			{
+				if (visited[start])
+					continue;
+
+				int current = start;
+				int hardVertex = -1;
+				int smoothestVertex = -1;
+				float smoothestDot = -2f;
+				bool closed = false;
+				while (!visited[current])
+				{
+					visited[current] = true;
+					int vertex = (int)(uint)boundaryEdges[current];
+					if (!outgoing.TryGetValue(vertex, out var nextEdges) || nextEdges.Count != 1)
+						break;
+
+					int next = nextEdges[0];
+					float dot = Vector3.Dot(edgeNormals[current], edgeNormals[next]);
+					if (dot < SmoothWallCos && hardVertex < 0)
+						hardVertex = vertex;
+					if (dot > smoothestDot)
+					{
+						smoothestDot = dot;
+						smoothestVertex = vertex;
+					}
+
+					current = next;
+					if (current == start)
+					{
+						closed = true;
+						break;
+					}
+				}
+
+				if (closed)
+					seams.Add(hardVertex >= 0 ? hardVertex : smoothestVertex);
+			}
+			return seams;
+		}
+
+		private static float[] BuildCornerUs(List<long> boundaryEdges, Vector3[] vertices, int[] cornerParents, Dictionary<int, List<int>> incoming, Dictionary<int, List<int>> outgoing, float uvScale)
+		{
+			var previous = new int[boundaryEdges.Count];
+			var next = new int[boundaryEdges.Count];
+			for (int i = 0; i < boundaryEdges.Count; i++)
+			{
+				previous[i] = -1;
+				next[i] = -1;
+			}
+
+			foreach (var pair in outgoing)
+			{
+				if (!incoming.TryGetValue(pair.Key, out var previousEdges))
+					continue;
+
+				for (int p = 0; p < previousEdges.Count; p++)
+				{
+					int previousEdge = previousEdges[p];
+					for (int q = 0; q < pair.Value.Count; q++)
+					{
+						int nextEdge = pair.Value[q];
+						if (Find(cornerParents, previousEdge * 2 + 1) != Find(cornerParents, nextEdge * 2))
+							continue;
+						next[previousEdge] = nextEdge;
+						previous[nextEdge] = previousEdge;
+					}
+				}
+			}
+
+			var cornerUs = new float[boundaryEdges.Count * 2];
+			var visited = new bool[boundaryEdges.Count];
+			for (int i = 0; i < boundaryEdges.Count; i++)
+			{
+				if (previous[i] < 0)
+					AssignCornerUs(i, boundaryEdges, vertices, next, visited, cornerUs, uvScale);
+			}
+			for (int i = 0; i < boundaryEdges.Count; i++)
+			{
+				if (!visited[i])
+					AssignCornerUs(i, boundaryEdges, vertices, next, visited, cornerUs, uvScale);
+			}
+			return cornerUs;
+		}
+
+		private static void AssignCornerUs(int start, List<long> boundaryEdges, Vector3[] vertices, int[] next, bool[] visited, float[] cornerUs, float uvScale)
+		{
+			float u = 0f;
+			int current = start;
+			while (current >= 0 && !visited[current])
+			{
+				visited[current] = true;
+				int a = (int)(boundaryEdges[current] >> 32);
+				int b = (int)(uint)boundaryEdges[current];
+				cornerUs[current * 2] = u;
+				Vector3 edge = vertices[b] - vertices[a];
+				u += Mathf.Sqrt(edge.x * edge.x + edge.z * edge.z) * uvScale;
+				cornerUs[current * 2 + 1] = u;
+				current = next[current];
+			}
+		}
+
+		private static int Find(int[] parents, int value)
+		{
+			while (parents[value] != value)
+			{
+				parents[value] = parents[parents[value]];
+				value = parents[value];
+			}
+			return value;
+		}
+
+		private static void Union(int[] parents, int a, int b)
+		{
+			a = Find(parents, a);
+			b = Find(parents, b);
+			if (a != b)
+				parents[b] = a;
 		}
 
 		private static long Key(int a, int b)

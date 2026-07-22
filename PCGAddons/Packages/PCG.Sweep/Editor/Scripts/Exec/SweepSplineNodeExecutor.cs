@@ -217,7 +217,7 @@ namespace PCG.Sweep
 
 				outOfBounds |= mesh.TerrainOutOfBounds;
 				if (extrudeHeight > 0f)
-					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight);
+					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight, snapshot.UvScale);
 				results.Add(new MeshInstanceData
 				{
 					Name = built > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,
@@ -237,7 +237,7 @@ namespace PCG.Sweep
 
 				outOfBounds |= mesh.TerrainOutOfBounds;
 				if (extrudeHeight > 0f)
-					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight);
+					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight, snapshot.UvScale);
 				results.Add(new MeshInstanceData
 				{
 					Name = built > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,
@@ -255,7 +255,7 @@ namespace PCG.Sweep
 				{
 					var mesh = patchMeshes[k];
 					if (extrudeHeight > 0f)
-						mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight);
+						mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight, snapshot.UvScale);
 					results.Add(new MeshInstanceData
 					{
 						Name = built > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,

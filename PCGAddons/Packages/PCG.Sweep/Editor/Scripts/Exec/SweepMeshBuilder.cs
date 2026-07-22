@@ -233,27 +233,25 @@ namespace PCG.Sweep
 				TrimColumns(frames, ups, positions, vpr, splineClosed, snapshot.MaxLateralExtent, ct, reportProgress);
 
 			outOfBounds = false;
-			if (hasTerrain)
+			for (int idx = 0; idx < ringVertexCount; idx++)
 			{
-				for (int idx = 0; idx < ringVertexCount; idx++)
+				float3 p = positions[idx];
+				if (hasTerrain)
 				{
-					float3 p = positions[idx];
 					if (terrain.TrySampleHeight(p.x, p.z, out float h))
-					{
-						p.y = h + snapshot.HeightOffset + verticalOffsets[idx];
-						positions[idx] = p;
-					}
+						p.y = h + verticalOffsets[idx];
 					else
-					{
 						outOfBounds = true;
-					}
+				}
 
-					progressCounter++;
-					if (progressCounter % 1024 == 0)
-					{
-						ct.ThrowIfCancellationRequested();
-						reportProgress();
-					}
+				p.y += snapshot.HeightOffset;
+				positions[idx] = p;
+
+				progressCounter++;
+				if (progressCounter % 1024 == 0)
+				{
+					ct.ThrowIfCancellationRequested();
+					reportProgress();
 				}
 			}
 
