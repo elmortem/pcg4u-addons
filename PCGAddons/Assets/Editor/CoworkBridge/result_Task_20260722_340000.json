@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260722_340000",
-    "status": "success",
-    "logs": [],
-    "return_value": "M4_SharpV: g=2/2 b=1/1(fan=1) r=0 tris=48 -> Temp/PatchDiag/M4_SharpV.png ;; M4_Hairpin: g=0/0 b=1/1(fan=0) r=0 tris=56 -> Temp/PatchDiag/M4_Hairpin.png ;; M4_HairpinWide: g=1/1 b=0/0(fan=0) r=0 tris=92 -> Temp/PatchDiag/M4_HairpinWide.png ;; M4_Cross: g=4/4 b=0/0(fan=0) r=2 tris=34 -> Temp/PatchDiag/M4_Cross.png ;; M4_RoundedBend: g=1/1 b=0/0(fan=0) r=0 tris=40 -> Temp/PatchDiag/M4_RoundedBend.png",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

@@ -1,0 +1,8 @@
+{
+    "id": "Task_20260722_420000",
+    "status": "success",
+    "logs": [],
+    "return_value": "H_Twist70: green=1 rings=25 -> Temp/PatchDiag/H_Twist70.png ;; H_Twist0: green=1 rings=19 -> Temp/PatchDiag/H_Twist0.png",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260722_320000",
-    "status": "success",
-    "logs": [],
-    "return_value": "fanType=True fanBuild=True classify=True",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

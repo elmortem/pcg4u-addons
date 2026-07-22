@@ -31,11 +31,16 @@ namespace PCG.Sweep
 			}
 
 			var turns = new float[quantCount];
+			var rolls = new float[quantCount];
 			for (int q = 0; q < quantCount; q++)
 			{
 				float3 t0 = math.normalizesafe(quantFrames[q].Tangent, new float3(0f, 0f, 1f));
 				float3 t1 = math.normalizesafe(quantFrames[q + 1].Tangent, new float3(0f, 0f, 1f));
 				turns[q] = math.acos(math.clamp(math.dot(t0, t1), -1f, 1f));
+
+				float3 u0 = math.normalizesafe(quantFrames[q].Up, new float3(0f, 1f, 0f));
+				float3 u1 = math.normalizesafe(quantFrames[q + 1].Up, new float3(0f, 1f, 0f));
+				rolls[q] = math.acos(math.clamp(math.dot(u0, u1), -1f, 1f));
 			}
 
 			var frames = new System.Collections.Generic.List<SweepFrame>(quantCount + 1);
@@ -46,13 +51,16 @@ namespace PCG.Sweep
 			{
 				int next = current + 1;
 				float turnSum = turns[current];
+				float rollSum = rolls[current];
 				while (next < quantCount)
 				{
 					float candidateTurn = turnSum + turns[next];
+					float candidateRoll = rollSum + rolls[next];
 					float candidateLength = quantFrames[next + 1].Distance - quantFrames[current].Distance;
-					if (candidateTurn > maxAngleRad || candidateLength > maxStep)
+					if (candidateTurn > maxAngleRad || candidateRoll > maxAngleRad || candidateLength > maxStep)
 						break;
 					turnSum = candidateTurn;
+					rollSum = candidateRoll;
 					next++;
 				}
 

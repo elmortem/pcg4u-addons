@@ -10,29 +10,23 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Splines;
 
-public static class Task_20260722_330000
+public static class Task_20260722_430000
 {
 	private const int Layer = 31;
 	private const int RenderSize = 1200;
 	private const string Folder = "Temp/PatchDiag";
 	private const int MaxVerts = 2000000;
+	private const float Step = 1f;
+	private const float MaxStep = 8f;
+	private const float Thickness = 1f;
 
 	public static async Task<string> Run()
 	{
 		await Task.Yield();
 		Directory.CreateDirectory(Folder);
 		var report = new List<string>();
-
-		report.Add(Render("M3_SharpV", new[] { Corner(new float3(-40, 0, 20), new float3(-2, 0, -30), new float3(40, 0, 20)) }, 8f));
-		report.Add(Render("M3_Hairpin", new[] { Hairpin() }, 8f));
-		report.Add(Render("M3_HairpinWide", new[] { HairpinWide() }, 8f));
-		report.Add(Render("M3_Cross", new[]
-		{
-			Line(new float3(-30, 0, 0), new float3(30, 0, 0)),
-			Line(new float3(0, 0, -30), new float3(0, 0, 30))
-		}, 8f));
-		report.Add(Render("M3_RoundedBend", new[] { Arc(40f, 5) }, 8f));
-
+		report.Add(Render("J_Twist90", Twisted(90f), 5f));
+		report.Add(Render("J_Twist0", Twisted(0f), 5f));
 		return string.Join(" ;; ", report);
 	}
 
@@ -41,94 +35,64 @@ public static class Task_20260722_330000
 		var temp = new List<UnityEngine.Object>();
 		try
 		{
-			const float step = 1f, maxStep = 8f;
 			float maxAngleRad = math.radians(5f);
 			float halfWidth = width * 0.5f;
 			var list = new List<Spline>(splines);
-			var snap = BuildSnapshot(list, halfWidth, step);
+			var snap = BuildSnapshot(list, halfWidth, Step);
 			int vpr = 2;
 
 			Type splitterT = FindType("PCG.Sweep.SweepRibbonSplitter");
 			MethodInfo split = splitterT.GetMethod("Split", BindingFlags.NonPublic | BindingFlags.Static);
-			MethodInfo classifyStepM = splitterT.GetMethod("ClassifyStep", BindingFlags.NonPublic | BindingFlags.Static);
 			MethodInfo buildFrames = FindType("PCG.Sweep.SweepNetworkFrames").GetMethod("BuildRangeFrames", BindingFlags.NonPublic | BindingFlags.Static);
-			MethodInfo fanBuild = FindType("PCG.Sweep.SweepRibbonCornerFanBuilder").GetMethod("Build", BindingFlags.NonPublic | BindingFlags.Static);
 
-			object result = split.Invoke(null, new object[] { snap, list, step, CancellationToken.None, (Action)(() => { }) });
+			object result = split.Invoke(null, new object[] { snap, list, Step, Thickness, CancellationToken.None, (Action)(() => { }) });
 			var pieces = (System.Collections.IEnumerable)Field(result, "Pieces");
-			float classifyStep = (float)classifyStepM.Invoke(null, new object[] { snap, step });
-
 			var pieceList = new List<object>();
 			foreach (var p in pieces) pieceList.Add(p);
 
 			Shader sh = Shader.Find("HDRP/Unlit");
-			Material greenMat = Mat(sh, new Color(0.75f, 0.68f, 0.5f));
-			Material blueMat = Mat(sh, new Color(0.42f, 0.60f, 0.92f));
+			Material greenMat = Mat(sh, new Color(0.78f, 0.72f, 0.55f));
 			Material wire = Mat(sh, new Color(0.05f, 0.05f, 0.06f));
-			temp.Add(greenMat); temp.Add(blueMat); temp.Add(wire);
+			temp.Add(greenMat); temp.Add(wire);
 
 			Bounds b0 = default; bool found = false;
-			int greenMeshes = 0, blueMeshes = 0, blueFan = 0, greenPieces = 0, bluePieces = 0, redPieces = 0, triCount = 0;
+			int rings = 0, greenMeshes = 0;
 
 			foreach (var pc in pieceList)
 			{
 				int st = (int)Field(pc, "State");
+				if (st != 0) continue;
 				int spl = (int)Field(pc, "Spline");
 				float a = (float)Field(pc, "StartStation");
 				float b = (float)Field(pc, "EndStation");
-
-				if (st == 1) { redPieces++; continue; }
-
-				if (st == 2)
-				{
-					bluePieces++;
-					object fan = fanBuild.Invoke(null, new object[] { list[spl], a, b, snap, classifyStep, CancellationToken.None, (Action)(() => { }) });
-					SweepMeshData blueMesh = (SweepMeshData)fan;
-					if (blueMesh.Vertices != null) blueFan++;
-					if (blueMesh.Vertices == null)
-					{
-						float lengthB = list[spl].GetLength();
-						object framesB = buildFrames.Invoke(null, new object[] { list[spl], a, b, lengthB, a, step, maxStep, maxAngleRad, vpr, MaxVerts });
-						if (framesB != null)
-						{
-							var fArr = (SweepFrame[])framesB;
-							if (fArr.Length >= 2)
-								blueMesh = SweepMeshBuilder.Build(PieceSnapshot(snap, fArr), 0, CancellationToken.None, () => { });
-						}
-					}
-					if (blueMesh.Vertices == null) continue;
-					blueMeshes++; triCount += blueMesh.Triangles.Length / 3;
-					Spawn(blueMesh, blueMat, wire, temp, ref b0, ref found);
-					continue;
-				}
-
-				greenPieces++;
 				float length = list[spl].GetLength();
-				object frames = buildFrames.Invoke(null, new object[] { list[spl], a, b, length, a, step, maxStep, maxAngleRad, vpr, MaxVerts });
+				object frames = buildFrames.Invoke(null, new object[] { list[spl], a, b, length, a, Step, MaxStep, maxAngleRad, vpr, MaxVerts });
 				if (frames == null) continue;
 				var framesArr = (SweepFrame[])frames;
 				if (framesArr.Length < 2) continue;
-				var pieceSnap = PieceSnapshot(snap, framesArr);
-				SweepMeshData mesh = SweepMeshBuilder.Build(pieceSnap, 0, CancellationToken.None, () => { });
+				rings += framesArr.Length;
+				SweepMeshData mesh = SweepMeshBuilder.Build(PieceSnapshot(snap, framesArr), 0, CancellationToken.None, () => { });
 				if (mesh.Vertices == null) continue;
-				greenMeshes++; triCount += mesh.Triangles.Length / 3;
+				greenMeshes++;
 				Spawn(mesh, greenMat, wire, temp, ref b0, ref found);
 			}
 
-			string stats = "g=" + greenPieces + "/" + greenMeshes + " b=" + bluePieces + "/" + blueMeshes + "(fan=" + blueFan + ") r=" + redPieces;
+			string stats = "green=" + greenMeshes + " rings=" + rings;
 			if (!found) return label + ": NO MESH " + stats;
 
 			GameObject camObj = new GameObject("C"); camObj.hideFlags = HideFlags.HideAndDontSave; temp.Add(camObj);
 			Camera cam = camObj.AddComponent<Camera>();
 			cam.cullingMask = 1 << Layer; cam.clearFlags = CameraClearFlags.SolidColor;
-			cam.backgroundColor = new Color(0.90f, 0.90f, 0.88f); cam.orthographic = true;
-			cam.orthographicSize = Mathf.Max(Mathf.Max(b0.size.x, b0.size.z) * 0.58f, 5f);
-			cam.transform.position = b0.center + Vector3.up * 200f;
-			cam.transform.rotation = Quaternion.LookRotation(Vector3.down, Vector3.forward);
-			cam.nearClipPlane = 0.01f; cam.farClipPlane = 500f;
+			cam.backgroundColor = new Color(0.28f, 0.28f, 0.30f);
+			float ext = Mathf.Max(b0.size.x, b0.size.z, b0.size.y);
+			cam.orthographic = false; cam.fieldOfView = 34f;
+			Vector3 camPos = b0.center + new Vector3(ext * 1.5f, ext * 0.35f, ext * 0.28f);
+			cam.transform.position = camPos;
+			cam.transform.rotation = Quaternion.LookRotation(b0.center - camPos, Vector3.up);
+			cam.nearClipPlane = 0.01f; cam.farClipPlane = 900f;
 			string path = Folder + "/" + label + ".png";
 			Capture(cam, path);
-			return label + ": " + stats + " tris=" + triCount + " -> " + path;
+			return label + ": " + stats + " -> " + path;
 		}
 		catch (Exception e)
 		{
@@ -165,7 +129,7 @@ public static class Task_20260722_330000
 		for (int i = 0; i + 2 < data.Triangles.Length; i += 3) { int x = data.Triangles[i], y = data.Triangles[i + 1], z = data.Triangles[i + 2];
 			lines[d++] = x; lines[d++] = y; lines[d++] = y; lines[d++] = z; lines[d++] = z; lines[d++] = x; }
 		var wm = new Mesh { hideFlags = HideFlags.HideAndDontSave, indexFormat = mesh.indexFormat, vertices = data.Vertices }; wm.SetIndices(lines, MeshTopology.Lines, 0, true); temp.Add(wm);
-		GameObject w = new GameObject("W"); w.hideFlags = HideFlags.HideAndDontSave; w.layer = Layer; w.transform.position = Vector3.up * 0.05f;
+		GameObject w = new GameObject("W"); w.hideFlags = HideFlags.HideAndDontSave; w.layer = Layer; w.transform.position = Vector3.up * 0.02f;
 		w.AddComponent<MeshFilter>().sharedMesh = wm; w.AddComponent<MeshRenderer>().sharedMaterial = wireMat; temp.Add(w);
 	}
 
@@ -182,37 +146,19 @@ public static class Task_20260722_330000
 		try { cam.targetTexture = tex; cam.Render(); RenderTexture.active = tex; img.ReadPixels(new Rect(0, 0, RenderSize, RenderSize), 0, 0); img.Apply(); File.WriteAllBytes(path, img.EncodeToPNG()); }
 		finally { cam.targetTexture = null; RenderTexture.active = prev; UnityEngine.Object.DestroyImmediate(tex); UnityEngine.Object.DestroyImmediate(img); }
 	}
-	private static Spline Line(float3 a, float3 b) { var s = new Spline(); s.Add(new BezierKnot(a), TangentMode.Linear); s.Add(new BezierKnot(b), TangentMode.Linear); return s; }
-	private static Spline Corner(float3 a, float3 b, float3 c) { var s = new Spline(); s.Add(new BezierKnot(a), TangentMode.Linear); s.Add(new BezierKnot(b), TangentMode.Linear); s.Add(new BezierKnot(c), TangentMode.Linear); return s; }
-	private static Spline Hairpin()
+	private static Spline[] Twisted(float maxRollDeg)
 	{
 		var s = new Spline();
-		s.Add(new BezierKnot(new float3(-40, 0, 3)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(10, 0, 3)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(16, 0, 0)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(10, 0, -3)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(-40, 0, -3)), TangentMode.AutoSmooth);
-		return s;
-	}
-	private static Spline HairpinWide()
-	{
-		var s = new Spline();
-		s.Add(new BezierKnot(new float3(-40, 0, 9)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(12, 0, 9)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(20, 0, 0)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(12, 0, -9)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(-40, 0, -9)), TangentMode.AutoSmooth);
-		return s;
-	}
-	private static Spline Arc(float radius, int knots)
-	{
-		var s = new Spline();
-		for (int i = 0; i < knots; i++)
+		int n = 7;
+		for (int i = 0; i < n; i++)
 		{
-			float ang = math.radians(90f * i / (knots - 1));
-			s.Add(new BezierKnot(new float3(math.cos(ang) * radius - radius, 0, -math.sin(ang) * radius)), TangentMode.AutoSmooth);
+			float x = -30f + 60f * i / (n - 1);
+			float roll = maxRollDeg * i / (n - 1);
+			var k = new BezierKnot(new float3(x, 6, 0));
+			k.Rotation = quaternion.AxisAngle(new float3(1, 0, 0), math.radians(roll));
+			s.Add(k, TangentMode.Linear);
 		}
-		return s;
+		return new[] { s };
 	}
 	private static SweepSnapshot BuildSnapshot(List<Spline> splines, float halfWidth, float step)
 	{
