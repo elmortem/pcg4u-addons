@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Splines;
 
-public static class Task_20260722_350000
+public static class Task_20260722_460000
 {
 	private const int Layer = 31;
 	private const int RenderSize = 1200;
@@ -18,6 +18,7 @@ public static class Task_20260722_350000
 	private const int MaxVerts = 2000000;
 	private const float Step = 1f;
 	private const float MaxStep = 8f;
+	private const float Thickness = 1f;
 
 	public static async Task<string> Run()
 	{
@@ -25,15 +26,27 @@ public static class Task_20260722_350000
 		Directory.CreateDirectory(Folder);
 		var report = new List<string>();
 
-		report.Add(Render("M5_SharpV", new[] { Corner(new float3(-40, 0, 20), new float3(-2, 0, -30), new float3(40, 0, 20)) }, 4f));
-		report.Add(Render("M5_SmoothCorner", new[] { SmoothCorner() }, 4f));
-		report.Add(Render("M5_Hairpin", new[] { Hairpin() }, 4f));
-		report.Add(Render("M5_Cross", new[]
+		report.Add(Render("P_Cross", new[]
 		{
 			Line(new float3(-30, 0, 0), new float3(30, 0, 0)),
 			Line(new float3(0, 0, -30), new float3(0, 0, 30))
-		}, 4f));
-		report.Add(Render("M5_RoundedBend", new[] { Arc(40f, 5) }, 4f));
+		}, 5f));
+		report.Add(Render("P_TJunction", new[]
+		{
+			Line(new float3(-30, 0, 0), new float3(30, 0, 0)),
+			Line(new float3(0, 0, 0), new float3(0, 0, 30))
+		}, 5f));
+		report.Add(Render("P_CurveCross", new[]
+		{
+			Curve(new float3(-45, 0, -12), new float3(0, 0, 12), new float3(45, 0, -12)),
+			Line(new float3(2, 0, -30), new float3(2, 0, 30))
+		}, 5f));
+		report.Add(Render("P_TripleStar", new[]
+		{
+			Line(new float3(-30, 0, 0), new float3(30, 0, 0)),
+			Line(new float3(-20, 0, -28), new float3(15, 0, 28)),
+			Line(new float3(20, 0, -28), new float3(-15, 0, 28))
+		}, 5f));
 
 		return string.Join(" ;; ", report);
 	}
@@ -53,21 +66,23 @@ public static class Task_20260722_350000
 			MethodInfo split = splitterT.GetMethod("Split", BindingFlags.NonPublic | BindingFlags.Static);
 			MethodInfo buildFrames = FindType("PCG.Sweep.SweepNetworkFrames").GetMethod("BuildRangeFrames", BindingFlags.NonPublic | BindingFlags.Static);
 			MethodInfo fanBuild = FindType("PCG.Sweep.SweepRibbonCornerFanBuilder").GetMethod("Build", BindingFlags.NonPublic | BindingFlags.Static);
+			MethodInfo patchBuild = FindType("PCG.Sweep.SweepRibbonPatchBuilder").GetMethod("Build", BindingFlags.NonPublic | BindingFlags.Static);
 
-			object result = split.Invoke(null, new object[] { snap, list, Step, CancellationToken.None, (Action)(() => { }) });
-			var pieces = (System.Collections.IEnumerable)Field(result, "Pieces");
-
+			object result = split.Invoke(null, new object[] { snap, list, Step, Thickness, CancellationToken.None, (Action)(() => { }) });
+			object piecesObj = Field(result, "Pieces");
+			var pieces = (System.Collections.IEnumerable)piecesObj;
 			var pieceList = new List<object>();
 			foreach (var p in pieces) pieceList.Add(p);
 
 			Shader sh = Shader.Find("HDRP/Unlit");
-			Material greenMat = Mat(sh, new Color(0.75f, 0.68f, 0.5f));
+			Material greenMat = Mat(sh, new Color(0.78f, 0.72f, 0.55f));
 			Material blueMat = Mat(sh, new Color(0.42f, 0.60f, 0.92f));
+			Material patchMat = Mat(sh, new Color(0.92f, 0.55f, 0.2f));
 			Material wire = Mat(sh, new Color(0.05f, 0.05f, 0.06f));
-			temp.Add(greenMat); temp.Add(blueMat); temp.Add(wire);
+			temp.Add(greenMat); temp.Add(blueMat); temp.Add(patchMat); temp.Add(wire);
 
 			Bounds b0 = default; bool found = false;
-			int greenMeshes = 0, blueMeshes = 0, blueFan = 0, greenPieces = 0, bluePieces = 0, redPieces = 0, triCount = 0;
+			int greenMeshes = 0, blueMeshes = 0, redPieces = 0, patchMeshes = 0;
 
 			foreach (var pc in pieceList)
 			{
@@ -80,54 +95,46 @@ public static class Task_20260722_350000
 
 				if (st == 2)
 				{
-					bluePieces++;
 					object fan = fanBuild.Invoke(null, new object[] { list[spl], a, b, snap, Step, CancellationToken.None, (Action)(() => { }) });
-					SweepMeshData blueMesh = (SweepMeshData)fan;
-					if (blueMesh.Vertices != null) blueFan++;
-					if (blueMesh.Vertices == null)
-					{
-						float lengthB = list[spl].GetLength();
-						object framesB = buildFrames.Invoke(null, new object[] { list[spl], a, b, lengthB, a, Step, MaxStep, maxAngleRad, vpr, MaxVerts });
-						if (framesB != null)
-						{
-							var fArr = (SweepFrame[])framesB;
-							if (fArr.Length >= 2)
-								blueMesh = SweepMeshBuilder.Build(PieceSnapshot(snap, fArr), 0, CancellationToken.None, () => { });
-						}
-					}
-					if (blueMesh.Vertices == null) continue;
-					blueMeshes++; triCount += blueMesh.Triangles.Length / 3;
-					Spawn(blueMesh, blueMat, wire, temp, ref b0, ref found);
+					SweepMeshData bm = (SweepMeshData)fan;
+					if (bm.Vertices == null) continue;
+					blueMeshes++; Spawn(bm, blueMat, wire, temp, ref b0, ref found, 0.02f);
 					continue;
 				}
 
-				greenPieces++;
 				float length = list[spl].GetLength();
 				object frames = buildFrames.Invoke(null, new object[] { list[spl], a, b, length, a, Step, MaxStep, maxAngleRad, vpr, MaxVerts });
 				if (frames == null) continue;
 				var framesArr = (SweepFrame[])frames;
 				if (framesArr.Length < 2) continue;
-				var pieceSnap = PieceSnapshot(snap, framesArr);
-				SweepMeshData mesh = SweepMeshBuilder.Build(pieceSnap, 0, CancellationToken.None, () => { });
+				SweepMeshData mesh = SweepMeshBuilder.Build(PieceSnapshot(snap, framesArr), 0, CancellationToken.None, () => { });
 				if (mesh.Vertices == null) continue;
-				greenMeshes++; triCount += mesh.Triangles.Length / 3;
-				Spawn(mesh, greenMat, wire, temp, ref b0, ref found);
+				greenMeshes++; Spawn(mesh, greenMat, wire, temp, ref b0, ref found, 0f);
 			}
 
-			string stats = "g=" + greenPieces + "/" + greenMeshes + " b=" + bluePieces + "/" + blueMeshes + "(fan=" + blueFan + ") r=" + redPieces;
+			object patchesObj = patchBuild.Invoke(null, new object[] { piecesObj, list, snap, Step });
+			var patches = (List<SweepMeshData>)patchesObj;
+			for (int i = 0; i < patches.Count; i++)
+			{
+				patchMeshes++;
+				Spawn(patches[i], patchMat, wire, temp, ref b0, ref found, 0.01f);
+			}
+
+			string stats = "g=" + greenMeshes + " b=" + blueMeshes + " r=" + redPieces + " patch=" + patchMeshes;
 			if (!found) return label + ": NO MESH " + stats;
 
 			GameObject camObj = new GameObject("C"); camObj.hideFlags = HideFlags.HideAndDontSave; temp.Add(camObj);
 			Camera cam = camObj.AddComponent<Camera>();
 			cam.cullingMask = 1 << Layer; cam.clearFlags = CameraClearFlags.SolidColor;
-			cam.backgroundColor = new Color(0.90f, 0.90f, 0.88f); cam.orthographic = true;
-			cam.orthographicSize = Mathf.Max(Mathf.Max(b0.size.x, b0.size.z) * 0.58f, 5f);
+			cam.backgroundColor = new Color(0.28f, 0.28f, 0.30f); cam.orthographic = true;
+			float ext = Mathf.Max(b0.size.x, b0.size.z);
+			cam.orthographicSize = Mathf.Max(ext * 0.55f, 5f);
 			cam.transform.position = b0.center + Vector3.up * 200f;
 			cam.transform.rotation = Quaternion.LookRotation(Vector3.down, Vector3.forward);
 			cam.nearClipPlane = 0.01f; cam.farClipPlane = 500f;
 			string path = Folder + "/" + label + ".png";
 			Capture(cam, path);
-			return label + ": " + stats + " tris=" + triCount + " -> " + path;
+			return label + ": " + stats + " -> " + path;
 		}
 		catch (Exception e)
 		{
@@ -152,19 +159,25 @@ public static class Task_20260722_350000
 		};
 	}
 
-	private static void Spawn(SweepMeshData data, Material surface, Material wireMat, List<UnityEngine.Object> temp, ref Bounds b, ref bool found)
+	private static void Spawn(SweepMeshData data, Material surface, Material wireMat, List<UnityEngine.Object> temp, ref Bounds b, ref bool found, float yLift)
 	{
-		var mesh = new Mesh { hideFlags = HideFlags.HideAndDontSave, indexFormat = data.Vertices.Length > 65535 ? IndexFormat.UInt32 : IndexFormat.UInt16, vertices = data.Vertices, uv = data.Uvs, triangles = data.Triangles };
+		var verts = data.Vertices;
+		if (yLift != 0f)
+		{
+			verts = new Vector3[data.Vertices.Length];
+			for (int i = 0; i < verts.Length; i++) verts[i] = data.Vertices[i] + Vector3.up * yLift;
+		}
+		var mesh = new Mesh { hideFlags = HideFlags.HideAndDontSave, indexFormat = verts.Length > 65535 ? IndexFormat.UInt32 : IndexFormat.UInt16, vertices = verts, uv = data.Uvs, triangles = data.Triangles };
 		mesh.RecalculateNormals(); temp.Add(mesh);
-		for (int i = 0; i < data.Vertices.Length; i++) { if (!found) { b = new Bounds(data.Vertices[i], Vector3.zero); found = true; } else b.Encapsulate(data.Vertices[i]); }
+		for (int i = 0; i < verts.Length; i++) { if (!found) { b = new Bounds(verts[i], Vector3.zero); found = true; } else b.Encapsulate(verts[i]); }
 		GameObject s = new GameObject("S"); s.hideFlags = HideFlags.HideAndDontSave; s.layer = Layer;
 		s.AddComponent<MeshFilter>().sharedMesh = mesh; s.AddComponent<MeshRenderer>().sharedMaterial = surface;
 		temp.Add(s);
 		var lines = new int[data.Triangles.Length * 2]; int d = 0;
 		for (int i = 0; i + 2 < data.Triangles.Length; i += 3) { int x = data.Triangles[i], y = data.Triangles[i + 1], z = data.Triangles[i + 2];
 			lines[d++] = x; lines[d++] = y; lines[d++] = y; lines[d++] = z; lines[d++] = z; lines[d++] = x; }
-		var wm = new Mesh { hideFlags = HideFlags.HideAndDontSave, indexFormat = mesh.indexFormat, vertices = data.Vertices }; wm.SetIndices(lines, MeshTopology.Lines, 0, true); temp.Add(wm);
-		GameObject w = new GameObject("W"); w.hideFlags = HideFlags.HideAndDontSave; w.layer = Layer; w.transform.position = Vector3.up * 0.05f;
+		var wm = new Mesh { hideFlags = HideFlags.HideAndDontSave, indexFormat = mesh.indexFormat, vertices = verts }; wm.SetIndices(lines, MeshTopology.Lines, 0, true); temp.Add(wm);
+		GameObject w = new GameObject("W"); w.hideFlags = HideFlags.HideAndDontSave; w.layer = Layer; w.transform.position = Vector3.up * 0.06f;
 		w.AddComponent<MeshFilter>().sharedMesh = wm; w.AddComponent<MeshRenderer>().sharedMaterial = wireMat; temp.Add(w);
 	}
 
@@ -182,35 +195,7 @@ public static class Task_20260722_350000
 		finally { cam.targetTexture = null; RenderTexture.active = prev; UnityEngine.Object.DestroyImmediate(tex); UnityEngine.Object.DestroyImmediate(img); }
 	}
 	private static Spline Line(float3 a, float3 b) { var s = new Spline(); s.Add(new BezierKnot(a), TangentMode.Linear); s.Add(new BezierKnot(b), TangentMode.Linear); return s; }
-	private static Spline Corner(float3 a, float3 b, float3 c) { var s = new Spline(); s.Add(new BezierKnot(a), TangentMode.Linear); s.Add(new BezierKnot(b), TangentMode.Linear); s.Add(new BezierKnot(c), TangentMode.Linear); return s; }
-	private static Spline SmoothCorner()
-	{
-		var s = new Spline();
-		s.Add(new BezierKnot(new float3(-40, 0, 20)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(0, 0, -12)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(40, 0, 20)), TangentMode.AutoSmooth);
-		return s;
-	}
-	private static Spline Hairpin()
-	{
-		var s = new Spline();
-		s.Add(new BezierKnot(new float3(-40, 0, 3)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(10, 0, 3)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(16, 0, 0)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(10, 0, -3)), TangentMode.AutoSmooth);
-		s.Add(new BezierKnot(new float3(-40, 0, -3)), TangentMode.AutoSmooth);
-		return s;
-	}
-	private static Spline Arc(float radius, int knots)
-	{
-		var s = new Spline();
-		for (int i = 0; i < knots; i++)
-		{
-			float ang = math.radians(90f * i / (knots - 1));
-			s.Add(new BezierKnot(new float3(math.cos(ang) * radius - radius, 0, -math.sin(ang) * radius)), TangentMode.AutoSmooth);
-		}
-		return s;
-	}
+	private static Spline Curve(float3 a, float3 b, float3 c) { var s = new Spline(); s.Add(new BezierKnot(a), TangentMode.AutoSmooth); s.Add(new BezierKnot(b), TangentMode.AutoSmooth); s.Add(new BezierKnot(c), TangentMode.AutoSmooth); return s; }
 	private static SweepSnapshot BuildSnapshot(List<Spline> splines, float halfWidth, float step)
 	{
 		var frames = new SweepFrame[splines.Count][]; var closed = new bool[splines.Count];

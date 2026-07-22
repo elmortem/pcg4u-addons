@@ -1,0 +1,8 @@
+{
+    "id": "Task_20260722_460000",
+    "status": "success",
+    "logs": [],
+    "return_value": "P_Cross: g=4 b=0 r=2 patch=1 -> Temp/PatchDiag/P_Cross.png ;; P_TJunction: g=3 b=0 r=2 patch=1 -> Temp/PatchDiag/P_TJunction.png ;; P_CurveCross: g=4 b=0 r=2 patch=1 -> Temp/PatchDiag/P_CurveCross.png ;; P_TripleStar: g=6 b=0 r=3 patch=1 -> Temp/PatchDiag/P_TripleStar.png",
+    "compiler_errors": [],
+    "foreign_errors": false
+}

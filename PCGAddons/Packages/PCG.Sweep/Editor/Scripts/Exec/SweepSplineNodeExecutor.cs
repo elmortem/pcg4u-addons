@@ -46,14 +46,10 @@ namespace PCG.Sweep
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			SplineNetworkTopology topology = Data.Enabled ? GetInputValue(nameof(Data.Topology), Data.Topology) : null;
-			bool networkMode = topology != null && topology.Junctions != null && topology.Junctions.Count > 0;
 			bool mergeMode = Data.Enabled && Data.MergeIntersections;
 
 			if (mergeMode)
 				await ComputeMergedAsync(ct);
-			else if (networkMode)
-				await ComputeNetworkAsync(topology, ct);
 			else
 				await ComputeSingleAsync(ct);
 		}
@@ -111,6 +107,9 @@ namespace PCG.Sweep
 			_previewDebugState = split.DebugState.ToArray();
 
 			var material = GetInputValue(nameof(Data.Material), Data.Material);
+			var junctionMaterial = GetInputValue(nameof(Data.JunctionMaterial), Data.JunctionMaterial);
+			if (junctionMaterial == null)
+				junctionMaterial = material;
 			float maxStep = math.max(step, GetInputValue(nameof(Data.MaxStep), Data.MaxStep));
 			float maxAngleRad = math.radians(math.clamp(GetInputValue(nameof(Data.MaxAngle), Data.MaxAngle), 0.5f, 180f));
 			int vpr = snapshot.ProfilePoints.Length;
@@ -136,6 +135,7 @@ namespace PCG.Sweep
 
 			var greenMeshes = new SweepMeshData[greenSnaps.Count];
 			var blueMeshes = new SweepMeshData[bluePieces.Count];
+			List<SweepMeshData> patchMeshes = null;
 			await UniTask.RunOnThreadPool(() =>
 			{
 				for (int k = 0; k < greenSnaps.Count; k++)
@@ -150,6 +150,8 @@ namespace PCG.Sweep
 					else if (blueFallback[k] != null)
 						blueMeshes[k] = SweepMeshBuilder.Build(blueFallback[k], 0, ct, reportProgress);
 				}
+
+				patchMeshes = SweepRibbonPatchBuilder.Build(split.Pieces, splines, snapshot, step);
 			}, true, ct);
 
 			await UniTaskEditor.SwitchToEditorThread();
@@ -167,6 +169,8 @@ namespace PCG.Sweep
 				if (blueMeshes[k].Vertices != null)
 					built++;
 			}
+			if (patchMeshes != null)
+				built += patchMeshes.Count;
 
 			for (int k = 0; k < greenMeshes.Length; k++)
 			{
@@ -202,6 +206,23 @@ namespace PCG.Sweep
 					Triangles = mesh.Triangles,
 					Collider = snapshot.Collider
 				});
+			}
+
+			if (patchMeshes != null)
+			{
+				for (int k = 0; k < patchMeshes.Count; k++)
+				{
+					var mesh = patchMeshes[k];
+					results.Add(new MeshInstanceData
+					{
+						Name = built > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,
+						Material = junctionMaterial,
+						Vertices = mesh.Vertices,
+						Uvs = mesh.Uvs,
+						Triangles = mesh.Triangles,
+						Collider = snapshot.Collider
+					});
+				}
 			}
 
 			if (outOfBounds)
@@ -319,381 +340,6 @@ namespace PCG.Sweep
 			await SyncSceneAsync(results, ct);
 		}
 
-		private async UniTask ComputeNetworkAsync(SplineNetworkTopology topology, CancellationToken ct)
-		{
-			List<Spline> flat = null;
-			SplineSnapshot[] snapshots = null;
-			float2[] profilePoints = null;
-			float[] profileUs = null;
-			int[] profileSegments = null;
-			bool profileClosed = false;
-			float[] widthLut = null;
-			float[] heightLut = null;
-			float[] twistLut = null;
-
-			Material material = null;
-			Material junctionMaterial = null;
-			TerrainData terrain = null;
-			Vector3 terrainOffset = default;
-
-			float step = 0f;
-			float maxStep = 0f;
-			float maxAngleRad = 0f;
-			float setbackScale = 0f;
-			float uvScale = 0f;
-			float heightOffset = 0f;
-			float lateralExtent = 0f;
-			float lateralExtentMax = 0f;
-			bool capEnds = false;
-			bool collider = false;
-			string name = null;
-			bool ready = false;
-
-			using (var scope = OperationScope.Start(this))
-			{
-				var profile = ResolveProfile(Warn);
-				if (profile != null && profile.Points != null && profile.Points.Length >= 2)
-				{
-					profilePoints = (float2[])profile.Points.Clone();
-					profileUs = (float[])profile.Us.Clone();
-					profileSegments = (int[])profile.Segments.Clone();
-					profileClosed = profile.Closed;
-
-					widthLut = BuildLut(Data.WidthByT, true);
-					heightLut = BuildLut(Data.HeightByT, true);
-					twistLut = BuildLut(Data.TwistByT, false);
-
-					material = GetInputValue(nameof(Data.Material), Data.Material);
-					junctionMaterial = GetInputValue(nameof(Data.JunctionMaterial), Data.JunctionMaterial);
-
-					step = math.max(0.05f, GetInputValue(nameof(Data.Step), Data.Step));
-					maxStep = math.max(step, GetInputValue(nameof(Data.MaxStep), Data.MaxStep));
-					maxAngleRad = math.radians(math.clamp(GetInputValue(nameof(Data.MaxAngle), Data.MaxAngle), 0.5f, 180f));
-					setbackScale = math.max(0f, GetInputValue(nameof(Data.SetbackScale), Data.SetbackScale));
-					uvScale = GetInputValue(nameof(Data.UvScale), Data.UvScale);
-					heightOffset = GetInputValue(nameof(Data.HeightOffset), Data.HeightOffset);
-					name = GetInputValue(nameof(Data.Name), Data.Name);
-					capEnds = Data.CapEnds;
-					collider = Data.Collider;
-					terrain = GetInputValue(nameof(Data.Terrain), Data.Terrain);
-					terrainOffset = GetInputValue(nameof(Data.TerrainOffset), Data.TerrainOffset);
-
-					float maxAbs = 0f;
-					for (int i = 0; i < profilePoints.Length; i++)
-						maxAbs = math.max(maxAbs, math.length(profilePoints[i]));
-					lateralExtent = maxAbs;
-					float maxMul = math.max(MaxLut(widthLut), MaxLut(heightLut));
-					lateralExtentMax = maxAbs * maxMul;
-
-					var splinesInput = GetInputValues(nameof(Data.Splines), Data.Splines);
-					flat = SplineNetworkInput.Flatten(splinesInput);
-					snapshots = new SplineSnapshot[flat.Count];
-					for (int i = 0; i < flat.Count; i++)
-					{
-						var spline = flat[i];
-						if (spline != null && spline.Count >= 2)
-							snapshots[i] = SplineSnapshot.Capture(spline);
-
-						await scope.Step(ct: ct);
-					}
-
-					ready = flat.Count > 0;
-				}
-
-				await scope.Step(ct: ct);
-			}
-
-			Action reportProgress = () => PcgComputeSystem.ReportProgress(this);
-			SplineSplitResult split = null;
-
-			if (ready)
-			{
-				await UniTask.SwitchToThreadPool();
-				try
-				{
-					split = SweepNetworkSolver.SolveSplit(snapshots, topology, ct, reportProgress);
-				}
-				finally
-				{
-					await UniTaskEditor.SwitchToEditorThread();
-				}
-			}
-
-			if (split != null && split.InvalidValues)
-			{
-				Debug.LogError("[Sweep Spline] Network topology contains conflicting or invalid cuts; no network mesh was published.");
-				Results.Value = new List<MeshInstanceData>();
-				await SyncSceneAsync(Results.Value, ct);
-				return;
-			}
-
-			SweepNetworkSnapshot snapshot = null;
-
-			if (ready)
-			{
-				using (var scope = OperationScope.Start(this))
-				{
-					var solve = SweepNetworkSolver.BuildNetwork(flat, split, topology, profilePoints, lateralExtent, setbackScale, step, widthLut, heightLut, twistLut, terrain != null, ct);
-
-					if (solve.PieceSplines.Count > 0)
-					{
-						int count = solve.PieceSplines.Count;
-						int vpr = profilePoints.Length;
-						var frames = new SweepFrame[count][];
-						var splineClosed = new bool[count];
-						var capStartFlags = new bool[count];
-						var capEndFlags = new bool[count];
-
-						for (int i = 0; i < count; i++)
-						{
-							float sourceOffset = solve.PieceStartDistance[i] + solve.RangeStart[i];
-							frames[i] = SweepNetworkFrames.BuildRangeFrames(solve.PieceSplines[i], solve.RangeStart[i], solve.RangeEnd[i], solve.SourceLength[i], sourceOffset, step, maxStep, maxAngleRad, vpr, MaxVerticesPerMesh);
-							splineClosed[i] = solve.PieceClosed[i];
-							capStartFlags[i] = solve.FreeStart[i] && capEnds;
-							capEndFlags[i] = solve.FreeEnd[i] && capEnds;
-
-							await scope.Step(ct: ct);
-						}
-
-						var pieces = new SweepSnapshot
-						{
-							ProfilePoints = (float2[])profilePoints.Clone(),
-							ProfileUs = (float[])profileUs.Clone(),
-							ProfileSegments = (int[])profileSegments.Clone(),
-							ProfileClosed = profileClosed,
-							Frames = frames,
-							SplineClosed = splineClosed,
-							WidthLut = widthLut,
-							HeightLut = heightLut,
-							TwistLut = twistLut,
-							MaxLateralExtent = lateralExtentMax,
-							UvScale = uvScale,
-							HeightOffset = heightOffset,
-							CapStartFlags = capStartFlags,
-							CapEndFlags = capEndFlags,
-							Collider = collider,
-							Name = name
-						};
-
-						if (terrain != null)
-							pieces.Terrain = CaptureTerrainWindow(solve, pieces, terrain, terrainOffset, lateralExtentMax);
-
-						snapshot = new SweepNetworkSnapshot
-						{
-							Pieces = pieces,
-							Junctions = solve.Junctions,
-							Step = step,
-							MaxAngleRad = maxAngleRad,
-							UvScale = uvScale,
-							HeightOffset = heightOffset,
-							Collider = collider,
-							CapEnds = capEnds,
-							Name = name,
-							JunctionMaterial = junctionMaterial
-						};
-					}
-
-					await scope.Step(ct: ct);
-				}
-			}
-
-			var results = new List<MeshInstanceData>();
-
-			if (snapshot != null)
-			{
-				int pieceCount = snapshot.Pieces.Frames.Length;
-				int junctionCount = snapshot.Junctions.Length;
-				var pieceMeshes = new SweepMeshData[pieceCount];
-				var pieceTasks = new List<UniTask>(pieceCount);
-
-				for (int i = 0; i < pieceCount; i++)
-				{
-					if (snapshot.Pieces.Frames[i] == null)
-						continue;
-
-					int index = i;
-					pieceTasks.Add(UniTask.RunOnThreadPool(() =>
-					{
-						pieceMeshes[index] = SweepMeshBuilder.Build(snapshot.Pieces, index, ct, reportProgress);
-					}, true, ct));
-				}
-
-				await UniTask.WhenAll(pieceTasks);
-				snapshot.PieceMeshes = pieceMeshes;
-				snapshot.PieceStartRings = new Vector3[pieceCount][];
-				snapshot.PieceEndRings = new Vector3[pieceCount][];
-				for (int i = 0; i < pieceCount; i++)
-				{
-					snapshot.PieceStartRings[i] = pieceMeshes[i].StartRing;
-					snapshot.PieceEndRings[i] = pieceMeshes[i].EndRing;
-				}
-
-				SweepRibbonNetworkBuildResult globalNetwork = null;
-				string globalNetworkFailure = null;
-				bool globalMaterialCompatible = junctionMaterial == null || junctionMaterial == material;
-				bool tryGlobalRectangle = globalMaterialCompatible && SweepRectangleNetworkMeshBuilder.CanBuild(snapshot, out globalNetworkFailure);
-				bool tryGlobalRibbon = !tryGlobalRectangle && globalMaterialCompatible && SweepRibbonNetworkMeshBuilder.CanBuild(snapshot, out globalNetworkFailure);
-				bool tryGlobalHeightfield = !tryGlobalRectangle && !tryGlobalRibbon && globalMaterialCompatible && SweepHeightfieldNetworkMeshBuilder.CanBuild(snapshot, out globalNetworkFailure);
-				SweepSnapshot globalBooleanSnapshot = null;
-				bool tryGlobalBoolean = false;
-				if (!tryGlobalRectangle && !tryGlobalRibbon && !tryGlobalHeightfield && globalMaterialCompatible)
-				{
-					await UniTaskEditor.SwitchToEditorThread();
-					globalBooleanSnapshot = BuildSnapshot(ct);
-					tryGlobalBoolean = globalBooleanSnapshot != null && globalBooleanSnapshot.Frames != null && globalBooleanSnapshot.Frames.Length > 0;
-				}
-				bool tryGlobalNetwork = tryGlobalRectangle || tryGlobalRibbon || tryGlobalHeightfield || tryGlobalBoolean;
-				if (tryGlobalNetwork)
-				{
-					await UniTask.RunOnThreadPool(() =>
-					{
-						SweepRibbonNetworkBuildResult built;
-						string failure;
-						bool builtSuccessfully;
-						if (tryGlobalRectangle)
-							builtSuccessfully = SweepRectangleNetworkMeshBuilder.TryBuild(snapshot, ct, reportProgress, out built, out failure);
-						else if (tryGlobalRibbon)
-							builtSuccessfully = SweepRibbonNetworkMeshBuilder.TryBuild(snapshot, ct, reportProgress, out built, out failure);
-						else if (tryGlobalHeightfield)
-							builtSuccessfully = SweepHeightfieldNetworkMeshBuilder.TryBuild(snapshot, ct, reportProgress, out built, out failure);
-						else
-						{
-							SweepMeshData booleanMesh = SweepNetworkBooleanMeshBuilder.Build(globalBooleanSnapshot, topology, ct, reportProgress);
-							builtSuccessfully = booleanMesh.Vertices != null && booleanMesh.Triangles != null && booleanMesh.Triangles.Length > 0;
-							built = builtSuccessfully
-								? new SweepRibbonNetworkBuildResult { Meshes = new[] { booleanMesh } }
-								: null;
-							failure = booleanMesh.FailureCode;
-						}
-						if (builtSuccessfully)
-							globalNetwork = built;
-						else
-							globalNetworkFailure = failure;
-					}, true, ct);
-				}
-
-				SweepMeshData[] junctionMeshes = null;
-				if (globalNetwork == null)
-				{
-					junctionMeshes = new SweepMeshData[junctionCount];
-					var junctionTasks = new List<UniTask>(junctionCount);
-					bool useRibbonJunctions = SweepRibbonJunctionMeshBuilder.CanBuild(snapshot);
-					for (int j = 0; j < junctionCount; j++)
-					{
-						int index = j;
-						junctionTasks.Add(UniTask.RunOnThreadPool(() =>
-						{
-							junctionMeshes[index] = useRibbonJunctions
-								? SweepRibbonJunctionMeshBuilder.Build(snapshot, index, ct, reportProgress)
-								: SweepJunctionBooleanMeshBuilder.Build(snapshot, index, ct, reportProgress);
-						}, true, ct));
-					}
-					await UniTask.WhenAll(junctionTasks);
-				}
-				await UniTaskEditor.SwitchToEditorThread();
-
-				bool outOfBounds = false;
-				if (globalNetwork != null)
-				{
-					SweepMeshData[] globalMeshes = globalNetwork.Meshes;
-					for (int i = 0; i < globalMeshes.Length; i++)
-					{
-						SweepMeshData mesh = globalMeshes[i];
-						outOfBounds |= mesh.TerrainOutOfBounds;
-						results.Add(new MeshInstanceData
-						{
-							Name = globalMeshes.Length > 1 ? $"{snapshot.Name} {i}" : snapshot.Name,
-							Material = material,
-							Vertices = mesh.Vertices,
-							Uvs = mesh.Uvs,
-							Triangles = mesh.Triangles,
-							Collider = snapshot.Collider
-						});
-					}
-				}
-				else
-				{
-					if (tryGlobalNetwork && !string.IsNullOrEmpty(globalNetworkFailure))
-						Debug.LogWarning($"[Sweep Spline] Global {(tryGlobalRectangle ? "Rectangle" : tryGlobalRibbon ? "Ribbon" : tryGlobalHeightfield ? "Heightfield" : "Boolean")} fallback: node {Address}, code {globalNetworkFailure}.");
-					int builtStrips = 0;
-					for (int i = 0; i < pieceMeshes.Length; i++)
-					{
-						if (pieceMeshes[i].Vertices != null)
-							builtStrips++;
-					}
-
-					for (int i = 0; i < pieceMeshes.Length; i++)
-					{
-						var mesh = pieceMeshes[i];
-						if (mesh.Vertices == null)
-							continue;
-
-						outOfBounds |= mesh.TerrainOutOfBounds;
-						results.Add(new MeshInstanceData
-						{
-							Name = builtStrips > 1 ? $"{snapshot.Name} {i}" : snapshot.Name,
-							Material = material,
-							Vertices = mesh.Vertices,
-							Uvs = mesh.Uvs,
-							Triangles = mesh.Triangles,
-							Collider = snapshot.Collider
-						});
-					}
-
-					var patchMaterial = junctionMaterial != null ? junctionMaterial : material;
-					BuildJunctionResults(junctionMeshes, snapshot.Name, patchMaterial, snapshot.Collider, Address.ToString(), results, ref outOfBounds);
-				}
-
-				if (outOfBounds)
-					Debug.LogWarning("[Sweep Spline] Part of the sweep is outside the terrain and keeps the spline height.");
-			}
-
-			Results.Value = results;
-
-			await SyncSceneAsync(results, ct);
-		}
-
-		internal static int BuildJunctionResults(SweepMeshData[] meshes, string name, Material material, bool collider, string nodeAddress, List<MeshInstanceData> results, ref bool outOfBounds)
-		{
-			int built = 0;
-			for (int j = 0; j < meshes.Length; j++)
-			{
-				if (meshes[j].Vertices != null)
-					built++;
-			}
-
-			int failed = 0;
-			for (int j = 0; j < meshes.Length; j++)
-			{
-				var mesh = meshes[j];
-				if (mesh.Vertices == null)
-				{
-					if (mesh.FailureCode != null)
-					{
-						failed++;
-						Debug.LogWarning($"[Sweep Spline] Junction patch failed: node {nodeAddress}, junction {j}, code {mesh.FailureCode}.");
-					}
-					continue;
-				}
-
-				outOfBounds |= mesh.TerrainOutOfBounds;
-				results.Add(new MeshInstanceData
-				{
-					Name = built > 1 ? $"{name} Junction {j}" : $"{name} Junction",
-					Material = material,
-					Vertices = mesh.Vertices,
-					Uvs = mesh.Uvs,
-					Triangles = mesh.Triangles,
-					Collider = collider
-				});
-			}
-
-			if (failed > 0)
-				Debug.LogWarning($"[Sweep Spline] {failed} junction patches failed; see earlier diagnostics.");
-
-			return failed;
-		}
-
 		private SweepSnapshot BuildSnapshot(CancellationToken ct, List<Spline> accepted = null)
 		{
 			var profile = ResolveProfile(Warn);
@@ -723,12 +369,6 @@ namespace PCG.Sweep
 			var framesList = new List<SweepFrame[]>();
 			var closedList = new List<bool>();
 
-			float minX = float.MaxValue;
-			float minZ = float.MaxValue;
-			float maxX = float.MinValue;
-			float maxZ = float.MinValue;
-			bool hasBounds = false;
-
 			var splinesInput = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesInput != null)
 			{
@@ -753,27 +393,8 @@ namespace PCG.Sweep
 						framesList.Add(frames);
 						closedList.Add(spline.Closed);
 						accepted?.Add(spline);
-
-						for (int f = 0; f < frames.Length; f++)
-						{
-							float3 p = frames[f].Position;
-							minX = math.min(minX, p.x);
-							maxX = math.max(maxX, p.x);
-							minZ = math.min(minZ, p.z);
-							maxZ = math.max(maxZ, p.z);
-							hasBounds = true;
-						}
 					}
 				}
-			}
-
-			SweepTerrainWindow terrainWindow = null;
-			var terrain = GetInputValue(nameof(Data.Terrain), Data.Terrain);
-			if (terrain != null && hasBounds)
-			{
-				var terrainOffset = GetInputValue(nameof(Data.TerrainOffset), Data.TerrainOffset);
-				float margin = lateralExtent;
-				terrainWindow = CaptureTerrainWindow(terrain, terrainOffset, minX - margin, maxX + margin, minZ - margin, maxZ + margin);
 			}
 
 			var capStartFlags = new bool[framesList.Count];
@@ -795,7 +416,7 @@ namespace PCG.Sweep
 				WidthLut = widthLut,
 				HeightLut = heightLut,
 				TwistLut = twistLut,
-				Terrain = terrainWindow,
+				Terrain = null,
 				MaxLateralExtent = lateralExtent,
 				UvScale = uvScale,
 				HeightOffset = heightOffset,
@@ -898,102 +519,6 @@ namespace PCG.Sweep
 			return true;
 		}
 
-		private static SweepTerrainWindow CaptureTerrainWindow(SweepNetworkSolveResult solve, SweepSnapshot pieces, TerrainData terrain, Vector3 origin, float lateralExtent)
-		{
-			float minX = float.MaxValue;
-			float minZ = float.MaxValue;
-			float maxX = float.MinValue;
-			float maxZ = float.MinValue;
-			bool hasBounds = false;
-
-			for (int i = 0; i < pieces.Frames.Length; i++)
-			{
-				var frames = pieces.Frames[i];
-				if (frames == null)
-					continue;
-
-				for (int f = 0; f < frames.Length; f++)
-				{
-					float3 p = frames[f].Position;
-					minX = math.min(minX, p.x);
-					maxX = math.max(maxX, p.x);
-					minZ = math.min(minZ, p.z);
-					maxZ = math.max(maxZ, p.z);
-					hasBounds = true;
-				}
-			}
-
-			float maxSetback = 0f;
-			for (int j = 0; j < solve.Junctions.Length; j++)
-			{
-				var junction = solve.Junctions[j];
-				minX = math.min(minX, junction.Center.x);
-				maxX = math.max(maxX, junction.Center.x);
-				minZ = math.min(minZ, junction.Center.z);
-				maxZ = math.max(maxZ, junction.Center.z);
-				hasBounds = true;
-
-				for (int a = 0; a < junction.Arms.Length; a++)
-				{
-					var arm = junction.Arms[a];
-					for (int f = 0; f < arm.ApproachFrames.Length; f++)
-					{
-						float3 p = arm.ApproachFrames[f].Position;
-						minX = math.min(minX, p.x);
-						maxX = math.max(maxX, p.x);
-						minZ = math.min(minZ, p.z);
-						maxZ = math.max(maxZ, p.z);
-					}
-					float len = solve.PieceSplines[arm.PieceIndex].GetLength();
-					float sb = arm.AtPieceStart ? solve.RangeStart[arm.PieceIndex] : len - solve.RangeEnd[arm.PieceIndex];
-					maxSetback = math.max(maxSetback, sb);
-				}
-			}
-
-			if (!hasBounds)
-				return null;
-
-			float margin = lateralExtent + maxSetback;
-			return CaptureTerrainWindow(terrain, origin, minX - margin, maxX + margin, minZ - margin, maxZ + margin);
-		}
-
-		private static SweepTerrainWindow CaptureTerrainWindow(TerrainData terrain, Vector3 origin, float worldMinX, float worldMaxX, float worldMinZ, float worldMaxZ)
-		{
-			int resolution = terrain.heightmapResolution;
-			Vector3 size = terrain.size;
-
-			float txMin = (worldMinX - origin.x) / size.x * (resolution - 1);
-			float txMax = (worldMaxX - origin.x) / size.x * (resolution - 1);
-			float tzMin = (worldMinZ - origin.z) / size.z * (resolution - 1);
-			float tzMax = (worldMaxZ - origin.z) / size.z * (resolution - 1);
-
-			int x0 = math.clamp((int)math.floor(txMin) - 1, 0, resolution - 1);
-			int x1 = math.clamp((int)math.ceil(txMax) + 1, 0, resolution - 1);
-			int z0 = math.clamp((int)math.floor(tzMin) - 1, 0, resolution - 1);
-			int z1 = math.clamp((int)math.ceil(tzMax) + 1, 0, resolution - 1);
-
-			int width = x1 - x0 + 1;
-			int height = z1 - z0 + 1;
-
-			var heights = terrain.GetHeights(x0, z0, width, height);
-
-			return new SweepTerrainWindow
-			{
-				Heights = heights,
-				X0 = x0,
-				Z0 = z0,
-				Width = width,
-				Height = height,
-				Resolution = resolution,
-				SizeX = size.x,
-				SizeY = size.y,
-				SizeZ = size.z,
-				OriginX = origin.x,
-				OriginY = origin.y,
-				OriginZ = origin.z
-			};
-		}
-
 		private SweepProfile ResolveProfile(Action<string> warn)
 		{
 			var connected = GetInputValue(nameof(Data.Profile), Data.Profile);
@@ -1065,10 +590,6 @@ namespace PCG.Sweep
 			{
 				int hash = 17;
 
-				var terrain = GetInputValue(nameof(Data.Terrain), Data.Terrain);
-				if (terrain != null)
-					hash = (hash * 397) ^ PcgTerrainContentVersion.Get(terrain);
-
 				var profile = ResolveProfile(null);
 				if (profile != null)
 					hash = (hash * 397) ^ profile.GetContentHash();
@@ -1076,9 +597,6 @@ namespace PCG.Sweep
 				hash = (hash * 397) ^ CurveHash(Data.WidthByT);
 				hash = (hash * 397) ^ CurveHash(Data.HeightByT);
 				hash = (hash * 397) ^ CurveHash(Data.TwistByT);
-
-				var topology = GetInputValue(nameof(Data.Topology), Data.Topology);
-				hash = (hash * 397) ^ (topology != null ? topology.GetContentHash() : 0);
 				return hash;
 			}
 		}

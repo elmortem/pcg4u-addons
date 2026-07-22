@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260722_350000",
-    "status": "success",
-    "logs": [],
-    "return_value": "M5_SharpV: g=2/2 b=1/1(fan=1) r=0 tris=55 -> Temp/PatchDiag/M5_SharpV.png ;; M5_SmoothCorner: g=1/1 b=0/0(fan=0) r=0 tris=58 -> Temp/PatchDiag/M5_SmoothCorner.png ;; M5_Hairpin: g=2/2 b=1/1(fan=1) r=0 tris=63 -> Temp/PatchDiag/M5_Hairpin.png ;; M5_Cross: g=4/4 b=0/0(fan=0) r=2 tris=36 -> Temp/PatchDiag/M5_Cross.png ;; M5_RoundedBend: g=1/1 b=0/0(fan=0) r=0 tris=40 -> Temp/PatchDiag/M5_RoundedBend.png",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

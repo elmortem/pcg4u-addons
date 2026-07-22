@@ -23,10 +23,6 @@ namespace PCG.Sweep
 		public List<Spline> Splines = new();
 
 		[Input(Connection = PcgConnectionType.Override)]
-		[PcgMemberInfo("Optional network topology from Spline Intersection; connected builds junction patches.", Tags = new[] { "topology", "network", "junction" })]
-		public SplineNetworkTopology Topology;
-
-		[Input(Connection = PcgConnectionType.Override)]
 		[PcgMemberInfo("Optional profile override reused from a Profile node.", Tags = new[] { "profile", "override" })]
 		public SweepProfile Profile;
 
@@ -86,23 +82,11 @@ namespace PCG.Sweep
 		public bool ShowAllCuts;
 
 		[Input]
-		[PcgMemberInfo("Multiplier of the automatic junction setback.", Tags = new[] { "setback", "junction" })]
-		public float SetbackScale = 1f;
-
-		[Input]
 		[PcgMemberInfo("Longitudinal UV scale along the sweep.", Tags = new[] { "uv", "scale" })]
 		public float UvScale = 0.25f;
 
 		[Input]
-		[PcgMemberInfo("Terrain the mesh is draped over; empty keeps it in the spline frame.", Tags = new[] { "terrain" })]
-		public TerrainData Terrain;
-
-		[Input]
-		[PcgMemberInfo("World-space offset of the terrain.", Tags = new[] { "terrain", "offset" })]
-		public Vector3 TerrainOffset;
-
-		[Input]
-		[PcgMemberInfo("Vertical offset above the terrain surface.", Tags = new[] { "height", "offset" })]
+		[PcgMemberInfo("Vertical offset added to the mesh height.", Tags = new[] { "height", "offset" })]
 		public float HeightOffset = 0.1f;
 
 		[Input]
