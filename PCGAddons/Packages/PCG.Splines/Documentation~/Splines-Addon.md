@@ -12,6 +12,7 @@ Addon for working with Unity Splines. Provides nodes for creating, modifying, an
 * [[Change Spline Position Node|PCG.Splines/Splines/Change-Spline-Position-Node]]
 * [[Spline From Points Node|PCG.Splines/Splines/Spline-From-Points-Node]]
 * [[Resample Splines Node|PCG.Splines/Splines/Resample-Splines-Node]]
+* **Spline To Terrain**
 * [[Smooth Splines Node|PCG.Splines/Splines/Smooth-Splines-Node]]
 * [[Offset Splines Node|PCG.Splines/Splines/Offset-Splines-Node]]
 * [[Join Splines Node|PCG.Splines/Splines/Join-Splines-Node]]
@@ -27,4 +28,17 @@ Addon for working with Unity Splines. Provides nodes for creating, modifying, an
 
 ### Create Points
 * [[Points Offset Splines Node|PCG.Splines/CreatePoints/Points-Offset-Splines-Node]]
-* [[Splines Surface Node|PCG.Splines/CreatePoints/Splines-Surface-Node
+* [[Splines Surface Node|PCG.Splines/CreatePoints/Splines-Surface-Node]]
+
+## Spline To Terrain
+
+Projects spline knots onto a `TerrainData` heightfield before downstream mesh or point generation.
+
+* **Splines** — source world-space splines.
+* **Terrain** — heightfield data. When empty, valid inputs pass through unchanged.
+* **Terrain Origin** — world-space position of the Terrain object. `TerrainData` does not store this transform, so this is a coordinate origin rather than a visual offset.
+* **Height Offset** — world-Y lift applied after projection.
+* **Align To Terrain Normal** — aligns knot Up with the sampled terrain normal while preserving the evaluated curve tangents.
+* **Resample / Step** — optionally rebuilds the curve with the same fixed-step AutoSmooth algorithm as `Resample Splines` before projection. Disabled mode copies knots, tangent metadata and embedded spline data.
+
+Out-of-bounds knots keep their original height and orientation. The node fits the spline centreline only; it does not drape the full width of a mesh generated later.

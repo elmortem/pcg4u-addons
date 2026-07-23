@@ -16,6 +16,7 @@
 | `JoinSplinesNode` | Splines | склейка открытых сплайнов по близким концам | `Splines, Threshold` → `Results` |
 | `OffsetSplinesNode` | Splines | боковое смещение сплайна | `Splines, Offset, Up` → `Results` |
 | `ResampleSplinesNode` | Splines | передискретизация с шагом | `Splines, Step` → `Results` |
+| `SplineToTerrainNode` | Splines | укладывает knots сплайна на heightfield, опционально передискретизирует и выравнивает Up | `Splines, Terrain, TerrainOrigin, HeightOffset, AlignToTerrainNormal, Resample, Step` → `Results` |
 | `SmoothSplinesNode` | Splines | лапласово сглаживание | `Splines, Iterations, Strength` → `Results` |
 | `RandomSplineNode` | Splines | случайные сплайны через пары точек | `Points, Up, Segments, Height, Seed` → `Results` |
 | `ClosedSplinesNode` | Splines | разделить на замкнутые/открытые | `Splines` → `Results, OpenedSplines` |
@@ -54,3 +55,11 @@ First-class тип для передачи пересечений между н�
 - `SplinePoints` (static) — генерация `PointData` на сплайне (Surface/Volume × Regular/Random; `SurfaceRegular` — по длине дуги). `GetPointsByDistance` — точки с шагом по дистанции (с `Distribute`).
 - `SplineNodeRenderer` (`CustomPcgNodeRenderer`) — кнопки Start/Stop Edit в ноде.
 - `GameObjectsToSplinesAdapter` (`PcgPortAdapter`) — `List<GameObject>` → `List<Spline>`.
+- `SplineResampleUtility` — общий fixed-step AutoSmooth алгоритм для `ResampleSplinesNodeExecutor` и `SplineToTerrainNodeExecutor`.
+- `SplineTerrainWindow` — immutable bilinear height-window и world-space normal sampling для `SplineToTerrainNodeExecutor`.
+
+## Spline To Terrain
+
+`SplineToTerrainNode` проецирует центральную линию сплайна на `TerrainData`. `TerrainOrigin` задаёт мировую позицию объекта Terrain, потому что сам `TerrainData` трансформа не содержит; `HeightOffset` — отдельный художественный подъём по мировому Y. `AlignToTerrainNormal` меняет knot frame с компенсацией локальных tangents, поэтому форма кривой не меняется от одного только выравнивания Up.
+
+При `Resample=false` используется полная копия исходного сплайна с metadata и embedded data. При `Resample=true` сначала строится новая AutoSmooth-сетка тем же алгоритмом, что у `Resample Splines`. Узлы вне bounds сохраняют исходные Y и Up. Нода укладывает только сплайн: драпировка полной ширины будущего меша не выполняется.

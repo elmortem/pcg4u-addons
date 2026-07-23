@@ -9,7 +9,6 @@ namespace PCG.Sweep
 		public int[] Triangles;
 		public Vector3[] StartRing;
 		public Vector3[] EndRing;
-		public bool TerrainOutOfBounds;
 		public string FailureCode;
 	}
 }

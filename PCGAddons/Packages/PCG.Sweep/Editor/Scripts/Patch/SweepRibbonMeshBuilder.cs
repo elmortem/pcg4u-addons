@@ -21,7 +21,6 @@ namespace PCG.Sweep
 			float rightU = source.ProfileUs[negativeProfile];
 			var vertices = new Vector3[count * 2];
 			var uvs = new Vector2[count * 2];
-			bool outOfBounds = false;
 
 			for (int i = 0; i < count; i++)
 			{
@@ -35,8 +34,8 @@ namespace PCG.Sweep
 				int next = math.min(count - 1, i + 1);
 				float3 right = SweepRibbonSampling.Right3D(path.Tangents[i], path.Ups[i], path.Positions[prev], path.Positions[next]);
 				float halfWidth = profileHalf * SampleLut(source.WidthLut, path.NormalizedTs[i]);
-				float3 left = Elevate(path.Positions[i] + right * halfWidth, source, ref outOfBounds);
-				float3 rightPoint = Elevate(path.Positions[i] - right * halfWidth, source, ref outOfBounds);
+				float3 left = Elevate(path.Positions[i] + right * halfWidth, source);
+				float3 rightPoint = Elevate(path.Positions[i] - right * halfWidth, source);
 				int offset = i * 2;
 				vertices[offset] = left;
 				vertices[offset + 1] = rightPoint;
@@ -62,22 +61,13 @@ namespace PCG.Sweep
 			{
 				Vertices = vertices,
 				Uvs = uvs,
-				Triangles = triangleArray,
-				TerrainOutOfBounds = outOfBounds
+				Triangles = triangleArray
 			};
 		}
 
-		private static float3 Elevate(float3 point, SweepSnapshot source, ref bool outOfBounds)
+		private static float3 Elevate(float3 point, SweepSnapshot source)
 		{
-			float y = point.y + source.HeightOffset;
-			if (source.Terrain != null)
-			{
-				if (source.Terrain.TrySampleHeight(point.x, point.z, out float h))
-					y = h + source.HeightOffset;
-				else
-					outOfBounds = true;
-			}
-			point.y = y;
+			point.y += source.HeightOffset;
 			return point;
 		}
 

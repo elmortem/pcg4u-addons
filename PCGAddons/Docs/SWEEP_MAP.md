@@ -2,67 +2,57 @@
 
 > Аддон PCG4U. Базовые контракты ядра, раскладку папок и чек-лист новой ноды см. в [`PROJECT_MAP.md`](PROJECT_MAP.md).
 
-**Структура аддона:** `Scripts/` — рантайм-ноды и опорные типы (asmdef `PCG.Sweep`); `Editor/` — исполнители (asmdef `PCG.Sweep.Editor`).
+`Scripts/` содержит runtime-ноды и типы профиля (`PCG.Sweep`), `Editor/` — исполнители и mesh builders (`PCG.Sweep.Editors`).
 
-Дороги, тропы, стены, русла: 2D-сечение (`SweepProfile`) выметается вдоль `List<Spline>`, на выходе ядровый `MeshInstanceData`, материализация тем же `MeshInstanceMaker`. UV по метражу (`V = distance * UvScale`, `U` поперёк 0..1), ширина/высота по кривым, twist, крышки, драпировка на террейн. Шаг адаптивный: кольца на квантовой сетке `Step`, прямые участки прорежаются до `MaxStep`, дуги уплотняются при накопленном повороте тангенса свыше `MaxAngle`; складки на крутых поворотах (радиус меньше полуширины) снимаются тримом самопересечений колонок в билдере. Подключённая к порту `Topology` та же нода `SweepSplineNode` включает сетевой режим: сплайны режутся на куски по перекрёсткам (setback от центра), каждый junction закрывается патчем-«плитой» (контур из торцевых колец рукавов и Безье-кромок между углами, верхний/нижний листы ear-clipping'ом + боковые ленты) отдельным объектом на перекрёсток. Зависит от `PCG`, `PCG.Splines` (сеть перекрёстков), `Unity.Splines`, `Unity.Mathematics`, `UniTask`.
+Аддон строит дороги, тропы, стены, трубы и русла из world-space `List<Spline>`. UV идут по метражу, ширина/высота управляются кривыми, профиль может вращаться, торцы — закрываться. `SweepSplineNode` не читает heightmap: если ось должна идти по поверхности, перед ним ставится `SplineToTerrainNode` из PCG.Splines. Собственный `HeightOffset` Sweep остаётся независимым мировым Y-сдвигом готовой геометрии.
 
 ## Ноды
 
 | Нода | Категория | Назначение | Input → Output |
 |---|---|---|---|
-| `ProfileNode` | Sweep | строит 2D-профиль сечения | `Shape, Width, Height, CustomPoints, CustomClosed` → `Profile: SweepProfile` |
-| `SweepSplineNode` | Sweep | выметает профиль вдоль сплайнов, строит меши; с `Topology` — сетевой режим с патчами перекрёстков | `Splines, Topology(override), Profile(override), Shape/Width/Height/Custom*, Step, MaxStep, MaxAngle, Width/Height/TwistByT, CapEnds, SetbackScale, UvScale, Terrain, TerrainOffset, HeightOffset, Name, Material, JunctionMaterial, Collider` → `Results: List<MeshInstanceData>` |
+| `ProfileNode` | Sweep | строит переиспользуемый 2D-профиль | `Shape, Width, Height, Sides, CustomPoints, CustomClosed` → `Profile: SweepProfile` |
+| `SweepSplineNode` | Sweep | выметает inline- или подключённый профиль и строит меши | `Splines, Profile(override), Shape/Width/Height/Sides/Custom*, Step, MaxStep, MaxAngle, Width/Height/TwistByT, CapEnds, MergeIntersections, MergeThickness, UvScale, HeightOffset, Name, Material, JunctionMaterial, Collider` → `Results: List<MeshInstanceData>` |
 
-## Пресеты (`Presets/`)
-Поставляемые сабграфы-пресеты (`PcgSubGraph`), биндятся в чистом проекте с задекларированными зависимостями (`com.elmortem.pcg.splines` в `package.json`). Вход сплайнов — блекборд-переменная `SplinesValue` (`IsArray` → мультипорт `vSplines` на `SubGraphNode`); выходы — `SubGraphOutputNode` (`InstanceDatasValue`), материализуются `GameObjectInstanceMaker` + `MeshInstanceMaker` на объекте-хосте.
+## Пресет StonePath
 
-- `StonePath.asset` — каменная тропа. Полотно: `SweepSplineNode` (Ribbon, `Width`←пилюля, `Terrain`/`TerrainOffset`←пилюля `Terrain`, `Material`←`PathMaterial`, `Collider=true`) → выход `Path`. Обочины: `PointsOffsetSplines` (`Distance=1.2`, `Offset`←`StoneOffset`, `BothSides`) → `PointToTerrain` (Surface) → `ChangeScale`(Set 0.3–0.9) → `ChangeAngle`(Set 0–360) → `GameObjectWeights`(`Stones`) → выход `Stones`. Переменные: `Splines, Terrain, PathMaterial, Stones, Width, StoneOffset, Seed`. Инвариант: `StoneOffset >= Width/2 + радиус камня`.
+`Packages/PCG.Sweep/Presets/StonePath.asset` — `PcgSubGraph`, а не отдельная нода.
 
-## Опорные типы (`Scripts/Sweep/`, рантайм)
-- `ProfileShape` (enum) — Ribbon / Rectangle / HalfPipe / Custom.
-- `SweepProfile` (class) — значение между нодами: `Points: float2[]` (X вправо, Y вверх), `Us: float[]`, `Segments: int[]` (пары индексов рёбер), `Closed: bool`, `GetContentHash()`. Наружная нормаль ребра `a→b` — `(-dy, dx)`; создаётся только билдером (инварианты гарантированы).
-- `SweepProfileBuilder` (static) — единственная точка построения профиля (используется и `ProfileNode`, и инлайн-дефолтом `SweepSplineNode`): Ribbon (нормаль +Y), Rectangle (8 вершин, углы дублированы = hard edges, наружные нормали низ/право/верх/лево, перим-UV со швом), HalfPipe (9 общих вершин = гладкий жёлоб), Custom (фильтр NaN/дублей, closed нормализует winding по signed area под наружные нормали + дубль-шов, fallback на Ribbon).
+- Ось полотна: `Splines → SplineToTerrainNode → SweepSplineNode`.
+- `SplineToTerrainNode`: `Resample=true`, `Step=2`, `AlignToTerrainNormal=true`, `HeightOffset=0.08`; `TerrainObjectValue.Terrain → Terrain`, `TerrainObjectValue.Offset → TerrainOrigin`.
+- `SweepSplineNode`: Ribbon, `HeightOffset=0`, `Width` и `PathMaterial` приходят из variables, `Collider=true`.
+- Тот же спроецированный spline идёт в `PointsOffsetSplinesNode`; после бокового смещения существующий `PointToTerrainNode` отдельно укладывает точки камней.
+- Входы: `Splines, Terrain, PathMaterial, Stones, Width, StoneOffset, Seed`. Выходы: `Path`, `Stones`.
+- Хост требует `MeshInstanceMaker` и `GameObjectInstanceMaker`. Инвариант: `StoneOffset >= Width / 2 + радиус самого крупного камня`.
 
-## Editor (`Editor/Scripts/Exec/`)
-- `ProfileNodeExecutor` (`PcgSyncNodeExecutor<ProfileNode>`) — `DoCompute` через `SweepProfileBuilder.Build`.
-- `SweepSplineNodeExecutor` (`PcgAsyncPreviewNodeExecutor<SweepSplineNode>`, `INodeInfo`/`IInstancesNode`) — полный immutable snapshot на главном потоке → геометрия батчами в пуле потоков (`UniTask.RunOnThreadPool`, индексированные слоты) → единый finalize (синхронизация сцены при любом валидном результате, включая пустой; `try/finally` на `Begin/End`). При `MergeIntersections=false` Ribbon строится прямым планово-стабильным quad-strip через `SweepRibbonMeshBuilder`; Rectangle сначала переводится в тот же Ribbon, затем готовый верх экструдируется `SweepPrismBuilder`. HalfPipe строится полными кольцами через `SweepProfileMeshBuilder`; Pipe/Custom остаются на профильном `SweepMeshBuilder`. `GetVersionSalt` подмешивает `PcgTerrainContentVersion.Get` разрешённого `TerrainData`, `GetContentHash()` профиля и хеш ключей трёх `AnimationCurve`. Превью пустое (результат — реальные объекты сцены).
-- `SweepSnapshot` / `SweepFrame` / `SweepMeshData` / `SweepTerrainWindow` — чистые данные снапшота (профиль, кадры сплайнов `Position/Tangent/Up/T/Distance`, LUT кривых `float[256]`, боковой вылет профиля `MaxLateralExtent`, окно высот террейна с билинейным `TrySampleHeight`). Капы — пофайлово по концам каждого сплайна: `CapStartFlags[]` / `CapEndFlags[]` (индекс = индекс сплайна в `Frames`), чтобы `Sweep Network` капал только свободные концы кусков.
-- `SweepWeldKey` (readonly struct) — ключ сварки вершин по квантованным позиции+UV (1e-5); веер с одной позицией, но разным V ключами не совпадает и не сваривается.
-- `SweepMeshBuilder` (static) — построение меша одного сплайна из снапшота фазами (каждые 1024 элемента — `ct`/прогресс): реортогонализация кадра + anti-flip базис → сырые вершины/UV (без Unity API, при террейне XZ по проекции right, вертикали в `verticalOffsets`) → `TrimColumns` (снятие складок крутых поворотов по самопересечению офсетных ломаных колонок в 2D-проекции на плоскость усреднённого up: spatial-hash сегментов, ближайшее вперёд пересечение с защитами по накопленному повороту `TurnLimit` и 3D-зазору `BridgeTolerance`, кольца петли снапаются в точку пересечения; для closed два прогона со сдвигом на полкольца, шов из кольца 0) → драпировка на террейн (только Y по билинейному семплу, XZ от трима) → безусловный мировой Y-сдвиг `HeightOffset` (работает и без террейна, включая terrain-out-of-bounds fallback) → крышки по концам раздельно (`applyFront`/`applyBack` из `CapStartFlags`/`CapEndFlags`) ear-clipping'ом → `Cleanup` (`internal static`; сварка по `SweepWeldKey`, отброс дегенератных треугольников по площади `MinTriangleArea`, детерминированная компакция; переиспользуется билдером патчей). Читает только снапшот (без Unity API).
-- `SweepRibbonMeshBuilder` (`internal static`) — простой non-merge путь для Ribbon: использует тот же `SweepRibbonSampling.Right3D`, что merge-режим, строит по две кромочные вершины на каждый адаптивный сэмпл и соединяет соседние кольца quad-strip'ом. Ширина остаётся плановой при 3D-высоте сплайна, `HeightOffset` применяется ко всему полотну, UV — поперечный `ProfileUs` и продольный station·`UvScale`.
-- `SweepProfileMeshBuilder` (`internal static`) — прямой путь HalfPipe: строит все точки профильного кольца на каждом адаптивном сэмпле, сохраняет плановую ширину на 3D-уклонах и соединяет только соседние кольца. Общие вершины между восьмью сегментами сохраняют гладкие нормали полукруглого профиля.
+## Runtime-типы
 
-### Сетевой режим — Topology (`Editor/Scripts/Exec/`)
-- Метод `SweepSplineNodeExecutor.ComputeNetworkAsync` (включается подключением `Topology`) — главный поток: резолв профиля, flatten сплайнов, `SplineSnapshot.Capture`, читка топологии/материалов → пул: `SweepNetworkSolver.SolveSplit` → главный поток: `SweepNetworkSolver.BuildNetwork` + `SweepNetworkFrames.BuildRangeFrames` по кускам, сборка `SweepSnapshot`/`SweepNetworkSnapshot`, захват окна террейна по баундам кадров/центров junction (`margin = lateralExtent + maxSetback`) → пул: параллельно `SweepMeshBuilder.Build` по кускам и `SweepJunctionMeshBuilder.Build` по junction → главный поток: ленты (`Material`) + патчи отдельными объектами через `BuildJunctionResults` (`JunctionMaterial ?? Material`, имя `{Name} Junction {i}` при >1 патче, иначе `{Name} Junction`), единый `SyncScene`. `GetVersionSalt` подмешивает террейн-версию, хеш профиля и `Topology.GetContentHash()`. Без топологии/junction — сплошной свип целых сплайнов без патчей.
-- `SweepNetworkSolver` (`internal static`) + `SweepNetworkSolveResult` — детерминированный солвер: сплит сплайнов переиспользованным `SplineSplitSolver`, геометрическая привязка концов кусков к junction (кут-концы всегда, свободные — если ближе `lateralExtent`), setback по митрам угловых зазоров (`lateralExtent / tan(γ/2)`, кламп ≤ 2.5·ширины, кламп ≤ 0.9 длины куска), два прохода (azimuth на дистанции 0 → финальные frame/basis на дистанции setback), заполнение `arm.EdgeDir` (плановая наружная проекция тангенса). Возвращает `PieceSplines`, `RangeStart/End`, `FreeStart/End`, `PieceClosed`, `SourceLength`, `PieceStartDistance`, `SweepNetworkJunction[]`.
-- `SweepNetworkFrames` (`internal static`) — `BuildRangeFrames` (квантовый адаптивный марш `SweepSplineNodeExecutor.BuildFrames`, перенесённый на диапазон куска; `Frame.Distance` локальная, чтобы V стартовал с 0 на торце).
-- `SweepProfileChains` (`internal sealed`) — разбор профиля один раз на `Build`: `UpperChain`/`LowerChain` (верхняя/нижняя цепочки индексов), `RightColumn`/`LeftColumn` (колонки крайних-x, отсортированы по возрастанию `y`, дедуп по `y`), `Closed`. Открытый профиль: `UpperChain = [0..vpr-1]`, колонки — концы полилинии, нижнего листа/лент нет. Закрытый: контур `SweepMeshBuilder.ExtractOutline`+`MapOutlineToProfile` (нормализация CCW), правый/левый ран по `x`, цепочки — CCW-пути контура между верхами/низами ранов.
-- `SweepJunctionMeshBuilder` (`internal static`) — меш одного junction «плита по контуру»: единый замкнутый контур из торцевых колец рукавов (обход от CW- к CCW-углу) и квадратичных Безье-кромок между углами соседних рукавов (контрольная точка `ControlPoint`, число сэмплов по угловому зазору/длине с террейном); верхний лист (и нижний при закрытом профиле) — ear-clipping в плане (`TriangulateLoop`) после схлопывания коллинеарных кромочных точек (`CollapseColinear`, кольцевые не трогаются) и звёздно-монотонной очистки контура относительно центра (`MakeStarMonotone` — снимает скрещенные углы перекрытых острых рукавов); боковые ленты вдоль кромок по этажам колонок (UV: `U` из `ProfileUs`, `V` по длине нижней кромки); террейн — midpoint-подразбиение листов по `Step` + драпировка по `ry`; финальный `SweepMeshBuilder.Cleanup`. Отсутствие дыр/нахлёстов/неверного виндинга — по построению (один контур — одна триангуляция).
-- `SweepNetworkSnapshot` / `SweepNetworkJunction` / `SweepNetworkArm` — данные сети: снапшот лент `Pieces`, массив `Junctions` (центр/ось/базис `E1,E2`/рукава по возрастанию азимута), рукав (кусок, конец, азимут, `Outward`, frame/right/up, `EdgeDir`, `WidthMul`).
+- `ProfileShape` — `Ribbon`, `Rectangle`, `HalfPipe`, `Custom`, `Pipe`.
+- `SweepProfile` — точки профиля, U-координаты, пары рёбер, признак замкнутости и content hash.
+- `SweepProfileBuilder` — единая фабрика для `ProfileNode` и inline-профиля: Ribbon; Rectangle с hard edges; гладкий 9-точечный HalfPipe; Custom с фильтрацией и нормализацией winding; Pipe с заданным числом сегментов.
+- `SweepSplineNode.HeightOffset` — `[Input] float`, который не зависит от террейна и не меняет высоту самого профиля.
 
-### Merge Intersections — разбиение сплайнов по ширине (`Editor/Scripts/Patch/`)
-Режим включается галкой `MergeIntersections` на ноде (приоритетнее порта `Topology`), только для Ribbon-профиля (2 точки, `y≈0`, открытый). Топология не нужна — пересечения считаются самостоятельно. **Текущий скоуп (WIP): не генерируем ленту, а разбиваем сплайны на свободные куски по ширине в местах касания.** Меш не публикуется (`Results` пустой), результат — превью-гизмо на ноде: свободные куски центральной линии (cyan), хорды реза (green), точки пересечения кромок (black). Галка `ShowIntersections` включает рисование.
+## Обычный build path
 
-Для `Rectangle` во всех режимах сначала строятся те же верхние Ribbon-меши, после чего каждый готовый верх экструдируется `SweepPrismBuilder`: крышки, дно и стенки имеют отдельные vertex streams; стенки сглаживаются только на поворотах до 45°, а резкие углы разделяются. UV стенок метрические (`U` по длине бокового контура, `V` по высоте, оба через `UvScale`) с разрывом на жёстких углах и одним швом замкнутого гладкого контура; UV крышек не меняются.
+- `SweepSplineNodeExecutor` снимает immutable snapshot на editor thread, строит геометрию в thread pool и синхронизирует результат одним finalize-путём.
+- `SweepRibbonSampling` даёт общий 3D frame для Ribbon и HalfPipe.
+- `SweepRibbonMeshBuilder` строит Ribbon по две вершины на станцию.
+- `SweepProfileMeshBuilder` строит полный 9-точечный HalfPipe-кольцевой профиль и соединяет только соседние кольца.
+- `SweepMeshBuilder` обслуживает остальные профили, trim складок, caps, cleanup и применяет `HeightOffset`.
+- `SweepPrismBuilder` экструдирует верх Rectangle после его построения, поэтому верх, дно и стенки получают одинаковый `HeightOffset`.
+- `SweepMeshBuilder.Cleanup` сваривает по `SweepWeldKey`, отбрасывает вырожденные треугольники и детерминированно уплотняет vertex streams.
 
-`HeightOffset` одинаково сдвигает по мировому Y все верхние поверхности merge-режима: зелёные ribbon pieces, синие corner fans и красные junction patches. Экструзия `Rectangle` выполняется после сдвига, поэтому крышка, дно и боковины перемещаются вместе без изменения высоты профиля.
+## Merge Intersections
 
-`HalfPipe` во всех режимах строится прямыми кольцами полного 9-точечного профиля по тому же адаптивному сэмплингу, что и Ribbon. Поперечная ось сохраняет ширину в плане на 3D-уклонах, ось высоты остаётся ортогональной касательной, а соседние сегменты профиля делят вершины для гладких нормалей. Старые `BuildBasis` и `TrimColumns` в этот путь не входят.
+`MergeIntersections` использует текущий patch pipeline без внешней topology-ноды:
 
-Ключевой принцип (алгоритм автора): идём по каждому сплайну кольцами; на каждом кольце пробуем рез = поперечное сечение (перпендикуляр). Рез **чистый**, если его сечение не попадает ни в одну ДРУГУЮ часть какой-либо ленты (с учётом ширины). Подряд идущие чистые кольца = один свободный кусок; границы этого куска (первое и последнее чистое сечение) = показываемые резы. Грязные зоны (где сечение с чем-то перекрывается) выпадают. Так каждый сплайн режется на куски, которые точно ничего не касаются своей шириной, и рез никогда не протыкает соседа (он ставится только там, где чисто).
+1. `SweepRibbonSplitter` классифицирует равномерные поперечные сечения как green, blue или red с учётом `MergeThickness`.
+2. Green pieces строятся обычным sweep path.
+3. Blue sharp-corner pieces строятся `SweepRibbonCornerFanBuilder` с fallback на обычный piece.
+4. Red overlap regions закрываются `SweepRibbonPatchBuilder`.
+5. `Rectangle` экструдируется после сборки верхних поверхностей; `HalfPipe` во всех режимах использует полный профильный ring path.
 
-- `SweepBoundaryCurve` — кромка как полилиния (`Points`/`Plan`/`Station`), из колонок `SweepMeshBuilder.BuildRingPositions` (вынесен из `Build` ради переиспользования): трим складок и драпировка уже применены. `BuildBasis` чинит вырожденный тангенс на торце конечной разностью (иначе торцевое кольцо разворачивалось поперёк — «бабочка»).
-**Прямой сэмплинг сплайна.** `SweepRibbonSplitter` НЕ использует адаптивные кадры ленты (прорежены `MaxStep`/`MaxAngle`, схлопнуты `TrimColumns`) — иначе резы кривые и зависят от `MaxStep`. Идёт по каждому сплайну равномерным шагом `Step` в реальных юнитах (`ceil(length/Step)` точек, `ConvertIndexUnit(Distance→Normalized)`), тангент — конечной разностью по позициям (устойчив на торцах, иначе «бабочка»), перпендикуляр-рез `right = cross(up, tangent)`, длина ровно ширина.
+`HeightOffset` одинаково применяется к обычным мешам, green pieces, blue fans и red patches. `JunctionMaterial` используется для patch-геометрии и при отсутствии значения откатывается к `Material`. `ShowIntersections` и `ShowAllCuts` управляют preview-диагностикой.
 
-**Три состояния** (превью, `ShowAllCuts`): каждое кольцо классифицируется, приоритет красный > синий > зелёный.
-- **Красный** (`StateRed`) — рез касается ДРУГОЙ части: `CutHitsOther` — отрезок реза (в плане) ближе полуширины чужой осевой (`SegmentDistanceSqXz <= segment.HalfWidth²`, spatial hash осевых сегментов). Тест отрезком (а не точкой-центром) ловит перекрытие до полной ширины (полуширина реза + полуширина чужой ленты). Своя лента исключается окном `guard = 2·ширины` по станции — чтобы самоскладка резкого угла не считалась пересечением; другой сплайн и дальнее самопересечение (за окном) краснеют.
-- **Синий** (`StateBlue`) — резкий угол: `IsSharp` — поворот тангенса на окне ±полуширины больше `SharpAngleDeg = 45°`.
-- **Зелёный** (`StateGreen`) — чисто. Идеальный результат, готов в меш. Свободные куски = максимальные зелёные ряды (короче `MinFreeLength` отбрасываются), резы = сечения на их границах.
+## Зависимость от ядра
 
-Результат `SweepRibbonSplitResult` (`FreeSplines`/`CutChords`/`DebugCuts`/`DebugState`), рисуется превью-гизмо. `SweepRibbonCoverage`/`SweepBoundaryIntersector` больше не используются (дремлют).
-
-Проверено сверху: перпендикулярный крест — красный квадрат перекрытия; пологий крест / параллель в 6 — красные (ленты перекрываются); острый V — синий угол, рукава зелёные, красного нет; капля — хвосты красные, скругления синие, бока зелёные.
-
-Дремлющие файлы патч-подхода (`SweepPatchNetworkBuilder`/`SweepPatchBoundaryBuilder`/`SweepPatchMeshBuilder`/`SweepPatchClusterSolver`/`SweepRibbonFootprint`) в исполнение не входят — оставлены до шага генерации ленты по свободным кускам.
-
-**Зависимость от ядра:** `MeshInstanceMaker` после `RecalculateNormals()` должен вызывать `RecalculateTangents()` (normal map требует полный vertex stream) и спавнить объект в world-identity независимо от трансформа `Parent`. Правки живут в ProjectPCG (обновление DLL), не в этом репозитории.
+`MeshInstanceMaker` должен пересчитывать normals и tangents и материализовать меш в world-identity относительно parent. Эта обязанность живёт в ProjectPCG, не в данном аддоне.

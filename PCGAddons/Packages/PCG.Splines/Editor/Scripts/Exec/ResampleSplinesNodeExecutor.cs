@@ -1,14 +1,12 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using PCG.Exec;
+using PCG.Splines.Tools;
 using PCG.Splines.Utilities;
-using Unity.Mathematics;
+using PCG.Utilities;
 using UnityEngine;
 using UnityEngine.Splines;
-using PCG.Utilities;
-using PCG.Exec;
-using PCG.GraphModel;
-using PCG.Points;
 
 namespace PCG.Splines
 {
@@ -40,25 +38,7 @@ namespace PCG.Splines
 						if (spline.Count <= 1)
 							continue;
 
-						var length = spline.GetLength();
-						var steps = math.max(1, (int)math.round(length / math.max(0.0001f, step)));
-						var arcStep = length / steps;
-						var lastIndex = spline.Closed ? steps - 1 : steps;
-
-						var result = new Spline
-						{
-							Closed = spline.Closed
-						};
-
-						for (int i = 0; i <= lastIndex; i++)
-						{
-							var t = SplineUtility.ConvertIndexUnit(spline, i * arcStep, PathIndexUnit.Distance, PathIndexUnit.Normalized);
-							var position = spline.EvaluatePosition(math.clamp(t, 0f, 1f));
-							result.Add(new BezierKnot(position, float3.zero, float3.zero), TangentMode.AutoSmooth);
-							await scope.Step(ct: ct);
-						}
-
-						Results.Value.Add(result);
+						Results.Value.Add(await SplineResampleUtility.ResampleAsync(spline, step, scope, ct));
 					}
 				}
 			}

@@ -11,6 +11,5 @@ namespace PCG.Sweep
 		public List<Vector3[]> DebugCuts = new();
 		public List<int> DebugState = new();
 		public List<SweepRibbonPiece> Pieces = new();
-		public bool TerrainOutOfBounds;
 	}
 }

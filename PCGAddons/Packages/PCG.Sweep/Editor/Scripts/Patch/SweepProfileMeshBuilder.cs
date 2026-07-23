@@ -20,7 +20,6 @@ namespace PCG.Sweep
 			int segmentCount = source.ProfileSegments.Length / 2;
 			var vertices = new Vector3[ringCount * verticesPerRing];
 			var uvs = new Vector2[vertices.Length];
-			bool outOfBounds = false;
 
 			for (int i = 0; i < ringCount; i++)
 			{
@@ -40,7 +39,6 @@ namespace PCG.Sweep
 				float twist = math.radians(SampleLut(source.TwistLut, path.NormalizedTs[i]));
 				float twistCos = math.cos(twist);
 				float twistSin = math.sin(twist);
-				float2 rightXz = math.normalizesafe(new float2(right.x, right.z), new float2(1f, 0f));
 
 				for (int j = 0; j < verticesPerRing; j++)
 				{
@@ -49,23 +47,8 @@ namespace PCG.Sweep
 					float py = point.y * heightMul;
 					float rx = px * twistCos - py * twistSin;
 					float ry = px * twistSin + py * twistCos;
-					float3 position;
-					if (source.Terrain == null)
-					{
-						position = path.Positions[i] + right * rx + up * ry;
-						position.y += source.HeightOffset;
-					}
-					else
-					{
-						position = new float3(
-							path.Positions[i].x + rightXz.x * rx,
-							path.Positions[i].y + ry + source.HeightOffset,
-							path.Positions[i].z + rightXz.y * rx);
-						if (source.Terrain.TrySampleHeight(position.x, position.z, out float height))
-							position.y = height + ry + source.HeightOffset;
-						else
-							outOfBounds = true;
-					}
+					float3 position = path.Positions[i] + right * rx + up * ry;
+					position.y += source.HeightOffset;
 
 					int index = i * verticesPerRing + j;
 					vertices[index] = position;
@@ -113,8 +96,7 @@ namespace PCG.Sweep
 				Uvs = uvs,
 				Triangles = triangles,
 				StartRing = startRing,
-				EndRing = endRing,
-				TerrainOutOfBounds = outOfBounds
+				EndRing = endRing
 			};
 		}
 

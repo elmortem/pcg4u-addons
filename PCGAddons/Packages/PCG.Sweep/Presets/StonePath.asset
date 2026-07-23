@@ -21,7 +21,6 @@ MonoBehaviour:
     - rid: 1664906219765891152
     - rid: 1664906219765891153
     - rid: 1664906219765891154
-    - rid: 1664906219765891155
     - rid: 1664906219765891156
     - rid: 1664906219765891157
     - rid: 1664906219765891158
@@ -29,35 +28,9 @@ MonoBehaviour:
     - rid: 1664906219765891160
     - rid: 1664906219765891161
     - rid: 1664906219765891162
+    - rid: 1664906326683680772
+    - rid: 1664906326683680773
     Edges:
-    - FromNodeId: 1
-      FromPort: Value
-      ToNodeId: 8
-      ToPort: Splines
-    - FromNodeId: 5
-      FromPort: Value
-      ToNodeId: 8
-      ToPort: Width
-    - FromNodeId: 2
-      FromPort: Terrain
-      ToNodeId: 8
-      ToPort: Terrain
-    - FromNodeId: 2
-      FromPort: Offset
-      ToNodeId: 8
-      ToPort: TerrainOffset
-    - FromNodeId: 3
-      FromPort: Value
-      ToNodeId: 8
-      ToPort: Material
-    - FromNodeId: 8
-      FromPort: Results
-      ToNodeId: 9
-      ToPort: Value
-    - FromNodeId: 1
-      FromPort: Value
-      ToNodeId: 10
-      ToPort: Splines
     - FromNodeId: 6
       FromPort: Value
       ToNodeId: 10
@@ -106,7 +79,43 @@ MonoBehaviour:
       FromPort: Results
       ToNodeId: 15
       ToPort: Value
-    NextNodeId: 16
+    - FromNodeId: 3
+      FromPort: Value
+      ToNodeId: 17
+      ToPort: Material
+    - FromNodeId: 5
+      FromPort: Value
+      ToNodeId: 17
+      ToPort: Width
+    - FromNodeId: 17
+      FromPort: Results
+      ToNodeId: 9
+      ToPort: Value
+    - FromNodeId: 1
+      FromPort: Value
+      ToNodeId: 16
+      ToPort: Splines
+    - FromNodeId: 2
+      FromPort: Terrain
+      ToNodeId: 16
+      ToPort: Terrain
+    - FromNodeId: 2
+      FromPort: Offset
+      ToNodeId: 16
+      ToPort: TerrainOrigin
+    - FromNodeId: 16
+      FromPort: Results
+      ToNodeId: 17
+      ToPort: Splines
+    - FromNodeId: 16
+      FromPort: Results
+      ToNodeId: 10
+      ToPort: Splines
+    - FromNodeId: 2
+      FromPort: Offset
+      ToNodeId: 16
+      ToPort: TerrainOffset
+    NextNodeId: 18
     Variables:
     - Id: Splines
       Name: Splines
@@ -136,7 +145,7 @@ MonoBehaviour:
       Name: Seed
       Default:
         rid: 1664906219765891169
-  ContentVersion: 1
+  ContentVersion: 120
   references:
     version: 2
     RefIds:
@@ -144,7 +153,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         NodeId: 1
-        NodePosition: {x: -600, y: 200}
+        NodePosition: {x: -600, y: 275}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
@@ -153,7 +162,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         NodeId: 2
-        NodePosition: {x: -600, y: 300}
+        NodePosition: {x: -600, y: 341}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
@@ -162,7 +171,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         NodeId: 3
-        NodePosition: {x: -600, y: 400}
+        NodePosition: {x: -600, y: 451}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
@@ -171,7 +180,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         NodeId: 4
-        NodePosition: {x: -600, y: 500}
+        NodePosition: {x: -600, y: 517}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
@@ -180,7 +189,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         NodeId: 5
-        NodePosition: {x: -600, y: 600}
+        NodePosition: {x: -600, y: 583}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
@@ -189,7 +198,7 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         NodeId: 6
-        NodePosition: {x: -600, y: 700}
+        NodePosition: {x: -600, y: 649}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
@@ -198,16 +207,186 @@ MonoBehaviour:
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
         NodeId: 7
-        NodePosition: {x: -600, y: 800}
+        NodePosition: {x: -600, y: 715}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
         VariableId: Seed
-    - rid: 1664906219765891155
+    - rid: 1664906219765891156
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        NodeId: 9
+        NodePosition: {x: 197, y: 569}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Name: Path
+        Value:
+          rid: 1664906219765891170
+    - rid: 1664906219765891157
+      type: {class: PointsOffsetSplinesNode, ns: PCG.CreatePoints, asm: PCG.Splines}
+      data:
+        NodeId: 10
+        NodePosition: {x: -103, y: 40}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Splines: []
+        Offset: 5
+        Distance: 1.2
+        Count: 10
+        Spacing: 0
+        BothSides: 1
+        UpNormal: 0
+        NoRotation: 0
+    - rid: 1664906219765891158
+      type: {class: PointToTerrainNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 11
+        NodePosition: {x: 197, y: 331}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Terrain: {fileID: 0}
+        Offset: {x: 0, y: 0, z: 0}
+        Points: []
+        ProjectionMode: 2
+        ProjectNormal: 1
+    - rid: 1664906219765891159
+      type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 12
+        NodePosition: {x: 497, y: 409}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0.3
+        Max: 0.9
+        Seed: 950982146
+        Mode: 2
+    - rid: 1664906219765891160
+      type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
+      data:
+        NodeId: 13
+        NodePosition: {x: 797, y: 409}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Points: []
+        Min: 0
+        Max: 360
+        Seed: 732521286
+        Mode: 2
+    - rid: 1664906219765891161
+      type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
+      data:
+        NodeId: 14
+        NodePosition: {x: 1097, y: 419}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Enabled: 1
+        Points: []
+        Seed: 576879673
+        Weights: []
+    - rid: 1664906219765891162
+      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
+      data:
+        NodeId: 15
+        NodePosition: {x: 1397, y: 450}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        Name: Stones
+        Value:
+          rid: 1664906219765891171
+    - rid: 1664906219765891163
+      type: {class: SplinesValue, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        Containers: []
+    - rid: 1664906219765891164
+      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
+      data:
+        Terrain: {fileID: 0}
+    - rid: 1664906219765891165
+      type: {class: MaterialValue, ns: PCG.Values, asm: PCG}
+      data:
+        Material: {fileID: 0}
+    - rid: 1664906219765891166
+      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
+      data:
+        Weights: []
+    - rid: 1664906219765891167
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 3
+    - rid: 1664906219765891168
+      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1.8
+    - rid: 1664906219765891169
+      type: {class: IntValue, ns: PCG.Values, asm: PCG}
+      data:
+        Value: 1
+    - rid: 1664906219765891170
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []
+    - rid: 1664906219765891171
+      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
+      data:
+        InstanceDatas: []
+    - rid: 1664906326683680772
+      type: {class: SplineToTerrainNode, ns: PCG.Splines, asm: PCG.Splines}
+      data:
+        NodeId: 16
+        NodePosition: {x: -403, y: 389}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
+        GizmosOptions:
+          Override: 0
+          Color: {r: 1, g: 1, b: 1, a: 1}
+          PointSize: 1
+        IsPreviewLocal: 0
+        Splines: []
+        Terrain: {fileID: 0}
+        TerrainOffset: {x: 0, y: 0, z: 0}
+        HeightOffset: 0.08
+        AlignToTerrainNormal: 1
+        Resample: 1
+        Step: 2
+    - rid: 1664906326683680773
       type: {class: SweepSplineNode, ns: PCG.Sweep, asm: PCG.Sweep}
       data:
-        NodeId: 8
-        NodePosition: {x: -260, y: 200}
+        NodeId: 17
+        NodePosition: {x: -103, y: 358}
         NodeCollapsed: 0
         NodeWidth: 220
         NodeTitle: 
@@ -218,17 +397,15 @@ MonoBehaviour:
         IsPreviewLocal: 0
         Enabled: 1
         Splines: []
-        Topology:
-          Junctions: []
-          Cuts: []
-        Shape: 0
+        Shape: 1
         Width: 4
         Height: 0.5
+        Sides: 16
         CustomPoints: []
         CustomClosed: 0
-        Step: 1
+        Step: 0.5
         MaxStep: 8
-        MaxAngle: 5
+        MaxAngle: 30
         WidthByT:
           serializedVersion: 2
           m_Curve:
@@ -241,6 +418,33 @@ MonoBehaviour:
             weightedMode: 0
             inWeight: 0
             outWeight: 0
+          - serializedVersion: 3
+            time: 0.20169894
+            value: 0.94999695
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0.33333334
+          - serializedVersion: 3
+            time: 0.4948162
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0.33333334
+          - serializedVersion: 3
+            time: 0.74931437
+            value: 0.9502411
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0.33333334
           - serializedVersion: 3
             time: 1
             value: 1
@@ -302,162 +506,13 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
         CapEnds: 0
-        SetbackScale: 1
+        MergeIntersections: 1
+        MergeThickness: 1
+        ShowIntersections: 0
+        ShowAllCuts: 0
         UvScale: 0.5
-        Terrain: {fileID: 0}
-        TerrainOffset: {x: 0, y: 0, z: 0}
-        HeightOffset: 0.08
+        HeightOffset: 0
         Name: Path
         Material: {fileID: 0}
         JunctionMaterial: {fileID: 0}
         Collider: 1
-    - rid: 1664906219765891156
-      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
-      data:
-        NodeId: 9
-        NodePosition: {x: 20, y: 200}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        Name: Path
-        Value:
-          rid: 1664906219765891170
-    - rid: 1664906219765891157
-      type: {class: PointsOffsetSplinesNode, ns: PCG.CreatePoints, asm: PCG.Splines}
-      data:
-        NodeId: 10
-        NodePosition: {x: -260, y: 520}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Splines: []
-        Offset: 5
-        Distance: 1.2
-        Count: 10
-        Spacing: 0
-        BothSides: 1
-        UpNormal: 0
-        NoRotation: 0
-    - rid: 1664906219765891158
-      type: {class: PointToTerrainNode, ns: PCG.TransformPoints, asm: PCG}
-      data:
-        NodeId: 11
-        NodePosition: {x: 20, y: 520}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Terrain: {fileID: 0}
-        Offset: {x: 0, y: 0, z: 0}
-        Points: []
-        ProjectionMode: 2
-        ProjectNormal: 1
-    - rid: 1664906219765891159
-      type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
-      data:
-        NodeId: 12
-        NodePosition: {x: 300, y: 520}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Points: []
-        Min: 0.3
-        Max: 0.9
-        Seed: -1
-        Mode: 2
-    - rid: 1664906219765891160
-      type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
-      data:
-        NodeId: 13
-        NodePosition: {x: 580, y: 520}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Points: []
-        Min: 0
-        Max: 360
-        Seed: -1
-        Mode: 2
-    - rid: 1664906219765891161
-      type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
-      data:
-        NodeId: 14
-        NodePosition: {x: 860, y: 520}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        GizmosOptions:
-          Override: 0
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          PointSize: 1
-        IsPreviewLocal: 0
-        Enabled: 1
-        Points: []
-        Seed: -1
-        Weights: []
-    - rid: 1664906219765891162
-      type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
-      data:
-        NodeId: 15
-        NodePosition: {x: 1140, y: 520}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        Name: Stones
-        Value:
-          rid: 1664906219765891171
-    - rid: 1664906219765891163
-      type: {class: SplinesValue, ns: PCG.Splines, asm: PCG.Splines}
-      data:
-        Containers: []
-    - rid: 1664906219765891164
-      type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
-      data:
-        Terrain: {fileID: 0}
-    - rid: 1664906219765891165
-      type: {class: MaterialValue, ns: PCG.Values, asm: PCG}
-      data:
-        Material: {fileID: 0}
-    - rid: 1664906219765891166
-      type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
-      data:
-        Weights: []
-    - rid: 1664906219765891167
-      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
-      data:
-        Value: 3
-    - rid: 1664906219765891168
-      type: {class: FloatValue, ns: PCG.Values, asm: PCG}
-      data:
-        Value: 1.8
-    - rid: 1664906219765891169
-      type: {class: IntValue, ns: PCG.Values, asm: PCG}
-      data:
-        Value: 1
-    - rid: 1664906219765891170
-      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
-      data:
-        InstanceDatas: []
-    - rid: 1664906219765891171
-      type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
-      data:
-        InstanceDatas: []

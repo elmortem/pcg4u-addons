@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.Instances;
 using PCG.Splines;
-using PCG.Terrains;
 using PCG.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -185,7 +184,6 @@ namespace PCG.Sweep
 			}
 
 			var results = new List<MeshInstanceData>();
-			bool outOfBounds = split.TerrainOutOfBounds;
 			int built = 0;
 			for (int k = 0; k < greenMeshes.Length; k++)
 			{
@@ -206,7 +204,6 @@ namespace PCG.Sweep
 				if (mesh.Vertices == null)
 					continue;
 
-				outOfBounds |= mesh.TerrainOutOfBounds;
 				if (extrudeHeight > 0f)
 					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight, snapshot.UvScale);
 				results.Add(new MeshInstanceData
@@ -226,7 +223,6 @@ namespace PCG.Sweep
 				if (mesh.Vertices == null)
 					continue;
 
-				outOfBounds |= mesh.TerrainOutOfBounds;
 				if (extrudeHeight > 0f)
 					mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight, snapshot.UvScale);
 				results.Add(new MeshInstanceData
@@ -259,9 +255,6 @@ namespace PCG.Sweep
 				}
 			}
 
-			if (outOfBounds)
-				Debug.LogWarning("[Sweep Spline] Part of the sweep is outside the terrain and keeps the spline height.");
-
 			Results.Value = results;
 
 			await SyncSceneAsync(results, ct);
@@ -292,7 +285,6 @@ namespace PCG.Sweep
 				WidthLut = source.WidthLut,
 				HeightLut = source.HeightLut,
 				TwistLut = source.TwistLut,
-				Terrain = source.Terrain,
 				MaxLateralExtent = source.MaxLateralExtent,
 				PreservePlanWidth = true,
 				UvScale = source.UvScale,
@@ -367,7 +359,6 @@ namespace PCG.Sweep
 				await UniTask.WhenAll(tasks);
 				await UniTaskEditor.SwitchToEditorThread();
 
-				bool outOfBounds = false;
 				int builtCount = 0;
 				for (int i = 0; i < meshes.Length; i++)
 				{
@@ -381,7 +372,6 @@ namespace PCG.Sweep
 					if (mesh.Vertices == null)
 						continue;
 
-					outOfBounds |= mesh.TerrainOutOfBounds;
 					if (extrudeHeight > 0f)
 						mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight, snapshot.UvScale);
 					results.Add(new MeshInstanceData
@@ -395,8 +385,6 @@ namespace PCG.Sweep
 					});
 				}
 
-				if (outOfBounds)
-					Debug.LogWarning("[Sweep Spline] Part of the sweep is outside the terrain and keeps the spline height.");
 			}
 
 			Results.Value = results;
@@ -494,7 +482,6 @@ namespace PCG.Sweep
 				WidthLut = widthLut,
 				HeightLut = heightLut,
 				TwistLut = twistLut,
-				Terrain = null,
 				MaxLateralExtent = lateralExtent,
 				UvScale = uvScale,
 				HeightOffset = heightOffset,

@@ -52,7 +52,7 @@ namespace PCG.Sweep
 			int ringVertexCount = ringCount * vpr;
 			int totalVertexCount = ringVertexCount + capVertexCount;
 
-			var positions = BuildRingPositions(snapshot, splineIndex, ct, reportProgress, out bool outOfBounds);
+			var positions = BuildRingPositions(snapshot, splineIndex, ct, reportProgress);
 
 			var uvs = new Vector2[totalVertexCount];
 			for (int i = 0; i < ringCount; i++)
@@ -162,12 +162,11 @@ namespace PCG.Sweep
 				Uvs = uvs,
 				Triangles = triangles,
 				StartRing = startRing,
-				EndRing = endRing,
-				TerrainOutOfBounds = outOfBounds
+				EndRing = endRing
 			};
 		}
 
-		internal static float3[] BuildRingPositions(SweepSnapshot snapshot, int splineIndex, CancellationToken ct, Action reportProgress, out bool outOfBounds)
+		internal static float3[] BuildRingPositions(SweepSnapshot snapshot, int splineIndex, CancellationToken ct, Action reportProgress)
 		{
 			var frames = snapshot.Frames[splineIndex];
 			bool splineClosed = snapshot.SplineClosed[splineIndex];
@@ -179,11 +178,7 @@ namespace PCG.Sweep
 			var ups = new float3[ringCount];
 			BuildBasis(frames, rights, ups, snapshot.PreservePlanWidth);
 
-			var terrain = snapshot.Terrain;
-			bool hasTerrain = terrain != null;
-
 			var positions = new float3[ringVertexCount];
-			float[] verticalOffsets = hasTerrain ? new float[ringVertexCount] : null;
 
 			int progressCounter = 0;
 
@@ -199,7 +194,6 @@ namespace PCG.Sweep
 				float3 basePos = frames[i].Position;
 				float3 right = rights[i];
 				float3 up = ups[i];
-				float2 rightXz = math.normalizesafe(new float2(right.x, right.z), new float2(1f, 0f));
 
 				for (int j = 0; j < vpr; j++)
 				{
@@ -210,15 +204,7 @@ namespace PCG.Sweep
 					float ry = px * twistSin + py * twistCos;
 
 					int idx = i * vpr + j;
-					if (!hasTerrain)
-					{
-						positions[idx] = basePos + right * rx + up * ry;
-					}
-					else
-					{
-						positions[idx] = new float3(basePos.x + rightXz.x * rx, basePos.y + ry, basePos.z + rightXz.y * rx);
-						verticalOffsets[idx] = ry;
-					}
+					positions[idx] = basePos + right * rx + up * ry;
 
 					progressCounter++;
 					if (progressCounter % 1024 == 0)
@@ -232,18 +218,9 @@ namespace PCG.Sweep
 			if (vpr == 2)
 				TrimColumns(frames, ups, positions, vpr, splineClosed, snapshot.MaxLateralExtent, ct, reportProgress);
 
-			outOfBounds = false;
 			for (int idx = 0; idx < ringVertexCount; idx++)
 			{
 				float3 p = positions[idx];
-				if (hasTerrain)
-				{
-					if (terrain.TrySampleHeight(p.x, p.z, out float h))
-						p.y = h + verticalOffsets[idx];
-					else
-						outOfBounds = true;
-				}
-
 				p.y += snapshot.HeightOffset;
 				positions[idx] = p;
 

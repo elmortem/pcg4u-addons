@@ -56,7 +56,6 @@ namespace PCG.Sweep
 			var right = new float3[total];
 			var leftPlan = new float2[total];
 			var rightPlan = new float2[total];
-			bool outOfBounds = false;
 
 			for (int q = 0; q < total; q++)
 			{
@@ -76,8 +75,8 @@ namespace PCG.Sweep
 
 				leftPlan[q] = lp;
 				rightPlan[q] = rp;
-				left[q] = Elevate(lp, lw.y, source, ref outOfBounds);
-				right[q] = Elevate(rp, rw.y, source, ref outOfBounds);
+				left[q] = lw;
+				right[q] = rw;
 			}
 
 			int positiveProfile = source.ProfilePoints[0].x >= source.ProfilePoints[1].x ? 0 : 1;
@@ -104,13 +103,13 @@ namespace PCG.Sweep
 			else if (FindSelfIntersection(rightPlan, out apexPlan, out segA, out segB, out paramA, out paramB))
 				innerLeft = false;
 			else
-				return BuildUnion(footprint, quads, left, right, dists, leftU, rightU, source, outOfBounds, ct, reportProgress);
+				return BuildUnion(footprint, quads, left, right, dists, leftU, rightU, source, ct, reportProgress);
 
 			float3[] inner = innerLeft ? left : right;
 			float3[] outer = innerLeft ? right : left;
 
 			float apexY = (math.lerp(inner[segA].y, inner[segA + 1].y, paramA) + math.lerp(inner[segB].y, inner[segB + 1].y, paramB)) * 0.5f;
-			float3 apex = Elevate(apexPlan, apexY, source, ref outOfBounds);
+			float3 apex = new float3(apexPlan.x, apexY, apexPlan.y);
 
 			float innerU = innerLeft ? leftU : rightU;
 			float outerU = innerLeft ? rightU : leftU;
@@ -154,14 +153,13 @@ namespace PCG.Sweep
 			{
 				Vertices = vertsArr,
 				Uvs = uvsArr,
-				Triangles = trisArr,
-				TerrainOutOfBounds = outOfBounds
+				Triangles = trisArr
 			};
 
 			if (MatchesFootprint(fan, footprint, ct))
 				return fan;
 
-			return BuildUnion(footprint, quads, left, right, dists, leftU, rightU, source, outOfBounds, ct, reportProgress);
+			return BuildUnion(footprint, quads, left, right, dists, leftU, rightU, source, ct, reportProgress);
 		}
 
 		private static List<RibbonQuad> BuildQuads(float3[] left, float3[] right, List<float> dists, float leftU, float rightU, float uvScale)
@@ -333,7 +331,7 @@ namespace PCG.Sweep
 			return footprint;
 		}
 
-		private static SweepMeshData BuildUnion(List<Polygon2D> footprint, List<RibbonQuad> quads, float3[] left, float3[] right, List<float> dists, float leftU, float rightU, SweepSnapshot source, bool outOfBounds, CancellationToken ct, Action reportProgress)
+		private static SweepMeshData BuildUnion(List<Polygon2D> footprint, List<RibbonQuad> quads, float3[] left, float3[] right, List<float> dists, float leftU, float rightU, SweepSnapshot source, CancellationToken ct, Action reportProgress)
 		{
 			float planeY = 0f;
 			for (int i = 0; i < left.Length; i++)
@@ -363,7 +361,7 @@ namespace PCG.Sweep
 				ct.ThrowIfCancellationRequested();
 				float2 plan = new float2(vertices[i].x, vertices[i].z);
 				SampleSurface(plan, quads, out float y, out float2 uv);
-				float3 point = Elevate(plan, y, source, ref outOfBounds);
+				float3 point = new float3(plan.x, y, plan.y);
 
 				vertices[i] = point;
 				uvs[i] = uv;
@@ -381,8 +379,7 @@ namespace PCG.Sweep
 			{
 				Vertices = vertices,
 				Uvs = uvs,
-				Triangles = triangles,
-				TerrainOutOfBounds = outOfBounds
+				Triangles = triangles
 			};
 		}
 
@@ -721,19 +718,6 @@ namespace PCG.Sweep
 		private static float Cross(float2 a, float2 b)
 		{
 			return a.x * b.y - a.y * b.x;
-		}
-
-		private static float3 Elevate(float2 plan, float fallbackY, SweepSnapshot source, ref bool outOfBounds)
-		{
-			float y = fallbackY;
-			if (source.Terrain != null)
-			{
-				if (source.Terrain.TrySampleHeight(plan.x, plan.y, out float h))
-					y = h + source.HeightOffset;
-				else
-					outOfBounds = true;
-			}
-			return new float3(plan.x, y, plan.y);
 		}
 
 		private static void AddUpward(List<int> triangles, Vector3[] vertices, int a, int b, int c)

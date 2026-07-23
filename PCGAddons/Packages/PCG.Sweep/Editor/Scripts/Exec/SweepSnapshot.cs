@@ -16,8 +16,6 @@ namespace PCG.Sweep
 		public float[] HeightLut;
 		public float[] TwistLut;
 
-		public SweepTerrainWindow Terrain;
-
 		public float MaxLateralExtent;
 		public bool PreservePlanWidth;
 		public float UvScale;
