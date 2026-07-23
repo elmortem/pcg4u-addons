@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260723_033000",
-    "status": "success",
-    "logs": [],
-    "return_value": "generated=True restored=4,100000 meshes=2 vertices=557 minY=23,667180 maxY=26,946430 avgY=24,773860",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

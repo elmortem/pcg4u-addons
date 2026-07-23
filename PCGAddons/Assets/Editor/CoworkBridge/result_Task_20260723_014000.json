@@ -1,8 +1,0 @@
-{
-    "id": "Task_20260723_014000",
-    "status": "success",
-    "logs": [],
-    "return_value": "sharedPositions=36 withoutSmoothPair=0 worstBestDot=0,966",
-    "compiler_errors": [],
-    "foreign_errors": false
-}

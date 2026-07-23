@@ -75,16 +75,7 @@ namespace PCG.Sweep
 				step = math.max(0.05f, GetInputValue(nameof(Data.Step), Data.Step));
 				thickness = math.max(0f, GetInputValue(nameof(Data.MergeThickness), Data.MergeThickness));
 
-				if (snapshot != null && Data.Shape == ProfileShape.Rectangle)
-				{
-					float half = math.max(0.01f, GetInputValue(nameof(Data.Width), Data.Width)) * 0.5f;
-					snapshot.ProfilePoints = new[] { new float2(-half, 0f), new float2(half, 0f) };
-					snapshot.ProfileUs = new[] { 0f, 1f };
-					snapshot.ProfileSegments = new[] { 0, 1 };
-					snapshot.ProfileClosed = false;
-					snapshot.MaxLateralExtent = half * MaxLut(snapshot.WidthLut);
-					extrudeHeight = math.max(0.01f, GetInputValue(nameof(Data.Height), Data.Height));
-				}
+				extrudeHeight = ConfigureRectangleRibbon(snapshot);
 
 				await scope.Step(ct: ct);
 				if (snapshot != null && splines.Count == snapshot.Frames.Length)
@@ -316,14 +307,33 @@ namespace PCG.Sweep
 		private async UniTask ComputeSingleAsync(CancellationToken ct)
 		{
 			SweepSnapshot snapshot = null;
+			SweepRibbonPath[] ribbonPaths = null;
+			bool buildStableProfile = false;
 			Material material = null;
+			float extrudeHeight = 0f;
+			var splines = new List<Spline>();
 
 			using (var scope = OperationScope.Start(this))
 			{
 				if (Data.Enabled)
 				{
-					snapshot = BuildSnapshot(ct);
+					snapshot = BuildSnapshot(ct, splines);
 					material = GetInputValue(nameof(Data.Material), Data.Material);
+					extrudeHeight = ConfigureRectangleRibbon(snapshot);
+					buildStableProfile = Data.Shape == ProfileShape.HalfPipe;
+
+					if (snapshot != null && splines.Count == snapshot.Frames.Length &&
+						(buildStableProfile || SweepRibbonSplitter.CanBuild(snapshot, out _)))
+					{
+						float step = math.max(0.05f, GetInputValue(nameof(Data.Step), Data.Step));
+						ribbonPaths = new SweepRibbonPath[splines.Count];
+						for (int i = 0; i < splines.Count; i++)
+						{
+							float length = splines[i].GetLength();
+							ribbonPaths[i] = SweepRibbonSampling.Capture(splines[i], 0f, length, step, 2, ct);
+							await scope.Step(ct: ct);
+						}
+					}
 				}
 
 				await scope.Step(ct: ct);
@@ -342,7 +352,15 @@ namespace PCG.Sweep
 					int index = i;
 					tasks.Add(UniTask.RunOnThreadPool(() =>
 					{
-						meshes[index] = SweepMeshBuilder.Build(snapshot, index, ct, reportProgress);
+						if (ribbonPaths != null && ribbonPaths[index] != null)
+						{
+							if (buildStableProfile)
+								meshes[index] = SweepProfileMeshBuilder.Build(ribbonPaths[index], snapshot, ct, reportProgress);
+							else
+								meshes[index] = SweepRibbonMeshBuilder.Build(ribbonPaths[index], snapshot, ct, reportProgress);
+						}
+						else
+							meshes[index] = SweepMeshBuilder.Build(snapshot, index, ct, reportProgress);
 					}, true, ct));
 				}
 
@@ -364,6 +382,8 @@ namespace PCG.Sweep
 						continue;
 
 					outOfBounds |= mesh.TerrainOutOfBounds;
+					if (extrudeHeight > 0f)
+						mesh = SweepPrismBuilder.Extrude(mesh, extrudeHeight, snapshot.UvScale);
 					results.Add(new MeshInstanceData
 					{
 						Name = builtCount > 1 ? $"{snapshot.Name} {results.Count}" : snapshot.Name,
@@ -382,6 +402,20 @@ namespace PCG.Sweep
 			Results.Value = results;
 
 			await SyncSceneAsync(results, ct);
+		}
+
+		private float ConfigureRectangleRibbon(SweepSnapshot snapshot)
+		{
+			if (snapshot == null || Data.Shape != ProfileShape.Rectangle)
+				return 0f;
+
+			float half = math.max(0.01f, GetInputValue(nameof(Data.Width), Data.Width)) * 0.5f;
+			snapshot.ProfilePoints = new[] { new float2(-half, 0f), new float2(half, 0f) };
+			snapshot.ProfileUs = new[] { 0f, 1f };
+			snapshot.ProfileSegments = new[] { 0, 1 };
+			snapshot.ProfileClosed = false;
+			snapshot.MaxLateralExtent = half * MaxLut(snapshot.WidthLut);
+			return math.max(0.01f, GetInputValue(nameof(Data.Height), Data.Height));
 		}
 
 		private SweepSnapshot BuildSnapshot(CancellationToken ct, List<Spline> accepted = null)
