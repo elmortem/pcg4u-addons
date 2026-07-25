@@ -66,6 +66,86 @@ namespace PCG.Polygons
 			}
 		}
 
+		public static void FillRandomBlocking(
+			List<PointData> results,
+			IList<Polygon2D> polygons,
+			float planeY,
+			int count,
+			int seed,
+			CancellationToken ct = default)
+		{
+			if (count <= 0 || polygons.Count == 0)
+				return;
+
+			count = math.min(count, PCG.MaxListPoints);
+			GetBounds(polygons, out var min, out var max);
+			var random = PcgRandom.Create(seed);
+
+			int added = 0;
+			int tryCount = count * 8;
+			while (added < count && tryCount-- > 0)
+			{
+				ct.ThrowIfCancellationRequested();
+				var sample = new float2(random.NextFloat(min.x, max.x), random.NextFloat(min.y, max.y));
+				if (!ContainsAny(polygons, sample))
+					continue;
+
+				results.Add(new PointData
+				{
+					Position = new float3(sample.x, planeY, sample.y),
+					Normal = new float3(0f, 1f, 0f),
+					Scale = 1f
+				});
+				added++;
+			}
+		}
+
+		public static void FillGridBlocking(
+			List<PointData> results,
+			IList<Polygon2D> polygons,
+			float planeY,
+			float spacing,
+			CancellationToken ct = default)
+		{
+			FillGridBlocking(results, polygons, planeY, spacing, 0f, 0, ct);
+		}
+
+		public static void FillGridBlocking(
+			List<PointData> results,
+			IList<Polygon2D> polygons,
+			float planeY,
+			float spacing,
+			float jitter,
+			int seed,
+			CancellationToken ct = default)
+		{
+			if (spacing <= 0f || polygons.Count == 0)
+				return;
+
+			GetBounds(polygons, out var min, out var max);
+			float jitterDistance = math.clamp(jitter, 0f, 0.49f) * spacing;
+			var random = PcgRandom.Create(seed);
+			for (float x = min.x; x <= max.x; x += spacing)
+			{
+				for (float y = min.y; y <= max.y; y += spacing)
+				{
+					ct.ThrowIfCancellationRequested();
+					var sample = new float2(
+						x + random.NextFloat(-jitterDistance, jitterDistance),
+						y + random.NextFloat(-jitterDistance, jitterDistance));
+					if (ContainsAny(polygons, sample))
+					{
+						results.Add(new PointData
+						{
+							Position = new float3(sample.x, planeY, sample.y),
+							Normal = new float3(0f, 1f, 0f),
+							Scale = 1f
+						});
+					}
+				}
+			}
+		}
+
 		public static bool ContainsAny(IList<Polygon2D> polygons, float2 p)
 		{
 			for (int i = 0; i < polygons.Count; i++)

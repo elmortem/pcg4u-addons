@@ -170,14 +170,14 @@ MonoBehaviour:
       Name: Seed
       Default:
         rid: 7906782834765070422
-    - Id: Int_1
-      Name: GrassCount
-      Default:
-        rid: 7906782834765070424
     - Id: TerrainGrassDetailWeights
       Name: GrassDetails
       Default:
         rid: 7906782834765070426
+    - Id: Int_1
+      Name: GrassCount
+      Default:
+        rid: 7906782834765070424
     - Id: GameObjectWeights
       Name: FlowerPrefabs
       Default:
@@ -186,26 +186,26 @@ MonoBehaviour:
       Name: FlowerCount
       Default:
         rid: 7906782834765070472
-    - Id: Float
-      Name: MaxSlope
-      Default:
-        rid: 7906782943574228993
     - Id: Points
       Name: ExcludePoints
       Default:
         rid: 7906782943574229041
-  ContentVersion: 401
+    - Id: Float
+      Name: MaxSlope
+      Default:
+        rid: 7906782943574228993
+  ContentVersion: 403
   references:
     version: 2
     RefIds:
     - rid: 7906782834765070382
       type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
       data:
-        Id: 3
-        Position: {x: 419.0623, y: 402.02298}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 3
+        NodePosition: {x: 419.0623, y: 402.02298}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -214,18 +214,17 @@ MonoBehaviour:
         Terrain: {fileID: 0}
         Offset: {x: 0, y: 0, z: 0}
         Count: 1000
-        Seed: -1
-        PoissonMinDistance: 0.1
+        Seed: 1728568631
         ShuffleRegularPoints: 1
         PointMode: 1
     - rid: 7906782834765070394
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
-        Id: 4
-        Position: {x: 2753.726, y: 80.66229}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 4
+        NodePosition: {x: 2753.726, y: 80.66229}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         Name: GrassPoints
         Value:
           rid: 7906782834765070395
@@ -236,11 +235,11 @@ MonoBehaviour:
     - rid: 7906782834765070405
       type: {class: PointsNearPointsNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 6
-        Position: {x: 1201.1418, y: 408.57718}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 6
+        NodePosition: {x: 1201.1418, y: 408.57718}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -254,22 +253,22 @@ MonoBehaviour:
     - rid: 7906782834765070408
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
-        Id: 9
-        Position: {x: 2757.5815, y: 419.95624}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 9
+        NodePosition: {x: 2757.5815, y: 419.95624}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         Name: GrassInstances
         Value:
           rid: 7906782834765070414
     - rid: 7906782834765070411
       type: {class: TerrainGrassDetailWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
-        Id: 10
-        Position: {x: 2437.641, y: 414.117}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 10
+        NodePosition: {x: 2437.641, y: 414.117}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -277,7 +276,7 @@ MonoBehaviour:
         IsPreviewLocal: 0
         Enabled: 1
         Points: []
-        Seed: -1
+        Seed: 1613425170
         Details: []
     - rid: 7906782834765070414
       type: {class: InstanceDatasValue, ns: PCG.Values, asm: PCG}
@@ -290,11 +289,11 @@ MonoBehaviour:
     - rid: 7906782834765070421
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 11
-        Position: {x: 217.89868, y: 380.1304}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 11
+        NodePosition: {x: 217.89868, y: 380.1304}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: TerrainObject
     - rid: 7906782834765070422
       type: {class: IntValue, ns: PCG.Values, asm: PCG}
@@ -303,11 +302,11 @@ MonoBehaviour:
     - rid: 7906782834765070423
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 12
-        Position: {x: 77.46357, y: 712.90344}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 12
+        NodePosition: {x: 77.46357, y: 712.90344}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int
     - rid: 7906782834765070424
       type: {class: IntValue, ns: PCG.Values, asm: PCG}
@@ -316,11 +315,11 @@ MonoBehaviour:
     - rid: 7906782834765070425
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 13
-        Position: {x: 172.78589, y: 505.9467}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 13
+        NodePosition: {x: 172.78589, y: 505.9467}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int_1
     - rid: 7906782834765070426
       type: {class: TerrainGrassDetailWeightsValue, ns: PCG.Values, asm: PCG}
@@ -329,20 +328,20 @@ MonoBehaviour:
     - rid: 7906782834765070428
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 15
-        Position: {x: 2291.1553, y: 684.23865}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 15
+        NodePosition: {x: 2291.1553, y: 684.23865}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: TerrainGrassDetailWeights
     - rid: 7906782834765070442
       type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 16
-        Position: {x: 1543.4994, y: 420.33136}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 16
+        NodePosition: {x: 1543.4994, y: 420.33136}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -356,11 +355,11 @@ MonoBehaviour:
     - rid: 7906782834765070449
       type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
       data:
-        Id: 22
-        Position: {x: 301.22934, y: 1036.8097}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 22
+        NodePosition: {x: 301.22934, y: 1036.8097}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -369,46 +368,45 @@ MonoBehaviour:
         Terrain: {fileID: 0}
         Offset: {x: 0, y: 0, z: 0}
         Count: 1000
-        Seed: -1
-        PoissonMinDistance: 1
+        Seed: 855294658
         ShuffleRegularPoints: 0
         PointMode: 1
     - rid: 7906782834765070450
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 23
-        Position: {x: 75.93533, y: 999.25604}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 23
+        NodePosition: {x: 75.93533, y: 999.25604}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: TerrainObject
     - rid: 7906782834765070451
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 24
-        Position: {x: -174.88803, y: 1220.2186}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 24
+        NodePosition: {x: -174.88803, y: 1220.2186}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int
     - rid: 7906782834765070452
       type: {class: IntPlusNode, ns: PCG.Operations, asm: PCG}
       data:
-        Id: 25
-        Position: {x: -47.04413, y: 1219.0176}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 25
+        NodePosition: {x: -47.04413, y: 1219.0176}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         First: 0
         Second: 13
     - rid: 7906782834765070453
       type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 26
-        Position: {x: 1086.6416, y: 1036.0237}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 26
+        NodePosition: {x: 1086.6416, y: 1036.0237}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -422,11 +420,11 @@ MonoBehaviour:
     - rid: 7906782834765070454
       type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
-        Id: 27
-        Position: {x: 1434.1052, y: 1043.052}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 27
+        NodePosition: {x: 1434.1052, y: 1043.052}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -434,7 +432,7 @@ MonoBehaviour:
         IsPreviewLocal: 0
         Enabled: 1
         Points: []
-        Seed: -1
+        Seed: 1278253207
         Weights: []
     - rid: 7906782834765070455
       type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
@@ -443,20 +441,20 @@ MonoBehaviour:
     - rid: 7906782834765070456
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 28
-        Position: {x: 1203.6399, y: 1303.5991}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 28
+        NodePosition: {x: 1203.6399, y: 1303.5991}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: GameObjectWeights
     - rid: 7906782834765070457
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
-        Id: 29
-        Position: {x: 1819.4204, y: 1078.0637}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 29
+        NodePosition: {x: 1819.4204, y: 1078.0637}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         Name: FlowerInstances
         Value:
           rid: 7906782834765070458
@@ -467,29 +465,29 @@ MonoBehaviour:
     - rid: 7906782834765070463
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 30
-        Position: {x: 1350.1356, y: 657.50775}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 30
+        NodePosition: {x: 1350.1356, y: 657.50775}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int
     - rid: 7906782834765070464
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 31
-        Position: {x: 2322.269, y: 636.8745}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 31
+        NodePosition: {x: 2322.269, y: 636.8745}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int
     - rid: 7906782834765070465
       type: {class: ChangeDensityNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 32
-        Position: {x: 1902.3722, y: 400.9615}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 32
+        NodePosition: {x: 1902.3722, y: 400.9615}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -498,34 +496,34 @@ MonoBehaviour:
         Points: []
         Min: 0.1
         Max: 1
-        Seed: -1
+        Seed: 352784988
         Mode: 2
     - rid: 7906782834765070466
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 33
-        Position: {x: 1777.2152, y: 650.2262}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 33
+        NodePosition: {x: 1777.2152, y: 650.2262}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int
     - rid: 7906782834765070468
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 35
-        Position: {x: 945.7944, y: 1300.124}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 35
+        NodePosition: {x: 945.7944, y: 1300.124}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int
     - rid: 7906782834765070469
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 36
-        Position: {x: 1247.892, y: 1261.4255}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 36
+        NodePosition: {x: 1247.892, y: 1261.4255}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int
     - rid: 7906782834765070472
       type: {class: IntValue, ns: PCG.Values, asm: PCG}
@@ -534,11 +532,11 @@ MonoBehaviour:
     - rid: 7906782834765070473
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 37
-        Position: {x: 43.849884, y: 1130.7063}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 37
+        NodePosition: {x: 43.849884, y: 1130.7063}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Int_2
     - rid: 7906782943574228993
       type: {class: FloatValue, ns: PCG.Values, asm: PCG}
@@ -547,11 +545,11 @@ MonoBehaviour:
     - rid: 7906782943574228994
       type: {class: PointsBySlopeNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 41
-        Position: {x: 801.2678, y: 408.17255}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 41
+        NodePosition: {x: 801.2678, y: 408.17255}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -564,20 +562,20 @@ MonoBehaviour:
     - rid: 7906782943574228995
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 42
-        Position: {x: 675.14185, y: 652.019}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 42
+        NodePosition: {x: 675.14185, y: 652.019}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Float
     - rid: 7906782943574229004
       type: {class: PointsBySlopeNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 43
-        Position: {x: 646.0167, y: 1023.5309}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 43
+        NodePosition: {x: 646.0167, y: 1023.5309}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -590,11 +588,11 @@ MonoBehaviour:
     - rid: 7906782943574229005
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 44
-        Position: {x: 449.3971, y: 1329.9749}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 44
+        NodePosition: {x: 449.3971, y: 1329.9749}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Float
     - rid: 7906782943574229041
       type: {class: PointsValue, ns: PCG.Values, asm: PCG}

@@ -3,6 +3,7 @@
     "rootNamespace": "PCG.Polygons",
     "references": [
         "PCG",
+        "PCG.Mazes",
         "Unity.Mathematics",
         "Unity.Splines",
         "UniTask"

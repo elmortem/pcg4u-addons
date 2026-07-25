@@ -9,20 +9,48 @@ namespace PCG.Polygons
 	{
 		public static RegionMeshData Build(RegionSet region, TerrainData terrain, Vector3 terrainPosition, float maxHeightError, float minCellSize, float maxCellSize, int maxDepth, float heightOffset, float uvScale)
 		{
+			Func<float2, float> heightSampler = terrain == null
+				? null
+				: p => SampleHeight(p, region.PlaneY, terrain, terrainPosition);
+			return BuildCore(region, heightSampler, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
+		}
+
+		public static RegionMeshData BuildFromHeightSampler(
+			RegionSet region,
+			Func<float2, float> heightSampler,
+			float maxHeightError,
+			float minCellSize,
+			float maxCellSize,
+			int maxDepth,
+			float heightOffset,
+			float uvScale)
+		{
+			return BuildCore(region, heightSampler, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
+		}
+
+		private static RegionMeshData BuildCore(
+			RegionSet region,
+			Func<float2, float> heightSampler,
+			float maxHeightError,
+			float minCellSize,
+			float maxCellSize,
+			int maxDepth,
+			float heightOffset,
+			float uvScale)
+		{
 			var merged = PolygonClipper.Union(region.Regions, Array.Empty<Polygon2D>());
 
 			var triangles = new List<float2[]>();
 			if (merged.Count > 0)
 			{
-				if (terrain == null || maxCellSize <= 0f)
+				if (heightSampler == null || maxCellSize <= 0f)
 				{
 					triangles.AddRange(PolygonClipper.Triangulate(merged));
 				}
 				else
 				{
 					ComputeBounds(merged, out var boundsMin, out var boundsMax);
-					float planeY = region.PlaneY;
-					var tree = MeshQuadtree.Build(merged, boundsMin, boundsMax, maxCellSize, minCellSize, maxDepth, p => SampleHeight(p, planeY, terrain, terrainPosition), maxHeightError);
+					var tree = MeshQuadtree.Build(merged, boundsMin, boundsMax, maxCellSize, minCellSize, maxDepth, heightSampler, maxHeightError);
 
 					foreach (var leaf in tree.Leaves.Values)
 					{
@@ -43,9 +71,13 @@ namespace PCG.Polygons
 			{
 				var t = triangles[i];
 				EnsureCcw(ref t);
-				int i0 = Vertex(t[0], region.PlaneY, terrain, terrainPosition, heightOffset, uvScale, vertices, uvs, map);
-				int i1 = Vertex(t[1], region.PlaneY, terrain, terrainPosition, heightOffset, uvScale, vertices, uvs, map);
-				int i2 = Vertex(t[2], region.PlaneY, terrain, terrainPosition, heightOffset, uvScale, vertices, uvs, map);
+				int i0 = Vertex(t[0], region.PlaneY, heightSampler, heightOffset, uvScale, vertices, uvs, map);
+				int i1 = Vertex(t[1], region.PlaneY, heightSampler, heightOffset, uvScale, vertices, uvs, map);
+				int i2 = Vertex(t[2], region.PlaneY, heightSampler, heightOffset, uvScale, vertices, uvs, map);
+				if (i0 == i1 || i1 == i2 || i2 == i0)
+					continue;
+				if (Vector3.Cross(vertices[i1] - vertices[i0], vertices[i2] - vertices[i0]).sqrMagnitude < 0.00000001f)
+					continue;
 				indices.Add(i0);
 				indices.Add(i2);
 				indices.Add(i1);
@@ -143,13 +175,13 @@ namespace PCG.Polygons
 			}
 		}
 
-		private static int Vertex(float2 p, float planeY, TerrainData terrain, Vector3 terrainPosition, float heightOffset, float uvScale, List<Vector3> vertices, List<Vector2> uvs, Dictionary<(long, long), int> map)
+		private static int Vertex(float2 p, float planeY, Func<float2, float> heightSampler, float heightOffset, float uvScale, List<Vector3> vertices, List<Vector2> uvs, Dictionary<(long, long), int> map)
 		{
 			var key = ((long)math.round(p.x * 1000.0), (long)math.round(p.y * 1000.0));
 			if (map.TryGetValue(key, out int id))
 				return id;
 
-			float y = SampleHeight(p, planeY, terrain, terrainPosition) + heightOffset;
+			float y = (heightSampler != null ? heightSampler(p) : planeY) + heightOffset;
 			id = vertices.Count;
 			vertices.Add(new Vector3(p.x, y, p.y));
 			uvs.Add(new Vector2(p.x, p.y) * uvScale);

@@ -16,7 +16,6 @@ MonoBehaviour:
     Nodes:
     - rid: 1664906078027251764
     - rid: 1664906078027251765
-    - rid: 1664906078027251766
     - rid: 1664906078027251767
     - rid: 1664906078027251768
     - rid: 1664906078027251769
@@ -47,10 +46,6 @@ MonoBehaviour:
       FromPort: Offset
       ToNodeId: 12
       ToPort: Offset
-    - FromNodeId: 1
-      FromPort: Offset
-      ToNodeId: 16
-      ToPort: Offset
     - FromNodeId: 5
       FromPort: Value
       ToNodeId: 12
@@ -75,10 +70,6 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 16
       ToPort: Mask
-    - FromNodeId: 3
-      FromPort: Value
-      ToNodeId: 16
-      ToPort: Size
     - FromNodeId: 7
       FromPort: Value
       ToNodeId: 18
@@ -161,10 +152,6 @@ MonoBehaviour:
       Name: Mask
       Default:
         rid: 1664906078027251776
-    - Id: MaskSize
-      Name: MaskSize
-      Default:
-        rid: 1664906078027251777
     - Id: Trees
       Name: Trees
       Default:
@@ -197,108 +184,99 @@ MonoBehaviour:
       Name: ScaleMax
       Default:
         rid: 1664906078027251785
-  ContentVersion: 61
+  ContentVersion: 62
   references:
     version: 2
     RefIds:
     - rid: 1664906078027251764
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 1
-        Position: {x: 0, y: 0}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 1
+        NodePosition: {x: 0, y: 0}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Terrain
     - rid: 1664906078027251765
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 2
-        Position: {x: 0, y: 110}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 2
+        NodePosition: {x: 0, y: 110}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Mask
-    - rid: 1664906078027251766
-      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
-      data:
-        Id: 3
-        Position: {x: 0, y: 176}
-        Collapsed: 0
-        Width: 220
-        Title: 
-        VariableId: MaskSize
     - rid: 1664906078027251767
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 4
-        Position: {x: 0, y: 242}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 4
+        NodePosition: {x: 0, y: 242}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Trees
     - rid: 1664906078027251768
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 5
-        Position: {x: 0, y: 308}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 5
+        NodePosition: {x: 0, y: 308}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: CandidateCount
     - rid: 1664906078027251769
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 6
-        Position: {x: 0, y: 374}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 6
+        NodePosition: {x: 0, y: 374}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Seed
     - rid: 1664906078027251770
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 7
-        Position: {x: 0, y: 440}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 7
+        NodePosition: {x: 0, y: 440}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: SlopeMin
     - rid: 1664906078027251771
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 8
-        Position: {x: 0, y: 506}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 8
+        NodePosition: {x: 0, y: 506}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: SlopeMax
     - rid: 1664906078027251772
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 9
-        Position: {x: 0, y: 572}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 9
+        NodePosition: {x: 0, y: 572}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: Spacing
     - rid: 1664906078027251773
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 10
-        Position: {x: 0, y: 638}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 10
+        NodePosition: {x: 0, y: 638}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: ScaleMin
     - rid: 1664906078027251774
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 11
-        Position: {x: 0, y: 704}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 11
+        NodePosition: {x: 0, y: 704}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: ScaleMax
     - rid: 1664906078027251775
       type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
@@ -308,10 +286,8 @@ MonoBehaviour:
       type: {class: PaintMaskValue, ns: PCG.Masks, asm: PCG}
       data:
         Mask: {fileID: 0}
-    - rid: 1664906078027251777
-      type: {class: Vector2Value, ns: PCG.Values, asm: PCG}
-      data:
-        Value: {x: 500, y: 500}
+        Offset: {x: 0, y: 0, z: 0}
+        Size: {x: 500, y: 500}
     - rid: 1664906078027251778
       type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
       data:
@@ -347,11 +323,11 @@ MonoBehaviour:
     - rid: 1664906078027251786
       type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
       data:
-        Id: 12
-        Position: {x: 320, y: 214}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 12
+        NodePosition: {x: 320, y: 214}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -366,33 +342,33 @@ MonoBehaviour:
     - rid: 1664906078027251787
       type: {class: PerlineNoiseNode, ns: PCG.Noises, asm: PCG}
       data:
-        Id: 13
-        Position: {x: 0, y: 770}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 13
+        NodePosition: {x: 0, y: 770}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         Noise:
           Offset: {x: 0, y: 0}
           Scale: 50
     - rid: 1664906078027251788
       type: {class: FbmNoiseNode, ns: PCG.Noises, asm: PCG}
       data:
-        Id: 14
-        Position: {x: 320, y: 472}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 14
+        NodePosition: {x: 320, y: 472}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         Octaves: 4
         Lacunarity: 2
         Persistence: 0.5
     - rid: 1664906078027251789
       type: {class: DestinyByNoiseNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 15
-        Position: {x: 640, y: 343}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 15
+        NodePosition: {x: 640, y: 343}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -403,30 +379,31 @@ MonoBehaviour:
     - rid: 1664906078027251790
       type: {class: DensityByPaintMaskNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 16
-        Position: {x: 960, y: 313}
-        Collapsed: 0
-        Width: 220
-        Title: Density By Paint Mask
+        NodeId: 16
+        NodePosition: {x: 960, y: 313}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: Density By Paint Mask
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
-        Mask: {fileID: 0}
-        Offset: {x: 0, y: 0, z: 0}
-        Size: {x: 100, y: 100}
+        Mask:
+          Mask: {fileID: 0}
+          Offset: {x: 0, y: 0, z: 0}
+          Size: {x: 100, y: 100}
         Points: []
         Invert: 0
         Mode: 2
     - rid: 1664906078027251791
       type: {class: PointsByDensityNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 17
-        Position: {x: 1280, y: 333}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 17
+        NodePosition: {x: 1280, y: 333}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -438,11 +415,11 @@ MonoBehaviour:
     - rid: 1664906078027251792
       type: {class: PointsBySlopeNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 18
-        Position: {x: 1600, y: 323}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 18
+        NodePosition: {x: 1600, y: 323}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -455,11 +432,11 @@ MonoBehaviour:
     - rid: 1664906078027251793
       type: {class: PointsByVolumesNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 19
-        Position: {x: 1920, y: 353}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 19
+        NodePosition: {x: 1920, y: 353}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -470,11 +447,11 @@ MonoBehaviour:
     - rid: 1664906078027251794
       type: {class: PoissonPointsNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 20
-        Position: {x: 2240, y: 353}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 20
+        NodePosition: {x: 2240, y: 353}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -485,11 +462,11 @@ MonoBehaviour:
     - rid: 1664906078027251795
       type: {class: ChangeScaleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 21
-        Position: {x: 2560, y: 323}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 21
+        NodePosition: {x: 2560, y: 323}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -503,11 +480,11 @@ MonoBehaviour:
     - rid: 1664906078027251796
       type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 22
-        Position: {x: 2880, y: 323}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 22
+        NodePosition: {x: 2880, y: 323}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -521,11 +498,11 @@ MonoBehaviour:
     - rid: 1664906078027251797
       type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
-        Id: 23
-        Position: {x: 3200, y: 333}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 23
+        NodePosition: {x: 3200, y: 333}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -538,11 +515,11 @@ MonoBehaviour:
     - rid: 1664906078027251798
       type: {class: SubGraphOutputNode, ns: PCG.SubGraphs, asm: PCG}
       data:
-        Id: 24
-        Position: {x: 3520, y: 364}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 24
+        NodePosition: {x: 3520, y: 364}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         Name: Trees
         Value:
           rid: 1664906078027251799

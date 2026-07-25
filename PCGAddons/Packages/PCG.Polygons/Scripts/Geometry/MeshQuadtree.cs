@@ -72,37 +72,46 @@ namespace PCG.Polygons
 
 		private void Subdivide(int depth, int ix, int iz)
 		{
-			float cs = CellSize(depth);
-			float2 min = CellMin(depth, ix, iz);
-			float2 max = min + cs;
-
-			var cls = Classify(min, max);
-			if (cls == CellClass.Outside)
-				return;
-
-			bool canSplit = cs > MinCellSize && depth < MaxDepth;
-			bool split;
-			if (cls == CellClass.Boundary)
-				split = canSplit;
-			else
-				split = canSplit && _sampleHeight != null && HeightError(min, max) > _maxHeightError;
-
-			if (split)
+			var pending = new Stack<(int Depth, int Ix, int Iz)>();
+			pending.Push((depth, ix, iz));
+			while (pending.Count > 0)
 			{
-				Subdivide(depth + 1, ix * 2, iz * 2);
-				Subdivide(depth + 1, ix * 2 + 1, iz * 2);
-				Subdivide(depth + 1, ix * 2, iz * 2 + 1);
-				Subdivide(depth + 1, ix * 2 + 1, iz * 2 + 1);
-				return;
+				var cell = pending.Pop();
+				float cs = CellSize(cell.Depth);
+				float2 min = CellMin(cell.Depth, cell.Ix, cell.Iz);
+				float2 max = min + cs;
+
+				var cls = Classify(min, max);
+				if (cls == CellClass.Outside)
+					continue;
+
+				bool canSplit = cs > MinCellSize && cell.Depth < MaxDepth;
+				bool split;
+				if (cls == CellClass.Boundary)
+					split = canSplit;
+				else
+					split = canSplit && _sampleHeight != null && HeightError(min, max) > _maxHeightError;
+
+				if (split)
+				{
+					int childDepth = cell.Depth + 1;
+					int childX = cell.Ix * 2;
+					int childZ = cell.Iz * 2;
+					pending.Push((childDepth, childX + 1, childZ + 1));
+					pending.Push((childDepth, childX, childZ + 1));
+					pending.Push((childDepth, childX + 1, childZ));
+					pending.Push((childDepth, childX, childZ));
+					continue;
+				}
+
+				Leaves[(cell.Depth, cell.Ix, cell.Iz)] = new QuadLeaf
+				{
+					Depth = cell.Depth,
+					Ix = cell.Ix,
+					Iz = cell.Iz,
+					Boundary = cls == CellClass.Boundary
+				};
 			}
-
-			Leaves[(depth, ix, iz)] = new QuadLeaf
-			{
-				Depth = depth,
-				Ix = ix,
-				Iz = iz,
-				Boundary = cls == CellClass.Boundary
-			};
 		}
 
 		private CellClass Classify(float2 min, float2 max)

@@ -16,7 +16,6 @@ MonoBehaviour:
     Nodes:
     - rid: 1664906078027251764
     - rid: 1664906078027251765
-    - rid: 1664906078027251766
     - rid: 1664906078027251767
     - rid: 1664906078027251768
     - rid: 1664906078027251769
@@ -47,10 +46,6 @@ MonoBehaviour:
       FromPort: Offset
       ToNodeId: 12
       ToPort: Offset
-    - FromNodeId: 1
-      FromPort: Offset
-      ToNodeId: 16
-      ToPort: Offset
     - FromNodeId: 5
       FromPort: Value
       ToNodeId: 12
@@ -75,10 +70,6 @@ MonoBehaviour:
       FromPort: Value
       ToNodeId: 16
       ToPort: Mask
-    - FromNodeId: 3
-      FromPort: Value
-      ToNodeId: 16
-      ToPort: Size
     - FromNodeId: 7
       FromPort: Value
       ToNodeId: 18
@@ -161,10 +152,6 @@ MonoBehaviour:
       Name: Mask
       Default:
         rid: 1664906078027251776
-    - Id: MaskSize
-      Name: MaskSize
-      Default:
-        rid: 1664906078027251777
     - Id: Trees
       Name: Trees
       Default:
@@ -197,7 +184,7 @@ MonoBehaviour:
       Name: ScaleMax
       Default:
         rid: 1664906078027251785
-  ContentVersion: 61
+  ContentVersion: 62
   references:
     version: 2
     RefIds:
@@ -219,15 +206,6 @@ MonoBehaviour:
         NodeWidth: 220
         NodeTitle: 
         VariableId: Mask
-    - rid: 1664906078027251766
-      type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
-      data:
-        NodeId: 3
-        NodePosition: {x: 0, y: 176}
-        NodeCollapsed: 0
-        NodeWidth: 220
-        NodeTitle: 
-        VariableId: MaskSize
     - rid: 1664906078027251767
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
@@ -308,10 +286,8 @@ MonoBehaviour:
       type: {class: PaintMaskValue, ns: PCG.Masks, asm: PCG}
       data:
         Mask: {fileID: 0}
-    - rid: 1664906078027251777
-      type: {class: Vector2Value, ns: PCG.Values, asm: PCG}
-      data:
-        Value: {x: 500, y: 500}
+        Offset: {x: 0, y: 0, z: 0}
+        Size: {x: 500, y: 500}
     - rid: 1664906078027251778
       type: {class: GameObjectWeightsValue, ns: PCG.Values, asm: PCG}
       data:
@@ -413,9 +389,10 @@ MonoBehaviour:
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
-        Mask: {fileID: 0}
-        Offset: {x: 0, y: 0, z: 0}
-        Size: {x: 100, y: 100}
+        Mask:
+          Mask: {fileID: 0}
+          Offset: {x: 0, y: 0, z: 0}
+          Size: {x: 100, y: 100}
         Points: []
         Invert: 0
         Mode: 2

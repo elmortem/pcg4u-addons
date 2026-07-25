@@ -12,5 +12,6 @@ namespace PCG.Setup
 		public const string HdrpPackageName = "com.unity.render-pipelines.high-definition";
 		public const string UrpGizmosAsmdefName = "PCG.Gizmos.URP.Editor";
 		public const string HdrpGizmosAsmdefName = "PCG.Gizmos.HDRP.Editor";
+		public const string HdrpAsmdefName = "PCG.HDRP";
 	}
 }

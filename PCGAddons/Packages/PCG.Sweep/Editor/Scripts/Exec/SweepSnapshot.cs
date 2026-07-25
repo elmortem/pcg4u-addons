@@ -13,6 +13,7 @@ namespace PCG.Sweep
 		public bool[] SplineClosed;
 
 		public float[] WidthLut;
+		public float[][] WidthLuts;
 		public float[] HeightLut;
 		public float[] TwistLut;
 
@@ -24,5 +25,13 @@ namespace PCG.Sweep
 		public bool[] CapEndFlags;
 		public bool Collider;
 		public string Name;
+
+		public float[] GetWidthLut(int splineIndex)
+		{
+			if (WidthLuts != null && splineIndex >= 0 && splineIndex < WidthLuts.Length && WidthLuts[splineIndex] != null)
+				return WidthLuts[splineIndex];
+
+			return WidthLut;
+		}
 	}
 }

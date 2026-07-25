@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.Instances;
-using PCG.Utilities;
+using PCG.Splines;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace PCG.Polygons.City
@@ -42,21 +44,38 @@ namespace PCG.Polygons.City
 			var uvScale = GetInputValue(nameof(Data.UvScale), Data.UvScale);
 			var name = GetInputValue(nameof(Data.Name), Data.Name);
 			var material = GetInputValue(nameof(Data.Material), Data.Material);
+			bool collider = Data.Collider;
 
-			using (var scope = OperationScope.Start(this))
+			Func<float2, float> heightSampler = null;
+			if (terrain != null && maxCellSize > 0f)
 			{
-				var data = RegionMeshBuilder.Build(region, terrain, terrainPosition, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
-				Results.Value.Add(new MeshInstanceData
-				{
-					Name = name,
-					Material = material,
-					Vertices = data.Vertices,
-					Uvs = data.Uvs,
-					Triangles = data.Triangles
-				});
-
-				await scope.Step(ct: ct);
+				GetBounds(region, out float2 min, out float2 max);
+				var window = SplineTerrainWindow.Capture(terrain, terrainPosition, min.x, max.x, min.y, max.y);
+				float planeY = region.PlaneY;
+				heightSampler = p => window.TrySampleHeight(p.x, p.y, out float sampled) ? sampled : planeY;
 			}
+
+			var data = await PcgWorkerScheduler.RunAsync(
+				() => RegionMeshBuilder.BuildFromHeightSampler(
+					region,
+					heightSampler,
+					maxHeightError,
+					minCellSize,
+					maxCellSize,
+					maxDepth,
+					heightOffset,
+					uvScale),
+				ct);
+
+			Results.Value.Add(new MeshInstanceData
+			{
+				Name = name,
+				Material = material,
+				Collider = collider,
+				Vertices = data.Vertices,
+				Uvs = data.Uvs,
+				Triangles = data.Triangles
+			});
 
 			var container = InstanceMakerContainer;
 			if (container != null && (PcgComputeSystem.IsGenerating || IsPreviewLocal || IsPreviewGlobal))
@@ -64,8 +83,26 @@ namespace PCG.Polygons.City
 				await ClearInstancesAsync(ct);
 
 				container.Begin();
-				await container.AddInstances(Address.ToKey(), null, Results.Value, ct);
-				container.End();
+				try
+				{
+					await container.AddInstances(Address.ToKey(), null, Results.Value, ct);
+				}
+				finally
+				{
+					container.End();
+				}
+			}
+		}
+
+		private static void GetBounds(RegionSet region, out float2 min, out float2 max)
+		{
+			min = new float2(float.MaxValue, float.MaxValue);
+			max = new float2(float.MinValue, float.MinValue);
+			for (int i = 0; i < region.Regions.Count; i++)
+			{
+				region.Regions[i].GetBounds(out float2 lo, out float2 hi);
+				min = math.min(min, lo);
+				max = math.max(max, hi);
 			}
 		}
 

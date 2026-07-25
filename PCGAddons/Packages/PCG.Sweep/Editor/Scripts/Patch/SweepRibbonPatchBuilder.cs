@@ -59,7 +59,7 @@ namespace PCG.Sweep
 					float3 tangent = path.Tangents[q];
 					float3 up = path.Ups[q];
 					float3 right3 = SweepRibbonSampling.Right3D(tangent, up, positions[prev], positions[next]);
-					float halfWidth = profileHalf * SampleLut(source.WidthLut, ts[q]);
+					float halfWidth = profileHalf * SampleLut(source.GetWidthLut(piece.Spline), ts[q]);
 
 					float3 center = positions[q];
 					center.y += source.HeightOffset;

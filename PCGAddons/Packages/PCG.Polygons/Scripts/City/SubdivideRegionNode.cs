@@ -25,6 +25,10 @@ namespace PCG.Polygons.City
 		public float SplitJitter = 0.1f;
 
 		[Input]
+		[PcgMemberInfo("World-space rotation of the local subdivision grid.", Tags = new[] { "rotation", "angle", "district" })]
+		public float Rotation;
+
+		[Input]
 		[PcgMemberInfo("Random seed for the subdivision.", Tags = new[] { "seed", "random" })]
 		public int Seed;
 

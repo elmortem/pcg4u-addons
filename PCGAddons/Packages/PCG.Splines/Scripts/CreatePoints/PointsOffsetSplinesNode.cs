@@ -40,8 +40,18 @@ namespace PCG.CreatePoints
 		[PcgMemberInfo("How points are distributed along the spline.", Tags = new[] { "spacing", "mode" })]
 		public SplineSpacingMode Spacing = SplineSpacingMode.Distance;
 
+		[NodeEnum]
+		[PcgMemberInfo("Whether points include spline ends or represent segment centers.", Tags = new[] { "placement", "segments", "centers" })]
+		public SplinePointPlacement Placement = SplinePointPlacement.IncludeEnds;
+
 		[PcgMemberInfo("Whether to place points on both sides of the spline.", Tags = new[] { "sides", "mirror" })]
 		public bool BothSides = true;
+
+		[PcgMemberInfo("Whether the offset starts at a fraction of the spline width.", Tags = new[] { "width", "offset", "road" })]
+		public bool UseSplineWidth;
+
+		[PcgMemberInfo("Spline width multiplier added before the sideways offset.", Tags = new[] { "width", "multiplier", "offset" })]
+		public float WidthMultiplier = 0.5f;
 
 		[PcgMemberInfo("Whether point normals face the world up axis.", Tags = new[] { "normal", "up" })]
 		public bool UpNormal;

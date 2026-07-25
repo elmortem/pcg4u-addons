@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using PCG.Polygons.City;
 using Unity.Mathematics;
 
@@ -40,6 +41,87 @@ namespace PCG.Polygons
 			}
 
 			return byDepth;
+		}
+
+		public static void PruneShortDeadEnds(Dictionary<int, List<RoadSegment>> byDepth, float minimumLength)
+		{
+			if (byDepth == null || minimumLength <= 0f)
+				return;
+
+			bool changed;
+			do
+			{
+				changed = false;
+				var records = new List<SegmentRecord>();
+				foreach (var pair in byDepth)
+					for (int i = 0; i < pair.Value.Count; i++)
+						records.Add(new SegmentRecord(pair.Key, i, pair.Value[i]));
+				if (records.Count == 0)
+					return;
+
+				var vertices = new Dictionary<int2, int>();
+				var ends = new int2[records.Count];
+				var adjacency = new List<List<int>>();
+				for (int i = 0; i < records.Count; i++)
+				{
+					int a = VertexId(records[i].Segment.A, vertices, adjacency);
+					int b = VertexId(records[i].Segment.B, vertices, adjacency);
+					ends[i] = new int2(a, b);
+					adjacency[a].Add(i);
+					adjacency[b].Add(i);
+				}
+
+				var remove = new HashSet<int>();
+				for (int vertex = 0; vertex < adjacency.Count; vertex++)
+				{
+					if (adjacency[vertex].Count != 1)
+						continue;
+
+					var branch = new List<int>();
+					float length = 0f;
+					int currentVertex = vertex;
+					int currentEdge = adjacency[vertex][0];
+					var seen = new HashSet<int>();
+					while (seen.Add(currentEdge))
+					{
+						branch.Add(currentEdge);
+						RoadSegment segment = records[currentEdge].Segment;
+						length += math.distance(segment.A, segment.B);
+						if (length >= minimumLength)
+							break;
+
+						int nextVertex = ends[currentEdge].x == currentVertex
+							? ends[currentEdge].y
+							: ends[currentEdge].x;
+						if (adjacency[nextVertex].Count != 2)
+							break;
+
+						int nextEdge = adjacency[nextVertex][0] == currentEdge
+							? adjacency[nextVertex][1]
+							: adjacency[nextVertex][0];
+						currentVertex = nextVertex;
+						currentEdge = nextEdge;
+					}
+
+					if (length < minimumLength)
+						for (int i = 0; i < branch.Count; i++)
+							remove.Add(branch[i]);
+				}
+
+				if (remove.Count == 0)
+					continue;
+
+				foreach (var group in records
+					         .Select((record, index) => (record, index))
+					         .Where(item => remove.Contains(item.index))
+					         .GroupBy(item => item.record.Depth))
+				{
+					foreach (int index in group.Select(item => item.record.Index).OrderByDescending(index => index))
+						byDepth[group.Key].RemoveAt(index);
+				}
+				changed = true;
+			}
+			while (changed);
 		}
 
 		public static void Chain(List<RoadSegment> segments, List<float2[]> openPaths, List<float2[]> closedPaths)
@@ -139,6 +221,17 @@ namespace PCG.Polygons
 			return id;
 		}
 
+		private static int VertexId(float2 point, Dictionary<int2, int> vertices, List<List<int>> adjacency)
+		{
+			int2 key = Quant(point);
+			if (vertices.TryGetValue(key, out int id))
+				return id;
+			id = vertices.Count;
+			vertices[key] = id;
+			adjacency.Add(new List<int>());
+			return id;
+		}
+
 		private static int2 Quant(float2 p)
 		{
 			return new int2((int)math.round(p.x * 1000.0), (int)math.round(p.y * 1000.0));
@@ -153,6 +246,20 @@ namespace PCG.Polygons
 				return new int4(qb.x, qb.y, qa.x, qa.y);
 
 			return new int4(qa.x, qa.y, qb.x, qb.y);
+		}
+
+		private readonly struct SegmentRecord
+		{
+			public readonly int Depth;
+			public readonly int Index;
+			public readonly RoadSegment Segment;
+
+			public SegmentRecord(int depth, int index, RoadSegment segment)
+			{
+				Depth = depth;
+				Index = index;
+				Segment = segment;
+			}
 		}
 	}
 }

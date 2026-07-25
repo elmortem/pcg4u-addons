@@ -8,7 +8,7 @@ namespace PCG.Sweep
 {
 	internal static class SweepRibbonMeshBuilder
 	{
-		internal static SweepMeshData Build(SweepRibbonPath path, SweepSnapshot source, CancellationToken ct, Action reportProgress)
+		internal static SweepMeshData Build(SweepRibbonPath path, SweepSnapshot source, int splineIndex, CancellationToken ct, Action reportProgress)
 		{
 			if (path == null || path.Count < 2 || !(path.Length > 1e-4f))
 				return default;
@@ -33,7 +33,7 @@ namespace PCG.Sweep
 				int prev = math.max(0, i - 1);
 				int next = math.min(count - 1, i + 1);
 				float3 right = SweepRibbonSampling.Right3D(path.Tangents[i], path.Ups[i], path.Positions[prev], path.Positions[next]);
-				float halfWidth = profileHalf * SampleLut(source.WidthLut, path.NormalizedTs[i]);
+				float halfWidth = profileHalf * SampleLut(source.GetWidthLut(splineIndex), path.NormalizedTs[i]);
 				float3 left = Elevate(path.Positions[i] + right * halfWidth, source);
 				float3 rightPoint = Elevate(path.Positions[i] - right * halfWidth, source);
 				int offset = i * 2;

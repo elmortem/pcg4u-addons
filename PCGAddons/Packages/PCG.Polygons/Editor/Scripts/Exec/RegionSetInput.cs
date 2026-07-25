@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using PCG.Exec;
-using PCG.Utilities;
 
 namespace PCG.Polygons
 {
@@ -24,23 +23,21 @@ namespace PCG.Polygons
 			if (valid.Count <= 0)
 				return null;
 
-			if (valid.Count == 1)
-				return valid[0];
-
-			await UniTask.SwitchToThreadPool();
-
-			var result = new RegionSet();
-			result.PlaneY = valid[0].PlaneY;
-			for (int i = 0; i < valid.Count; i++)
+			return await PcgWorkerScheduler.RunAsync(() =>
 			{
-				if (ct.IsCancellationRequested)
-					break;
+				var result = new RegionSet
+				{
+					PlaneY = valid[0].PlaneY
+				};
 
-				result.Append(valid[i]);
-			}
+				for (int i = 0; i < valid.Count; i++)
+				{
+					ct.ThrowIfCancellationRequested();
+					result.Append(valid[i]);
+				}
 
-			await UniTaskEditor.SwitchToEditorThread();
-			return result;
+				return result;
+			}, ct);
 		}
 	}
 }

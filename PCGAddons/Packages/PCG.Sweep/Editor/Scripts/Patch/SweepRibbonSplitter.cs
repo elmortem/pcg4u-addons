@@ -80,7 +80,7 @@ namespace PCG.Sweep
 			var result = new SweepRibbonSplitResult();
 
 			float profileHalf = math.max(math.abs(full.ProfilePoints[0].x), math.abs(full.ProfilePoints[1].x));
-			float planWidth = math.max(1e-3f, profileHalf * 2f * MaxLut(full.WidthLut));
+			float planWidth = math.max(1e-3f, profileHalf * 2f * MaxWidthLut(full));
 			float verticalTolerance = math.max(0f, thickness);
 
 			var samples = new Sample[splineCount][];
@@ -88,7 +88,7 @@ namespace PCG.Sweep
 			{
 				ct.ThrowIfCancellationRequested();
 				reportProgress();
-				samples[i] = SampleSpline(paths[i], profileHalf, full.WidthLut);
+				samples[i] = SampleSpline(paths[i], profileHalf, full.GetWidthLut(i));
 			}
 
 			var quads = new List<Quad>();
@@ -471,6 +471,17 @@ namespace PCG.Sweep
 			float max = lut[0];
 			for (int i = 1; i < lut.Length; i++)
 				max = math.max(max, lut[i]);
+			return max;
+		}
+
+		private static float MaxWidthLut(SweepSnapshot snapshot)
+		{
+			float max = MaxLut(snapshot.WidthLut);
+			if (snapshot.WidthLuts == null)
+				return max;
+
+			for (int i = 0; i < snapshot.WidthLuts.Length; i++)
+				max = math.max(max, MaxLut(snapshot.WidthLuts[i]));
 			return max;
 		}
 	}

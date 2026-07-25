@@ -27,6 +27,14 @@ namespace PCG.Splines
 		[PcgMemberInfo("Maximum height difference, in world units, allowed between two branches to form a junction. Zero or less ignores height.", Tags = new[] { "height", "overpass", "world" })]
 		public float MaxHeightDifference = 2f;
 
+		[Input]
+		[PcgMemberInfo("Maximum distance for snapping an open endpoint to the interior of another spline. Zero disables snapping.", Tags = new[] { "endpoint", "snap", "distance", "world" })]
+		public float EndpointSnapDistance = 1f;
+
+		[Output]
+		[PcgMemberInfo("Input splines with eligible open endpoints snapped onto neighbouring splines.", Tags = new[] { "spline", "snap", "network", "results" })]
+		public List<Spline> SnappedSplines => default;
+
 		[Output]
 		[PcgMemberInfo("Topology of the network: junctions with valency and exact incident cuts.", Tags = new[] { "topology", "junction", "cuts" })]
 		public SplineNetworkTopology Topology => default;

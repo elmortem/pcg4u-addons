@@ -41,6 +41,7 @@ namespace PCG.Splines
 						transformedSpline.Add(transformedKnot, spline.GetTangentMode(i));
 					}
 
+					SplineWidthUtility.Copy(spline, transformedSpline);
 					result.Add(transformedSpline);
 				}
 			}
@@ -72,6 +73,17 @@ namespace PCG.Splines
 								hash = (hash * 397) ^ knot.TangentOut.GetHashCode();
 								hash = (hash * 397) ^ knot.Rotation.GetHashCode();
 								hash = (hash * 397) ^ (int)spline.GetTangentMode(k);
+							}
+
+							if (spline.TryGetFloatData(SplineWidthUtility.DataKey, out var widthData) && widthData != null)
+							{
+								hash = (hash * 397) ^ (int)widthData.PathIndexUnit;
+								hash = (hash * 397) ^ widthData.DefaultValue.GetHashCode();
+								foreach (var point in widthData)
+								{
+									hash = (hash * 397) ^ point.Index.GetHashCode();
+									hash = (hash * 397) ^ point.Value.GetHashCode();
+								}
 							}
 						}
 					}

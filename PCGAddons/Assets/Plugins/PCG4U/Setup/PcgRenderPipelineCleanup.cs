@@ -8,14 +8,13 @@ namespace PCG.Setup
 	{
 		public static bool IsCleanupNeeded()
 		{
-			if (FindFolder(PcgSetupConstants.UrpGizmosAsmdefName) == null)
-				return false;
-			if (FindFolder(PcgSetupConstants.HdrpGizmosAsmdefName) == null)
-				return false;
-			if (PcgPackageUtility.IsInstalled(PcgSetupConstants.UrpPackageName)
-				&& PcgPackageUtility.IsInstalled(PcgSetupConstants.HdrpPackageName))
-				return false;
-			return true;
+			var hasUrpSources = FindFolder(PcgSetupConstants.UrpGizmosAsmdefName) != null;
+			var hasHdrpSources = FindFolder(PcgSetupConstants.HdrpGizmosAsmdefName) != null
+				|| FindFolder(PcgSetupConstants.HdrpAsmdefName) != null;
+			var hasUrpPackage = PcgPackageUtility.IsInstalled(PcgSetupConstants.UrpPackageName);
+			var hasHdrpPackage = PcgPackageUtility.IsInstalled(PcgSetupConstants.HdrpPackageName);
+
+			return (hasUrpSources && !hasUrpPackage) || (hasHdrpSources && !hasHdrpPackage);
 		}
 
 		public static PcgRenderPipelineKind DetectPipeline()
@@ -36,7 +35,10 @@ namespace PCG.Setup
 			if (kind != PcgRenderPipelineKind.Urp)
 				DeleteFolder(PcgSetupConstants.UrpGizmosAsmdefName);
 			if (kind != PcgRenderPipelineKind.Hdrp)
+			{
 				DeleteFolder(PcgSetupConstants.HdrpGizmosAsmdefName);
+				DeleteFolder(PcgSetupConstants.HdrpAsmdefName);
+			}
 		}
 
 		private static string FindFolder(string asmdefName)

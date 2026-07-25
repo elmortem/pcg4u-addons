@@ -26,7 +26,7 @@ namespace PCG.TransformPoints
 
 			var radius = GetInputValue(nameof(Data.Radius), Data.Radius);
 
-			var results = Results.Rent(pointsList.TotalCount());
+			var results = new List<PointData>(pointsList.TotalCount());
 			foreach (var points in pointsList)
 			{
 				if (points == null || points.Count <= 0)
@@ -35,14 +35,23 @@ namespace PCG.TransformPoints
 			}
 
 			if (radius < 0.0001f)
+			{
+				Results.Value = results;
 				return;
+			}
 
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
+			var mode = Data.Mode;
+			const int curveResolution = 256;
+			var curveLut = new float[curveResolution + 1];
+			for (int i = 0; i <= curveResolution; i++)
+				curveLut[i] = Data.Curve.Evaluate(i / (float)curveResolution);
 
 			var samples = new List<float3>();
 			if (splinesList != null)
 			{
 				var sampleStep = radius * 0.25f;
+				using var scope = OperationScope.Start(this);
 				foreach (var splines in splinesList)
 				{
 					if (splines == null)
@@ -56,70 +65,78 @@ namespace PCG.TransformPoints
 						var length = spline.GetLength();
 						var count = math.clamp((int)math.round(length / sampleStep), 2, 4096);
 						for (int i = 0; i <= count; i++)
+						{
 							samples.Add(spline.EvaluatePosition(i / (float)count));
+							await scope.Step(ct: ct);
+						}
 					}
 				}
 			}
 
-			await UniTask.SwitchToThreadPool();
-
-			var cells = new Dictionary<int3, List<int>>();
-			for (int i = 0; i < samples.Count; i++)
+			var computed = await PcgWorkerScheduler.RunAsync(() =>
 			{
-				var cell = (int3)math.floor(samples[i] / radius);
-				if (!cells.TryGetValue(cell, out var list))
+				var cells = new Dictionary<int3, List<int>>();
+				for (int i = 0; i < samples.Count; i++)
 				{
-					list = new List<int>();
-					cells.Add(cell, list);
-				}
-				list.Add(i);
-			}
-
-			for (int i = 0; i < results.Count; i++)
-			{
-				ct.ThrowIfCancellationRequested();
-
-				var point = results[i];
-				var minDistSq = radius * radius;
-
-				if (samples.Count > 0)
-				{
-					var center = (int3)math.floor(point.Position / radius);
-					for (int x = -1; x <= 1; x++)
+					var cell = (int3)math.floor(samples[i] / radius);
+					if (!cells.TryGetValue(cell, out var list))
 					{
-						for (int y = -1; y <= 1; y++)
-						{
-							for (int z = -1; z <= 1; z++)
-							{
-								if (!cells.TryGetValue(center + new int3(x, y, z), out var list))
-									continue;
+						list = new List<int>();
+						cells.Add(cell, list);
+					}
+					list.Add(i);
+				}
 
-								for (int t = 0; t < list.Count; t++)
+				var output = new List<PointData>(results);
+				for (int i = 0; i < output.Count; i++)
+				{
+					ct.ThrowIfCancellationRequested();
+
+					var point = output[i];
+					var minDistSq = radius * radius;
+
+					if (samples.Count > 0)
+					{
+						var center = (int3)math.floor(point.Position / radius);
+						for (int x = -1; x <= 1; x++)
+						{
+							for (int y = -1; y <= 1; y++)
+							{
+								for (int z = -1; z <= 1; z++)
 								{
-									var distSq = math.distancesq(point.Position, samples[list[t]]);
-									if (distSq < minDistSq)
-										minDistSq = distSq;
+									if (!cells.TryGetValue(center + new int3(x, y, z), out var list))
+										continue;
+
+									for (int t = 0; t < list.Count; t++)
+									{
+										var distSq = math.distancesq(point.Position, samples[list[t]]);
+										if (distSq < minDistSq)
+											minDistSq = distSq;
+									}
 								}
 							}
 						}
 					}
+
+					var t01 = math.clamp(math.sqrt(minDistSq) / radius, 0f, 1f);
+					var scaled = t01 * curveResolution;
+					var curveIndex = math.min((int)scaled, curveResolution - 1);
+					var value = math.lerp(curveLut[curveIndex], curveLut[curveIndex + 1], scaled - curveIndex);
+
+					if (mode == ChangeDensityMode.Set)
+						point.Density = value;
+					else if (mode == ChangeDensityMode.Add)
+						point.Density += value;
+					else
+						point.Density *= value;
+
+					point.Density = math.clamp(point.Density, 0f, 1f);
+					output[i] = point;
 				}
+				return output;
+			}, ct);
 
-				var t01 = math.clamp(math.sqrt(minDistSq) / radius, 0f, 1f);
-				var value = Data.Curve.Evaluate(t01);
-
-				if (Data.Mode == ChangeDensityMode.Set)
-					point.Density = value;
-				else if (Data.Mode == ChangeDensityMode.Add)
-					point.Density += value;
-				else
-					point.Density *= value;
-
-				point.Density = math.clamp(point.Density, 0f, 1f);
-				results[i] = point;
-			}
-
-			await UniTaskEditor.SwitchToEditorThread();
+			Results.Value = computed;
 		}
 
 		public override void DrawPreview(Transform transform)

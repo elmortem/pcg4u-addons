@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using PCG.GraphModel;
+using UnityEngine.Splines;
 
 namespace PCG.Polygons.City
 {
@@ -21,8 +23,16 @@ namespace PCG.Polygons.City
 		[PcgMemberInfo("Miter limit for sharp joined corners.", Tags = new[] { "miter", "limit" })]
 		public float MiterLimit = 2f;
 
+		[PcgMemberInfo("Iteratively removes dangling road branches shorter than this length. Zero disables pruning.",
+			Tags = new[] { "road", "dead end", "prune", "topology" })]
+		public float MinimumDeadEndLength;
+
 		[Output]
 		[PcgMemberInfo("The generated road ribbons.", Tags = new[] { "region", "roads", "results" })]
 		public RegionSet Roads => default;
+
+		[Output]
+		[PcgMemberInfo("Road centerlines carrying their absolute width channel.", Tags = new[] { "spline", "roads", "centerline", "width" })]
+		public List<Spline> Centerlines => default;
 	}
 }

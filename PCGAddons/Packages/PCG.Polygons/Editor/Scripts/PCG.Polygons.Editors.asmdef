@@ -5,7 +5,9 @@
         "PCG",
         "PCG.Editors",
         "PCG.Polygons",
+        "PCG.Mazes",
         "PCG.Splines",
+        "PCG.Splines.Editor",
         "Unity.Splines",
         "Unity.Mathematics",
         "UniTask"

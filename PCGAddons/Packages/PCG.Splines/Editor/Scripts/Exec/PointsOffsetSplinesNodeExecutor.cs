@@ -55,32 +55,68 @@ namespace PCG.CreatePoints
 
 						if (Data.Spacing == SplineSpacingMode.Distance)
 						{
-							for (float dist = 0f; dist <= length; dist += distance)
+							if (Data.Placement == SplinePointPlacement.SegmentCenters)
 							{
-								EvaluateAndAdd(spline, dist, offset, Results.Value);
-								await scope.Step(ct: ct);
+								var total = math.max(1, (int)math.floor(length / distance));
+								var margin = (length - total * distance) * 0.5f;
+								for (int i = 0; i < total; i++)
+								{
+									EvaluateAndAdd(spline, margin + (i + 0.5f) * distance, offset, Results.Value);
+									await scope.Step(ct: ct);
+								}
+							}
+							else
+							{
+								for (float dist = 0f; dist <= length; dist += distance)
+								{
+									EvaluateAndAdd(spline, dist, offset, Results.Value);
+									await scope.Step(ct: ct);
+								}
 							}
 						}
 						else if (Data.Spacing == SplineSpacingMode.Count)
 						{
 							var total = math.max(1, count);
-							var lastIndex = spline.Closed ? total : total - 1;
-							var step = total == 1 ? 0f : length / lastIndex;
-							for (int i = 0; i < total; i++)
+							if (Data.Placement == SplinePointPlacement.SegmentCenters)
 							{
-								EvaluateAndAdd(spline, i * step, offset, Results.Value);
-								await scope.Step(ct: ct);
+								var step = length / total;
+								for (int i = 0; i < total; i++)
+								{
+									EvaluateAndAdd(spline, (i + 0.5f) * step, offset, Results.Value);
+									await scope.Step(ct: ct);
+								}
+							}
+							else
+							{
+								var lastIndex = spline.Closed ? total : total - 1;
+								var step = total == 1 ? 0f : length / lastIndex;
+								for (int i = 0; i < total; i++)
+								{
+									EvaluateAndAdd(spline, i * step, offset, Results.Value);
+									await scope.Step(ct: ct);
+								}
 							}
 						}
 						else
 						{
 							var steps = math.max(1, (int)math.round(length / distance));
 							var step = length / steps;
-							var lastIndex = spline.Closed ? steps - 1 : steps;
-							for (int i = 0; i <= lastIndex; i++)
+							if (Data.Placement == SplinePointPlacement.SegmentCenters)
 							{
-								EvaluateAndAdd(spline, i * step, offset, Results.Value);
-								await scope.Step(ct: ct);
+								for (int i = 0; i < steps; i++)
+								{
+									EvaluateAndAdd(spline, (i + 0.5f) * step, offset, Results.Value);
+									await scope.Step(ct: ct);
+								}
+							}
+							else
+							{
+								var lastIndex = spline.Closed ? steps - 1 : steps;
+								for (int i = 0; i <= lastIndex; i++)
+								{
+									EvaluateAndAdd(spline, i * step, offset, Results.Value);
+									await scope.Step(ct: ct);
+								}
 							}
 						}
 
@@ -104,8 +140,14 @@ namespace PCG.CreatePoints
 		private void EvaluateAndAddAtT(Spline spline, float t, float offset, List<PointData> target)
 		{
 			spline.Evaluate(t, out var point, out var tangent, out var upVector);
+			var effectiveOffset = offset;
 
-			if (math.abs(offset) < 0.0001f)
+			if (Data.UseSplineWidth)
+			{
+				effectiveOffset += SplineWidthUtility.Evaluate(spline, t, 0f) * Data.WidthMultiplier;
+			}
+
+			if (math.abs(effectiveOffset) < 0.0001f)
 			{
 				AddPoint(target, point, tangent, upVector);
 				return;
@@ -115,12 +157,12 @@ namespace PCG.CreatePoints
 
 			if (Data.BothSides)
 			{
-				AddPoint(target, point + offsetDirection * math.abs(offset), tangent, upVector);
-				AddPoint(target, point - offsetDirection * math.abs(offset), tangent, upVector);
+				AddPoint(target, point + offsetDirection * math.abs(effectiveOffset), tangent, upVector);
+				AddPoint(target, point - offsetDirection * math.abs(effectiveOffset), tangent, upVector);
 			}
 			else
 			{
-				AddPoint(target, point + offsetDirection * offset, tangent, upVector);
+				AddPoint(target, point + offsetDirection * effectiveOffset, tangent, upVector);
 			}
 		}
 

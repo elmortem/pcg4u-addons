@@ -103,7 +103,7 @@ public class FooNode : PcgPreviewNode
 ### 3.3 Кооперативная асинхронность — `OperationScope` (namespace `PCG.Utilities`)
 - `using (var scope = OperationScope.Start(this)) { ... await scope.Step(ct: ct); }`
 - `scope.Step()` — точка кооперативного прерывания/прогресса/отмены внутри тяжёлых циклов.
-- Тяжёлые вычисления часто уходят в пул потоков: `UniTask.SwitchToThreadPool()` → работа → `UniTaskEditor.SwitchToEditorThread()` перед возвратом (см. PCG.Octree).
+- Тяжёлые pure-data вычисления выполняются через общий ограниченный `PcgWorkerScheduler`; Unity API остаётся на editor thread, снимает immutable-снапшот и квантуется через `OperationScope`.
 
 ### 3.4 Типы точек и инстансов
 - `PCG.Points.PointData` — единица размещения: `Position` (Vector3), `Normal` (Vector3), `Angle` (float, вокруг Normal), `Scale` (float), `Density` (float, [0..1]).

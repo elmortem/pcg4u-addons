@@ -1,0 +1,25 @@
+{
+	"name": "PCG.HDRP",
+	"rootNamespace": "PCG",
+	"references": [
+		"PCG",
+		"Unity.RenderPipelines.HighDefinition.Runtime"
+	],
+	"includePlatforms": [],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": [
+		"PCG_HDRP_WATER"
+	],
+	"versionDefines": [
+		{
+			"name": "com.unity.render-pipelines.high-definition",
+			"expression": "14.0.0",
+			"define": "PCG_HDRP_WATER"
+		}
+	],
+	"noEngineReferences": false
+}

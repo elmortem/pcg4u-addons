@@ -20,45 +20,63 @@ namespace PCG.Polygons.City
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
 			var input = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Region), ct);
-			var results = Results.Rent(input != null ? input.Count : 0);
 			if (input == null)
+			{
+				Results.Value = new List<PointData>();
 				return;
+			}
 
 			var roads = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Roads), ct);
+			var exclusions = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.ExclusionRegions), ct);
 			var count = GetInputValue(nameof(Data.Count), Data.Count);
 			var spacing = GetInputValue(nameof(Data.Spacing), Data.Spacing);
+			var gridJitter = GetInputValue(nameof(Data.GridJitter), Data.GridJitter);
 			var margin = GetInputValue(nameof(Data.Margin), Data.Margin);
+			var footprintClearance = GetInputValue(nameof(Data.FootprintClearance), Data.FootprintClearance);
 			var seed = GetInputValue(nameof(Data.Seed), Data.Seed);
+			var mode = Data.Mode;
+			var edgeSource = roads != null && roads.Count > 0 ? roads : input;
 
-			using (var scope = OperationScope.Start(this))
+			var work = PcgWorkerScheduler.RunAsync(() =>
 			{
+				var output = new List<PointData>(input.Count);
+				var noBuildZones = exclusions != null && exclusions.Count > 0
+					? PolygonClipper.Inflate(exclusions.Regions, math.max(0f, footprintClearance))
+					: null;
 				for (int i = 0; i < input.Regions.Count; i++)
 				{
+					ct.ThrowIfCancellationRequested();
 					var pieces = Inset(input.Regions[i], margin);
+					if (noBuildZones != null && noBuildZones.Count > 0)
+						pieces = PolygonClipper.Difference(pieces, noBuildZones);
 					if (pieces.Count == 0)
-					{
-						await scope.Step(ct: ct);
 						continue;
-					}
 
-					switch (Data.Mode)
+					switch (mode)
 					{
 						case RegionToPointsMode.Centroid:
-							AddCentroid(results, pieces, input.PlaneY);
+							AddCentroid(output, pieces, input.PlaneY);
 							break;
 						case RegionToPointsMode.Random:
-							await RegionFill.FillRandom(scope, results, pieces, input.PlaneY, count, seed + i, ct);
+							RegionFill.FillRandomBlocking(output, pieces, input.PlaneY, count, seed + i, ct);
 							break;
 						case RegionToPointsMode.Grid:
-							await RegionFill.FillGrid(scope, results, pieces, input.PlaneY, spacing, ct);
+							RegionFill.FillGridBlocking(output, pieces, input.PlaneY, spacing, gridJitter, seed + i, ct);
 							break;
 					}
-
-					await scope.Step(ct: ct);
 				}
 
-				OrientToNearestEdge(results, roads != null && roads.Count > 0 ? roads : input);
+				OrientToNearestEdge(output, edgeSource);
+				return output;
+			}, ct);
+			while (work.Status == UniTaskStatus.Pending)
+			{
+				PcgComputeSystem.ReportProgress(this);
+				await UniTask.Delay(250, cancellationToken: ct);
 			}
+			var results = await work;
+
+			Results.Value = results;
 		}
 
 		private static List<Polygon2D> Inset(Polygon2D polygon, float margin)

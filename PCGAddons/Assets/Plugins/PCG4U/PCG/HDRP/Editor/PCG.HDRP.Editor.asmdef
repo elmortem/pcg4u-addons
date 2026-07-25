@@ -1,0 +1,38 @@
+{
+	"name": "PCG.HDRP.Editor",
+	"rootNamespace": "PCG",
+	"references": [
+		"PCG",
+		"PCG.HDRP",
+		"PCG.Editors",
+		"PCG.Gizmos.Editor",
+		"Unity.RenderPipelines.HighDefinition.Runtime",
+		"Unity.Mathematics",
+		"UniTask"
+	],
+	"includePlatforms": [
+		"Editor"
+	],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": [
+		"PCG_HDRP_WATER",
+		"HAS_UNITASK"
+	],
+	"versionDefines": [
+		{
+			"name": "com.cysharp.unitask",
+			"expression": "2.5.5",
+			"define": "HAS_UNITASK"
+		},
+		{
+			"name": "com.unity.render-pipelines.high-definition",
+			"expression": "14.0.0",
+			"define": "PCG_HDRP_WATER"
+		}
+	],
+	"noEngineReferences": false
+}

@@ -58,6 +58,9 @@ namespace PCG.Polygons.City
 		[PcgMemberInfo("Material assigned to the mesh.", Tags = new[] { "material" })]
 		public Material Material;
 
+		[PcgMemberInfo("Whether a MeshCollider is created for the generated surface.", Tags = new[] { "collider" })]
+		public bool Collider;
+
 		[Output]
 		[PcgMemberInfo("Generated mesh instance data.", Tags = new[] { "mesh", "instances", "results" })]
 		public List<MeshInstanceData> Results => default;

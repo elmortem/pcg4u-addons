@@ -32,8 +32,13 @@ namespace PCG.Polygons
 
 		public static List<Polygon2D> Inflate(IList<Polygon2D> input, float delta)
 		{
+			return Inflate(input, delta, JoinType.Miter);
+		}
+
+		public static List<Polygon2D> Inflate(IList<Polygon2D> input, float delta, JoinType joinType)
+		{
 			var paths = ToPaths(input);
-			var solution = Clipper.InflatePaths(paths, delta * Scale, JoinType.Miter, EndType.Polygon);
+			var solution = Clipper.InflatePaths(paths, delta * Scale, joinType, EndType.Polygon);
 			return ToPolygons(solution);
 		}
 
@@ -56,6 +61,26 @@ namespace PCG.Polygons
 			var solution = new Paths64();
 			co.Execute(delta * Scale, solution);
 			return ToPolygons(solution);
+		}
+
+		public static int RemoveSmallHoles(IList<Polygon2D> polygons, float minimumArea)
+		{
+			if (polygons == null || minimumArea <= 0f)
+				return 0;
+
+			int removed = 0;
+			for (int i = 0; i < polygons.Count; i++)
+			{
+				List<float2[]> holes = polygons[i].Holes;
+				for (int h = holes.Count - 1; h >= 0; h--)
+				{
+					if (math.abs(SignedArea(holes[h])) >= minimumArea)
+						continue;
+					holes.RemoveAt(h);
+					removed++;
+				}
+			}
+			return removed;
 		}
 
 		public static List<float2[]> Triangulate(IList<Polygon2D> polygons)

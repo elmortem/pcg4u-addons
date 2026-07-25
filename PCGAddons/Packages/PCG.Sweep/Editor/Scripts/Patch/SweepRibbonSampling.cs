@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
+using Cysharp.Threading.Tasks;
+using PCG.Utilities;
 using Unity.Mathematics;
 using UnityEngine.Splines;
 
@@ -108,6 +110,67 @@ namespace PCG.Sweep
 			};
 		}
 
+		internal static async UniTask<SweepRibbonPath> CaptureAsync(
+			Spline spline,
+			float start,
+			float end,
+			float baseStep,
+			int minSamples,
+			OperationScope scope,
+			CancellationToken ct)
+		{
+			float length = spline.GetLength();
+			if (!(length > 1e-4f) || !math.isfinite(length))
+				return null;
+
+			float rangeStart = math.clamp(start, 0f, length);
+			float rangeEnd = math.clamp(end, 0f, length);
+			if (!(rangeEnd - rangeStart > 1e-4f))
+				return null;
+
+			var stations = await AdaptiveStationsAsync(spline, rangeStart, rangeEnd, baseStep, scope, ct);
+			minSamples = math.max(2, minSamples);
+			if (stations.Count < minSamples)
+			{
+				stations.Clear();
+				for (int i = 0; i < minSamples; i++)
+					stations.Add(math.lerp(rangeStart, rangeEnd, i / (float)(minSamples - 1)));
+			}
+
+			int count = stations.Count;
+			var stationArray = stations.ToArray();
+			var ts = new float[count];
+			var positions = new float3[count];
+			var tangents = new float3[count];
+			var ups = new float3[count];
+			for (int i = 0; i < count; i++)
+			{
+				ct.ThrowIfCancellationRequested();
+				float t = math.saturate(spline.ConvertIndexUnit(stationArray[i], PathIndexUnit.Distance, PathIndexUnit.Normalized));
+				float3 position = spline.EvaluatePosition(t);
+				float3 tangent = spline.EvaluateTangent(t);
+				float3 up = spline.EvaluateUpVector(t);
+				if (!math.all(math.isfinite(position)) || !math.all(math.isfinite(tangent)) || !math.all(math.isfinite(up)))
+					return null;
+
+				ts[i] = t;
+				positions[i] = position;
+				tangents[i] = tangent;
+				ups[i] = up;
+				await scope.Step(ct: ct);
+			}
+
+			return new SweepRibbonPath
+			{
+				Length = length,
+				Stations = stationArray,
+				NormalizedTs = ts,
+				Positions = positions,
+				Tangents = tangents,
+				Ups = ups
+			};
+		}
+
 		internal static List<float> AdaptiveStations(Spline spline, float start, float end, float baseStep, CancellationToken ct)
 		{
 			var dists = new List<float>();
@@ -140,6 +203,51 @@ namespace PCG.Sweep
 				int sub = math.clamp((int)math.ceil(turn / maxTurnRad), 1, MaxSubdivisions);
 				for (int s = 1; s <= sub; s++)
 					dists.Add(math.lerp(baseDist[c], baseDist[c + 1], s / (float)sub));
+			}
+
+			return dists;
+		}
+
+		private static async UniTask<List<float>> AdaptiveStationsAsync(
+			Spline spline,
+			float start,
+			float end,
+			float baseStep,
+			OperationScope scope,
+			CancellationToken ct)
+		{
+			var dists = new List<float>();
+			float span = end - start;
+			if (!(span > 1e-4f))
+			{
+				dists.Add(start);
+				return dists;
+			}
+
+			int coarse = math.max(1, (int)math.ceil(span / baseStep));
+			var baseDist = new float[coarse + 1];
+			var baseTan = new float2[coarse + 1];
+			for (int c = 0; c <= coarse; c++)
+			{
+				ct.ThrowIfCancellationRequested();
+				float d = start + span * c / coarse;
+				baseDist[c] = d;
+				float t = math.saturate(spline.ConvertIndexUnit(d, PathIndexUnit.Distance, PathIndexUnit.Normalized));
+				float3 tangent = spline.EvaluateTangent(t);
+				baseTan[c] = math.normalizesafe(new float2(tangent.x, tangent.z), new float2(0f, 1f));
+				await scope.Step(ct: ct);
+			}
+
+			float maxTurnRad = math.radians(MaxTurnPerSampleDeg);
+			dists.Add(start);
+			for (int c = 0; c < coarse; c++)
+			{
+				ct.ThrowIfCancellationRequested();
+				float turn = math.acos(math.clamp(math.dot(baseTan[c], baseTan[c + 1]), -1f, 1f));
+				int sub = math.clamp((int)math.ceil(turn / maxTurnRad), 1, MaxSubdivisions);
+				for (int s = 1; s <= sub; s++)
+					dists.Add(math.lerp(baseDist[c], baseDist[c + 1], s / (float)sub));
+				await scope.Step(ct: ct);
 			}
 
 			return dists;

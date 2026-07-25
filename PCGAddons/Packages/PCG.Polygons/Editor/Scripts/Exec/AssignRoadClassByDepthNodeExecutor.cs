@@ -4,6 +4,7 @@ using PCG.Exec;
 using PCG.GraphModel;
 using PCG.Polygons.Utilities;
 using PCG.Utilities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace PCG.Polygons.City
@@ -16,22 +17,28 @@ namespace PCG.Polygons.City
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Result.Value = new RegionSet();
-
 			var input = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Blocks), ct);
 			if (input == null)
+			{
+				Result.Value = new RegionSet();
 				return;
+			}
 
 			var maxWidth = GetInputValue(nameof(Data.MaxWidth), Data.MaxWidth);
 			var minDepth = GetInputValue(nameof(Data.MinDepth), Data.MinDepth);
 			var maxDepth = GetInputValue(nameof(Data.MaxDepth), Data.MaxDepth);
 
-			var result = input.Clone();
+			const int curveResolution = 256;
+			var curveLut = new float[curveResolution + 1];
+			for (int i = 0; i <= curveResolution; i++)
+				curveLut[i] = Data.WidthByDepth.Evaluate(i / (float)curveResolution);
 
-			using (var scope = OperationScope.Start(this))
+			Result.Value = await PcgWorkerScheduler.RunAsync(() =>
 			{
+				var result = input.Clone();
 				foreach (var polygon in result.Regions)
 				{
+					ct.ThrowIfCancellationRequested();
 					if (!polygon.HasEdgeData())
 						continue;
 
@@ -45,15 +52,16 @@ namespace PCG.Polygons.City
 							continue;
 
 						float k = maxDepth > 0 ? (float)d / maxDepth : 0f;
-						float width = Data.WidthByDepth.Evaluate(k) * maxWidth;
+						float scaled = math.saturate(k) * curveResolution;
+						int curveIndex = math.min((int)scaled, curveResolution - 1);
+						float curveValue = math.lerp(curveLut[curveIndex], curveLut[curveIndex + 1], scaled - curveIndex);
+						float width = curveValue * maxWidth;
 						polygon.SetEdge(CityAttributes.Width, e, width);
 					}
-
-					await scope.Step(ct: ct);
 				}
 
-				Result.Value = result;
-			}
+				return result;
+			}, ct);
 		}
 
 		public override void DrawPreview(Transform transform)

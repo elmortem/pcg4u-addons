@@ -33,7 +33,7 @@
 
 ## Обычный build path
 
-- `SweepSplineNodeExecutor` снимает immutable snapshot на editor thread, строит геометрию в thread pool и синхронизирует результат одним finalize-путём.
+- `SweepSplineNodeExecutor` снимает immutable snapshot на editor thread с `OperationScope`, а splitter и геометрию строит через общий ограниченный `PcgWorkerScheduler` с индексированными слотами; результат публикуется одним finalize-путём.
 - `SweepRibbonSampling` даёт общий 3D frame для Ribbon и HalfPipe.
 - `SweepRibbonMeshBuilder` строит Ribbon по две вершины на станцию.
 - `SweepProfileMeshBuilder` строит полный 9-точечный HalfPipe-кольцевой профиль и соединяет только соседние кольца.
@@ -56,3 +56,7 @@
 ## Зависимость от ядра
 
 `MeshInstanceMaker` должен пересчитывать normals и tangents и материализовать меш в world-identity относительно parent. Эта обязанность живёт в ProjectPCG, не в данном аддоне.
+
+## Width channel
+
+`SweepSplineNode` сначала ищет embedded-канал `SplineWidth` на каждом входном сплайне. Если канал присутствует, его world-space значение семплируется вдоль кривой и имеет приоритет над scalar `Width` и `WidthByT`; при отсутствии канала сохраняется прежнее поведение. Контракт одинаков для обычного sweep, Ribbon, профильного build path и `MergeIntersections`, включая junction patches.

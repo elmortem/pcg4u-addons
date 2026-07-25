@@ -185,7 +185,7 @@ namespace PCG.Sweep
 			for (int i = 0; i < ringCount; i++)
 			{
 				float t = frames[i].T;
-				float widthMul = SampleLut(snapshot.WidthLut, t);
+				float widthMul = SampleLut(snapshot.GetWidthLut(splineIndex), t);
 				float heightMul = SampleLut(snapshot.HeightLut, t);
 				float twist = math.radians(SampleLut(snapshot.TwistLut, t));
 				float twistCos = math.cos(twist);

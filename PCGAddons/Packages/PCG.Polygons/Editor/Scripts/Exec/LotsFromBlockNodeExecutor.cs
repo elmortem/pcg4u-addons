@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.GraphModel;
 using PCG.Polygons.Utilities;
-using PCG.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -26,17 +25,19 @@ namespace PCG.Polygons.City
 
 			var lotWidth = GetInputValue(nameof(Data.LotWidth), Data.LotWidth);
 
-			var result = new RegionSet();
-			result.PlaneY = input.PlaneY;
-			int lotId = 0;
-
-			var subject = new List<Polygon2D>(1) { null };
-			var clip = new List<Polygon2D>(1) { null };
-
-			using (var scope = OperationScope.Start(this))
+			var result = await PcgWorkerScheduler.RunAsync(() =>
 			{
+				var computed = new RegionSet
+				{
+					PlaneY = input.PlaneY
+				};
+				int lotId = 0;
+				var subject = new List<Polygon2D>(1) { null };
+				var clip = new List<Polygon2D>(1) { null };
+
 				foreach (var block in input.Regions)
 				{
+					ct.ThrowIfCancellationRequested();
 					float2 dir = LongestEdgeDir(block);
 					float2 normal = new float2(-dir.y, dir.x);
 					ProjectRange(block, dir, out float minT, out float maxT);
@@ -57,15 +58,16 @@ namespace PCG.Polygons.City
 						var lots = PolygonEdgeClip.Intersection(subject, clip, null);
 						for (int j = 0; j < lots.Count; j++)
 						{
-							int row = result.AddRegion(lots[j]);
-							result.Attributes.Set(CityAttributes.LotId, row, lotId);
+							int row = computed.AddRegion(lots[j]);
+							computed.Attributes.Set(CityAttributes.LotId, row, lotId);
 							lotId++;
 						}
-
-						await scope.Step(ct: ct);
+						ct.ThrowIfCancellationRequested();
 					}
 				}
-			}
+
+				return computed;
+			}, ct);
 
 			Lots.Value = result;
 		}

@@ -7,7 +7,7 @@ namespace PCG.Sweep
 {
 	internal static class SweepProfileMeshBuilder
 	{
-		internal static SweepMeshData Build(SweepRibbonPath path, SweepSnapshot source, CancellationToken ct, Action reportProgress)
+		internal static SweepMeshData Build(SweepRibbonPath path, SweepSnapshot source, int splineIndex, CancellationToken ct, Action reportProgress)
 		{
 			if (path == null || path.Count < 2 || !(path.Length > 1e-4f) ||
 				source.ProfilePoints == null || source.ProfilePoints.Length < 2 ||
@@ -34,7 +34,7 @@ namespace PCG.Sweep
 				float3 tangent = math.normalizesafe(path.Tangents[i], path.Positions[next] - path.Positions[prev]);
 				float3 right = SweepRibbonSampling.Right3D(tangent, path.Ups[i], path.Positions[prev], path.Positions[next]);
 				float3 up = math.normalizesafe(math.cross(tangent, right), path.Ups[i]);
-				float widthMul = SampleLut(source.WidthLut, path.NormalizedTs[i]);
+				float widthMul = SampleLut(source.GetWidthLut(splineIndex), path.NormalizedTs[i]);
 				float heightMul = SampleLut(source.HeightLut, path.NormalizedTs[i]);
 				float twist = math.radians(SampleLut(source.TwistLut, path.NormalizedTs[i]));
 				float twistCos = math.cos(twist);

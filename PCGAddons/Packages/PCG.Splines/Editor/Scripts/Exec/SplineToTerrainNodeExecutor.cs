@@ -20,8 +20,6 @@ namespace PCG.Splines
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Results.Value = new List<Spline>();
-
 			var terrain = GetInputValue(nameof(Data.Terrain), Data.Terrain);
 			var terrainOffset = GetInputValue(nameof(Data.TerrainOffset), Data.TerrainOffset);
 			float heightOffset = GetInputValue(nameof(Data.HeightOffset), Data.HeightOffset);
@@ -29,10 +27,14 @@ namespace PCG.Splines
 
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesList == null || splinesList.Length == 0)
+			{
+				Results.Value = new List<Spline>();
 				return;
+			}
 
 			if (terrain == null)
 			{
+				var passthrough = new List<Spline>();
 				foreach (var splines in splinesList)
 				{
 					if (splines == null)
@@ -43,13 +45,16 @@ namespace PCG.Splines
 						if (spline == null || spline.Count < 2)
 							continue;
 
-						Results.Value.Add(spline);
+						passthrough.Add(spline);
 					}
 				}
 
+				Results.Value = passthrough;
 				return;
 			}
 
+			var resample = Data.Resample;
+			var alignToTerrainNormal = Data.AlignToTerrainNormal;
 			var copies = new List<Spline>();
 			var positions = new List<float3[]>();
 			float minX = float.MaxValue;
@@ -70,7 +75,7 @@ namespace PCG.Splines
 							continue;
 
 						Spline copy;
-						if (Data.Resample)
+						if (resample)
 							copy = await SplineResampleUtility.ResampleAsync(spline, step, scope, ct);
 						else
 							copy = SplineCopyUtility.CopySpline(spline);
@@ -94,7 +99,10 @@ namespace PCG.Splines
 			}
 
 			if (copies.Count == 0)
+			{
+				Results.Value = new List<Spline>();
 				return;
+			}
 
 			var window = SplineTerrainWindow.Capture(terrain, terrainOffset, minX, maxX, minZ, maxZ);
 			var heights = new float[copies.Count][];
@@ -102,8 +110,7 @@ namespace PCG.Splines
 			var inBounds = new bool[copies.Count][];
 			bool outOfBounds = false;
 
-			await UniTask.SwitchToThreadPool();
-			try
+			await PcgWorkerScheduler.RunAsync(() =>
 			{
 				int counter = 0;
 				for (int s = 0; s < positions.Count; s++)
@@ -141,12 +148,9 @@ namespace PCG.Splines
 					normals[s] = splineNormals;
 					inBounds[s] = splineInBounds;
 				}
-			}
-			finally
-			{
-				await UniTaskEditor.SwitchToEditorThread();
-			}
+			}, ct);
 
+			var results = new List<Spline>(copies.Count);
 			using (var scope = OperationScope.Start(this))
 			{
 				for (int s = 0; s < copies.Count; s++)
@@ -163,7 +167,7 @@ namespace PCG.Splines
 						await scope.Step(ct: ct);
 					}
 
-					if (Data.AlignToTerrainNormal)
+					if (alignToTerrainNormal)
 					{
 						for (int i = 0; i < copy.Count; i++)
 						{
@@ -175,10 +179,11 @@ namespace PCG.Splines
 						}
 					}
 
-					Results.Value.Add(copy);
+					results.Add(copy);
 				}
 			}
 
+			Results.Value = results;
 			if (outOfBounds)
 				Debug.LogWarning("[Spline To Terrain] Part of the splines is outside the terrain and keeps the spline height and up vector.");
 		}

@@ -16,9 +16,6 @@ namespace PCG.SelectPoints
 		public PcgOutput<List<PointData>> Results;
 		public PcgOutput<List<PointData>> NearPoints;
 
-		private readonly List<float2> _boundsMin = new();
-		private readonly List<float2> _boundsMax = new();
-
 		public override bool IsEmpty => Results.Value == null || NearPoints.Value == null;
 		public int PointsCount => ShowResults ? Results.Value?.Count ?? 0 : NearPoints.Value?.Count ?? 0;
 		public bool ShowResults { get; set; } = true;
@@ -36,46 +33,52 @@ namespace PCG.SelectPoints
 			var regions = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Regions), ct);
 			var hasRegions = regions != null && regions.Count > 0;
 
-			_boundsMin.Clear();
-			_boundsMax.Clear();
-
 			int totalCount = pointsList.TotalCount();
-			var results = Results.Rent(totalCount);
-			var nearPoints = NearPoints.Rent(totalCount / 10 + 10);
-			using (var scope = OperationScope.Start(this))
+			var pointsSnapshot = new List<PointData>(totalCount);
+			foreach (var points in pointsList)
 			{
-				foreach (var points in pointsList)
-				{
-					if (points == null)
-						continue;
-
-					foreach (var point in points)
-					{
-						if (hasRegions && CheckNearRegion(point, regions, radius))
-							nearPoints.Add(point);
-						else
-							results.Add(point);
-
-						await scope.Step(ct: ct);
-					}
-				}
+				if (points != null)
+					pointsSnapshot.AddRange(points);
 			}
+
+			var boundsMin = new float2[hasRegions ? regions.Regions.Count : 0];
+			var boundsMax = new float2[boundsMin.Length];
+			for (int i = 0; i < boundsMin.Length; i++)
+				regions.Regions[i].GetBounds(out boundsMin[i], out boundsMax[i]);
+
+			var useScale = Data.UseScale;
+			var nearMask = new bool[pointsSnapshot.Count];
+			await PcgWorkerScheduler.RunIndexedAsync(pointsSnapshot.Count, index =>
+			{
+				ct.ThrowIfCancellationRequested();
+				if (hasRegions && CheckNearRegion(pointsSnapshot[index], regions, boundsMin, boundsMax, radius, useScale))
+					nearMask[index] = true;
+			}, ct);
+
+			var results = new List<PointData>(totalCount);
+			var nearPoints = new List<PointData>(totalCount / 10 + 10);
+			for (int i = 0; i < pointsSnapshot.Count; i++)
+			{
+				if (nearMask[i])
+					nearPoints.Add(pointsSnapshot[i]);
+				else
+					results.Add(pointsSnapshot[i]);
+			}
+
+			Results.Value = results;
+			NearPoints.Value = nearPoints;
 		}
 
-		private bool CheckNearRegion(PointData point, RegionSet regions, float radius)
+		private static bool CheckNearRegion(
+			PointData point,
+			RegionSet regions,
+			float2[] boundsMin,
+			float2[] boundsMax,
+			float radius,
+			bool useScale)
 		{
-			if (_boundsMin.Count <= 0)
-			{
-				for (int i = 0; i < regions.Regions.Count; i++)
-				{
-					regions.Regions[i].GetBounds(out var min, out var max);
-					_boundsMin.Add(min);
-					_boundsMax.Add(max);
-				}
-			}
-
 			var effectiveRadius = radius;
-			if (Data.UseScale)
+			if (useScale)
 				effectiveRadius *= point.Scale;
 
 			var sqrRadius = effectiveRadius * effectiveRadius;
@@ -83,18 +86,15 @@ namespace PCG.SelectPoints
 
 			for (int i = 0; i < regions.Regions.Count; i++)
 			{
-				var min = _boundsMin[i];
-				var max = _boundsMax[i];
+				var min = boundsMin[i];
+				var max = boundsMax[i];
 				if (p.x < min.x - effectiveRadius || p.x > max.x + effectiveRadius)
 					continue;
 				if (p.y < min.y - effectiveRadius || p.y > max.y + effectiveRadius)
 					continue;
 
 				var polygon = regions.Regions[i];
-				if (polygon.Contains(p))
-					return true;
-
-				if (polygon.DistanceToBoundarySq(p) <= sqrRadius)
+				if (polygon.Contains(p) || polygon.DistanceToBoundarySq(p) <= sqrRadius)
 					return true;
 			}
 

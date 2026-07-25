@@ -26,7 +26,7 @@
 | `SplitSplinesNode` | Splines | точный разрез сплайнов по резам топологии или точкам (без ресемпла) | `Splines, Cuts: SplineNetworkTopology, Points, SnapDistance` → `Results: List<Spline>` |
 | `PointsBySplineNode` | SelectPoints | точки внутри/снаружи замкнутого сплайна | `Points, Splines` → `Results, Outsides` |
 | `PointsNearSplinesNode` | SelectPoints | точки близко/далеко от сплайна (режим 3D/2D, UseScale) | `Points, Splines, Distance` → `Results, NearPoints` |
-| `PointsOffsetSplinesNode` | CreatePoints | точки вдоль сплайна с offset | `Splines, Offset, Distance, Count, Spacing` → `Results, CornerPoints` |
+| `PointsOffsetSplinesNode` | CreatePoints | точки вдоль сплайна, в том числе в центрах секций и со смещением от ширины сплайна | `Splines, Offset, Distance, Count, Spacing, Placement, UseSplineWidth, WidthMultiplier` → `Results, CornerPoints` |
 | `SplinePointsByDistanceNode` | CreatePoints | точки вдоль сплайна с шагом по длине дуги | `Splines, Distance, Distribute` → `Results` |
 | `SplinesSurfaceNode` | CreatePoints | точки на поверхности/в объёме замкнутого сплайна | `Splines, Offset, PointMode, Count, Seed` → `Results` |
 | `DensityByDistanceToSplinesNode` | TransformPoints | плотность точек по расстоянию до сплайна | `Points, Splines, Radius, Curve, Mode` → `Results` |
@@ -39,6 +39,7 @@ First-class тип для передачи пересечений между н�
 
 ## Сетевые хелперы (`Editor/Scripts/Network/`)
 Снапшот и фоновые солверы для обеих нод.
+- `PcgWorkerScheduler` (`Scripts/Utilities/`) — общий ограниченный CPU-пул для Splines/Polygons/Sweep; резервирует editor thread, поддерживает отмену и индексированные детерминированные батчи.
 - `SplineSnapshot` (class) — immutable-снапшот сплайна (knots/modes/tensions/curves/lengths/prefix/closed/embedded), снимается на главном потоке (`Capture`), считается в пуле.
 - `SplineNetworkMath` (static) — `SubCurve` (точная вырезка кубической по `[t0,t1]` через `CurveUtility.Split`), `PartialLength`, `ChordErrorXz`, пересечение/дистанция отрезков в XZ.
 - `SplineIntersectionSolver` (static) — адаптивная дискретизация → spatial-hash broad phase (guard >64 клеток) → бисекция-refinement на исходных кривых → height policy → дедуп резов → union-find кластеризация junctions; детерминированный порядок. Типы: `NetworkSegment`, `SplineIntersectionResult`.
@@ -60,6 +61,22 @@ First-class тип для передачи пересечений между н�
 
 ## Spline To Terrain
 
-`SplineToTerrainNode` проецирует центральную линию сплайна на `TerrainData`. `TerrainOrigin` задаёт мировую позицию объекта Terrain, потому что сам `TerrainData` трансформа не содержит; `HeightOffset` — отдельный художественный подъём по мировому Y. `AlignToTerrainNormal` меняет knot frame с компенсацией локальных tangents, поэтому форма кривой не меняется от одного только выравнивания Up.
+`SplineToTerrainNode` проецирует центральную линию сплайна на `TerrainData`. `TerrainOffset` задаёт мировую позицию объекта Terrain, потому что сам `TerrainData` трансформа не содержит; `HeightOffset` — отдельный художественный подъём по мировому Y. `AlignToTerrainNormal` меняет knot frame с компенсацией локальных tangents, поэтому форма кривой не меняется от одного только выравнивания Up.
 
 При `Resample=false` используется полная копия исходного сплайна с metadata и embedded data. При `Resample=true` сначала строится новая AutoSmooth-сетка тем же алгоритмом, что у `Resample Splines`. Узлы вне bounds сохраняют исходные Y и Up. Нода укладывает только сплайн: драпировка полной ширины будущего меша не выполняется.
+
+## Width channel и road-network contract
+
+- `SplineWidthNode` копирует входные сплайны и записывает абсолютную ширину в world units в embedded-канал `SplineWidth`.
+- `SplineWidthUtility` читает, записывает, копирует и семплирует канал. `SplineResampleUtility`, `SplineToTerrainNode` и сетевые преобразования сохраняют его при создании новых сплайнов.
+- `SplinesValue.GetContentHash()` включает width channel, поэтому изменение ширины корректно инвалидирует downstream cache.
+- `SplineIntersectionNode.EndpointSnapDistance` предварительно объединяет близкие концы ветвей и отдаёт исправленную сеть через `SnappedSplines`; `Topology` и `Results` вычисляются уже по ней.
+- Типовая дорожная цепочка: `Spline → SplineWidth → SplineToTerrain → SplineIntersection.SnappedSplines → Sweep`.
+
+## Width channel и road-network contract
+
+- `SplineWidthNode` копирует входные сплайны и записывает абсолютную ширину в world units в embedded-канал `SplineWidth`.
+- `SplineWidthUtility` читает, записывает, копирует и семплирует канал. `SplineResampleUtility`, `SplineToTerrainNode` и сетевые преобразования сохраняют его при создании новых сплайнов.
+- `SplinesValue.GetContentHash()` включает width channel, поэтому изменение ширины корректно инвалидирует downstream cache.
+- `SplineIntersectionNode.EndpointSnapDistance` предварительно объединяет близкие концы ветвей и отдаёт исправленную сеть через `SnappedSplines`; `Topology` и `Results` вычисляются уже по ней.
+- Типовая дорожная цепочка: `Spline → SplineWidth → SplineToTerrain → SplineIntersection.SnappedSplines → Sweep`.

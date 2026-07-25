@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.GraphModel;
 using PCG.Polygons.Utilities;
-using PCG.Utilities;
 using UnityEngine;
 
 namespace PCG.Polygons.City
@@ -25,26 +24,28 @@ namespace PCG.Polygons.City
 
 			var delta = GetInputValue(nameof(Data.Delta), Data.Delta);
 
-			var result = new RegionSet();
-			result.PlaneY = input.PlaneY;
-			var single = new List<Polygon2D>(1);
-
-			using (var scope = OperationScope.Start(this))
+			var result = await PcgWorkerScheduler.RunAsync(() =>
 			{
+				var computed = new RegionSet
+				{
+					PlaneY = input.PlaneY
+				};
+				var single = new List<Polygon2D>(1);
 				for (int i = 0; i < input.Regions.Count; i++)
 				{
+					ct.ThrowIfCancellationRequested();
 					single.Clear();
 					single.Add(input.Regions[i]);
 					var inflated = PolygonClipper.Inflate(single, delta);
 					for (int j = 0; j < inflated.Count; j++)
 					{
-						result.Regions.Add(inflated[j]);
-						result.Attributes.AppendRow(input.Attributes, i);
+						computed.Regions.Add(inflated[j]);
+						computed.Attributes.AppendRow(input.Attributes, i);
 					}
-
-					await scope.Step(ct: ct);
 				}
-			}
+
+				return computed;
+			}, ct);
 
 			Result.Value = result;
 		}

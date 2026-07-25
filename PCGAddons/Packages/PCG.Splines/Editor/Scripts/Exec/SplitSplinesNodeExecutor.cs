@@ -62,17 +62,10 @@ namespace PCG.Splines
 				}
 			}
 
-			SplineSplitResult solved;
-			await UniTask.SwitchToThreadPool();
-			try
-			{
-				solved = SplineSplitSolver.Solve(snapshots, topologyCuts, points, snapDistance, ct,
-					() => PcgComputeSystem.ReportProgress(this));
-			}
-			finally
-			{
-				await UniTaskEditor.SwitchToEditorThread();
-			}
+			var solved = await PcgWorkerScheduler.RunAsync(
+				() => SplineSplitSolver.Solve(snapshots, topologyCuts, points, snapDistance, ct,
+					() => PcgComputeSystem.ReportProgress(this)),
+				ct);
 
 			if (solved.EmbeddedDataWarning)
 				Debug.LogWarning("[Split Splines] Embedded spline data and knot links are not transferred to the resulting pieces.");
@@ -80,6 +73,7 @@ namespace PCG.Splines
 				Debug.LogWarning("[Split Splines] NaN or infinite values in cuts or points were discarded.");
 
 			var results = new List<Spline>();
+			using var buildScope = OperationScope.Start(this);
 			for (int i = 0; i < flat.Count; i++)
 			{
 				var spline = flat[i];
@@ -104,6 +98,7 @@ namespace PCG.Splines
 					{
 						var instruction = piece[k];
 						built.Add(instruction.Knot, instruction.Mode, instruction.Tension);
+						await buildScope.Step(ct: ct);
 					}
 					results.Add(built);
 				}

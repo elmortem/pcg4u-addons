@@ -8,15 +8,12 @@ using PCG.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
-using Random = UnityEngine.Random;
 
 namespace PCG.Splines
 {
 	public class ChangeSplinePositionNodeExecutor : PcgAsyncPreviewNodeExecutor<ChangeSplinePositionNode>
 	{
 		public PcgOutput<List<Spline>> Results;
-
-		private CancellationTokenSource _cancel;
 
 		public override bool IsEmpty => Results.Value == null;
 
@@ -30,18 +27,16 @@ namespace PCG.Splines
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Results.Value = new List<Spline>();
-
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesList == null || splinesList.Length <= 0)
+			{
+				Results.Value = new List<Spline>();
 				return;
+			}
 
 			var min = (float3)GetInputValue(nameof(Data.Min), Data.Min);
 			var max = (float3)GetInputValue(nameof(Data.Max), Data.Max);
 			var seed = GetInputValue(nameof(Data.Seed), Data.Seed);
-
-			_cancel = new CancellationTokenSource();
-			var cancellationToken = _cancel.Token;
 
 			var flatSplines = new List<Spline>();
 			foreach (var splines in splinesList)
@@ -53,79 +48,67 @@ namespace PCG.Splines
 			}
 
 			if (flatSplines.Count <= 0)
-				return;
-
-			var batchSize = PCG.MaxGeneratePoints;
-			var batches = math.max(4, (int)math.ceil((float)flatSplines.Count / batchSize));
-			batchSize = (int)math.ceil((float)flatSplines.Count / batches);
-			var tasks = new List<UniTask>(batches);
-
-			for (int i = 0; i < flatSplines.Count; i += batchSize)
 			{
-				if (cancellationToken.IsCancellationRequested)
-					return;
-
-				int end = math.min(i + batchSize, flatSplines.Count);
-				var task = ProcessBatch(flatSplines, i, end, min, max, seed + i, cancellationToken);
-				tasks.Add(task);
+				Results.Value = new List<Spline>();
+				return;
 			}
 
-			await UniTask.WhenAll(tasks);
-
-			_cancel.Dispose();
-			_cancel = null;
-		}
-
-		private async UniTask ProcessBatch(List<Spline> splines, int start, int end, float3 min, float3 max,
-			int seed, CancellationToken cancellationToken)
-		{
-			await UniTask.SwitchToThreadPool();
-
-			var batchResults = new List<Spline>();
-			var localRandom = PcgRandom.Create(seed);
-
-			for (int i = start; i < end; i++)
+			var snapshots = new SplineInputSnapshot[flatSplines.Count];
+			using (var scope = OperationScope.Start(this))
 			{
-				if (cancellationToken.IsCancellationRequested)
-					return;
-
-				var spline = splines[i];
-				var modifiedSpline = new Spline
+				for (int i = 0; i < flatSplines.Count; i++)
 				{
-					Closed = spline.Closed
-				};
+					var spline = flatSplines[i];
+					var knots = new BezierKnot[spline.Count];
+					var modes = new TangentMode[spline.Count];
+					for (int knotIndex = 0; knotIndex < spline.Count; knotIndex++)
+					{
+						knots[knotIndex] = spline[knotIndex];
+						modes[knotIndex] = spline.GetTangentMode(knotIndex);
+						await scope.Step(ct: ct);
+					}
+					snapshots[i] = new SplineInputSnapshot(knots, modes, spline.Closed);
+				}
+			}
 
-				for (var knotIndex = 0; knotIndex < spline.Count; knotIndex++)
+			var modifiedKnots = new BezierKnot[snapshots.Length][];
+			await PcgWorkerScheduler.RunIndexedAsync(snapshots.Length, index =>
+			{
+				ct.ThrowIfCancellationRequested();
+				var snapshot = snapshots[index];
+				var localRandom = PcgRandom.Create(seed + index);
+				var output = new BezierKnot[snapshot.Knots.Length];
+				for (int knotIndex = 0; knotIndex < snapshot.Knots.Length; knotIndex++)
 				{
-					var knot = spline[knotIndex];
+					ct.ThrowIfCancellationRequested();
+					var knot = snapshot.Knots[knotIndex];
 					var randomOffset = localRandom.NextFloat3(min, max);
-
-					var modifiedKnot = new BezierKnot(
+					output[knotIndex] = new BezierKnot(
 						knot.Position + randomOffset,
 						knot.TangentIn,
 						knot.TangentOut,
-						knot.Rotation
-					);
-
-					modifiedSpline.Add(modifiedKnot, spline.GetTangentMode(knotIndex));
+						knot.Rotation);
 				}
+				modifiedKnots[index] = output;
+			}, ct);
 
-				batchResults.Add(modifiedSpline);
-			}
-
-			lock (Results.Value)
+			var results = new List<Spline>(snapshots.Length);
+			using (var scope = OperationScope.Start(this))
 			{
-				Results.Value.AddRange(batchResults);
+				for (int i = 0; i < snapshots.Length; i++)
+				{
+					var snapshot = snapshots[i];
+					var spline = new Spline { Closed = snapshot.Closed };
+					for (int knotIndex = 0; knotIndex < modifiedKnots[i].Length; knotIndex++)
+					{
+						spline.Add(modifiedKnots[i][knotIndex], snapshot.Modes[knotIndex]);
+						await scope.Step(ct: ct);
+					}
+					results.Add(spline);
+				}
 			}
-		}
 
-		public override void CancelCompute()
-		{
-			if (_cancel != null)
-			{
-				_cancel.Cancel();
-				_cancel = null;
-			}
+			Results.Value = results;
 		}
 
 		public override void DrawPreview(Transform transform)
@@ -134,6 +117,20 @@ namespace PCG.Splines
 
 			Gizmos.color = gizmosOptions.Color;
 			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+		}
+
+		private sealed class SplineInputSnapshot
+		{
+			public readonly BezierKnot[] Knots;
+			public readonly TangentMode[] Modes;
+			public readonly bool Closed;
+
+			public SplineInputSnapshot(BezierKnot[] knots, TangentMode[] modes, bool closed)
+			{
+				Knots = knots;
+				Modes = modes;
+				Closed = closed;
+			}
 		}
 	}
 }

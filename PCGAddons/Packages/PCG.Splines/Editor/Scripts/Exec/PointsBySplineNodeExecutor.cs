@@ -17,8 +17,6 @@ namespace PCG.SelectPoints
 		public PcgOutput<List<PointData>> Results;
 		public PcgOutput<List<PointData>> Outsides;
 
-		private readonly object _sync = new ();
-
 		public override bool IsEmpty => Results.Value == null || Outsides.Value == null;
 		public int PointsCount => ShowResults ? Results.Value?.Count??0 : Outsides.Value?.Count??0;
 		public bool ShowResults { get; set; } = true;
@@ -33,45 +31,42 @@ namespace PCG.SelectPoints
 			if (splinesList == null || splinesList.Length <= 0)
 				return;
 
-			var polygonsList = BakePolygons(splinesList, 16);
+			var polygonsList = await BakePolygonsAsync(splinesList, 16, ct);
 
 			int totalCount = pointsList.TotalCount();
-			Results.Rent(totalCount);
-			Outsides.Rent(totalCount);
-			var batchSize = PCG.MaxGeneratePoints;
-			var batches = math.max(4, (int)math.ceil((float)totalCount / batchSize));
-			batchSize = (int)math.ceil((float)totalCount / batches);
-			var tasks = new List<UniTask>(batches);
-
+			var pointsSnapshot = new List<PointData>(totalCount);
 			foreach (var points in pointsList)
 			{
-				if (points == null || points.Count <= 0)
-					continue;
-
-				int remainingPoints = points.Count;
-				int batchStart = 0;
-
-				while (remainingPoints > 0)
-				{
-					int currentBatchSize = math.min(batchSize, remainingPoints);
-					int batchEnd = batchStart + currentBatchSize;
-
-					var task = ProcessBatch(points, batchStart, batchEnd, polygonsList, ct);
-					tasks.Add(task);
-
-					batchStart = batchEnd;
-					remainingPoints -= currentBatchSize;
-				}
+				if (points != null)
+					pointsSnapshot.AddRange(points);
 			}
 
-			await UniTask.WhenAll(tasks);
+			var inside = new bool[pointsSnapshot.Count];
+			await PcgWorkerScheduler.RunIndexedAsync(pointsSnapshot.Count, index =>
+			{
+				ct.ThrowIfCancellationRequested();
+				inside[index] = CheckIntoPolygons(pointsSnapshot[index], polygonsList);
+			}, ct);
 
-			await UniTaskEditor.SwitchToEditorThread();
+			var results = new List<PointData>(totalCount);
+			var outsides = new List<PointData>(totalCount);
+			for (int i = 0; i < pointsSnapshot.Count; i++)
+			{
+				if (inside[i])
+					results.Add(pointsSnapshot[i]);
+				else
+					outsides.Add(pointsSnapshot[i]);
+			}
+
+			Results.Value = results;
+			Outsides.Value = outsides;
 		}
 
-		private static List<List<Vector2>>[] BakePolygons(List<Spline>[] splinesList, int resolution)
+		private async UniTask<List<List<Vector2>>[]> BakePolygonsAsync(
+			List<Spline>[] splinesList, int resolution, CancellationToken ct)
 		{
 			var result = new List<List<Vector2>>[splinesList.Length];
+			using var scope = OperationScope.Start(this);
 			for (int i = 0; i < splinesList.Length; i++)
 			{
 				var splines = splinesList[i];
@@ -95,6 +90,7 @@ namespace PCG.SelectPoints
 								float t = (float)k / resolution;
 								var p = spline.EvaluatePosition(t);
 								pts.Add(new Vector2(p.x, p.z));
+								await scope.Step(ct: ct);
 							}
 							polys.Add(pts);
 						}
@@ -105,6 +101,7 @@ namespace PCG.SelectPoints
 							{
 								var p = positions[k];
 								pts.Add(new Vector2(p.x, p.z));
+								await scope.Step(ct: ct);
 							}
 							polys.Add(pts);
 						}
@@ -153,32 +150,6 @@ namespace PCG.SelectPoints
 				}
 			}
 			return false;
-		}
-
-		private async UniTask ProcessBatch(List<PointData> points, int start, int end, List<List<UnityEngine.Vector2>>[] polygonsList, CancellationToken ct)
-		{
-			await UniTask.SwitchToThreadPool();
-
-			var batchResults = new List<PointData>(end - start);
-			var batchOutsides = new List<PointData>(end - start);
-
-			for (int i = start; i < end; i++)
-			{
-				ct.ThrowIfCancellationRequested();
-				var point = points[i];
-				if (CheckIntoPolygons(point, polygonsList))
-					batchResults.Add(point);
-				else
-					batchOutsides.Add(point);
-			}
-
-			lock (_sync)
-			{
-				if (Results.Value != null && batchResults.Count > 0)
-					Results.Value.AddRange(batchResults);
-				if (Outsides.Value != null && batchOutsides.Count > 0)
-					Outsides.Value.AddRange(batchOutsides);
-			}
 		}
 
 		public override void DrawPreview(Transform transform)

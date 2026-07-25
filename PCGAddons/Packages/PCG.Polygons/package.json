@@ -2,7 +2,7 @@
   "displayName": "PCG Polygons",
   "name": "com.elmortem.pcg.polygons",
   "author": "Makar Osokin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "unity": "2022.3",
   "description": "Polygons addon for PCG.",
   "keywords": [
@@ -24,6 +24,7 @@
   "dependencies": {
     "com.unity.mathematics": "1.2.6",
     "com.unity.splines": "2.8.2",
-    "com.elmortem.pcg.splines": "0.0.3"
+    "com.elmortem.pcg.splines": "0.0.5",
+    "com.elmortem.pcg.mazes": "0.0.2"
   }
 }
