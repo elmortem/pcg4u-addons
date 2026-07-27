@@ -11,7 +11,7 @@ namespace PCG.TransformPoints
 {
 	public sealed class StabilizeTerrainPointsNodeExecutor : PcgAsyncPreviewNodeExecutor<StabilizeTerrainPointsNode>, IPointsCount
 	{
-		public PcgOutput<List<PointData>> Results;
+		public PcgOutput<PcgPointCloud> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 		public int PointsCount => Results.Value?.Count ?? 0;
@@ -20,13 +20,32 @@ namespace PCG.TransformPoints
 		{
 			var pointsList = GetInputValues(nameof(Data.Points), Data.Points);
 			if (pointsList == null || pointsList.Length == 0)
-				return;
-
-			var results = new List<PointData>(pointsList.TotalCount());
-			foreach (var points in pointsList)
 			{
-				if (points != null)
-					results.AddRange(points);
+				Results.Rent(0);
+				return;
+			}
+
+			var totalCount = pointsList.TotalCount();
+			var flatPoints = new List<PointData>(totalCount);
+			var flatClouds = new List<PcgPointCloud>(totalCount);
+			var flatIndices = new List<int>(totalCount);
+			foreach (PcgPointCloud cloud in pointsList)
+			{
+				if (cloud == null || cloud.Count == 0)
+					continue;
+
+				for (int idx = 0; idx < cloud.Count; idx++)
+				{
+					flatPoints.Add(cloud[idx]);
+					flatClouds.Add(cloud);
+					flatIndices.Add(idx);
+				}
+			}
+
+			if (flatPoints.Count == 0)
+			{
+				Results.Rent(0);
+				return;
 			}
 
 			float maxTerrainSlope = math.clamp(GetInputValue(nameof(Data.MaxTerrainSlopeDegrees), Data.MaxTerrainSlopeDegrees), 0f, 89f);
@@ -35,19 +54,21 @@ namespace PCG.TransformPoints
 			float maxSink = math.max(0f, GetInputValue(nameof(Data.MaxSink), Data.MaxSink));
 			float maxTerrainSlopeRadians = math.radians(maxTerrainSlope);
 
-			var computed = await PcgWorkerScheduler.RunAsync(() =>
+			var (keepMask, stabilizedPoints) = await PcgWorkerScheduler.RunAsync(() =>
 			{
-				var output = new List<PointData>(results);
-				for (int i = output.Count - 1; i >= 0; i--)
+				var keep = new bool[flatPoints.Count];
+				var stabilized = new PointData[flatPoints.Count];
+				for (int i = 0; i < flatPoints.Count; i++)
 				{
 					ct.ThrowIfCancellationRequested();
-					var point = output[i];
+					var point = flatPoints[i];
 					var normal = (float3)point.Normal;
 					float lengthSq = math.lengthsq(normal);
 					if (lengthSq < 1e-8f)
 					{
 						point.Normal = Vector3.up;
-						output[i] = point;
+						keep[i] = true;
+						stabilized[i] = point;
 						continue;
 					}
 
@@ -58,7 +79,7 @@ namespace PCG.TransformPoints
 					float originalTilt = math.acos(upDot);
 					if (originalTilt > maxTerrainSlopeRadians)
 					{
-						output.RemoveAt(i);
+						keep[i] = false;
 						continue;
 					}
 
@@ -81,17 +102,31 @@ namespace PCG.TransformPoints
 					float scale = math.max(0f, point.Scale);
 					float sink = rootRadius * scale * math.max(0f, math.sin(originalTilt) - stabilizedTiltSin);
 					point.Position -= new float3(0f, math.min(maxSink, sink), 0f);
-					output[i] = point;
+
+					keep[i] = true;
+					stabilized[i] = point;
 				}
-				return output;
+				return (keep, stabilized);
 			}, ct);
 
-			Results.Value = computed;
+			int keptCount = 0;
+			for (int i = 0; i < keepMask.Length; i++)
+			{
+				if (keepMask[i])
+					keptCount++;
+			}
+
+			Results.Rent(keptCount);
+			for (int i = 0; i < flatPoints.Count; i++)
+			{
+				if (keepMask[i])
+					Results.Value.AppendFrom(flatClouds[i], flatIndices[i], stabilizedPoints[i]);
+			}
 		}
 
 		public override void DrawPreview(Transform transform)
 		{
-			GizmosUtility.DrawPoints(Results.Value, GetGizmosOptions(), transform);
+			GizmosUtility.DrawPoints(this, Results.Value, GetGizmosOptions(), transform);
 		}
 	}
 }

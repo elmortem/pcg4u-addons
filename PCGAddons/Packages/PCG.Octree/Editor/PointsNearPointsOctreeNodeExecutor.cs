@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Octree;
@@ -15,8 +14,8 @@ namespace PCG.Octree
 {
 	public class PointsNearPointsOctreeNodeExecutor : PcgAsyncPreviewNodeExecutor<PointsNearPointsOctreeNode>, IPointsCount, IShowResults
 	{
-		public PcgOutput<List<PointData>> Results;
-		public PcgOutput<List<PointData>> NearPoints;
+		public PcgOutput<PcgPointCloud> Results;
+		public PcgOutput<PcgPointCloud> NearPoints;
 
 		public override bool IsEmpty => Results.Value == null || NearPoints.Value == null;
 		public int PointsCount => ShowResults ? (Results.Value?.Count ?? 0) : (NearPoints.Value?.Count ?? 0);
@@ -33,23 +32,21 @@ namespace PCG.Octree
 			{
 				using (var scope = OperationScope.Start(this))
 				{
-					foreach (List<PointData> points in pointsList)
+					foreach (PcgPointCloud cloud in pointsList)
 					{
-						if (points == null)
+						if (cloud == null)
 							continue;
 
 						var batchPointsCount = 1000000;
-						var batchCount = points.Count / batchPointsCount;
+						var batchCount = cloud.Count / batchPointsCount;
 
 						if (Results.Value == null)
-							Results.Rent(points.Count);
+							Results.Rent(cloud.Count);
+
+						Results.Value.Append(cloud);
+
 						for (int i = 0; i < batchCount; i++)
 						{
-							var pointStart = i * batchPointsCount;
-							var pointCount = math.min(batchPointsCount, points.Count - i * batchPointsCount);
-
-							Results.Value.AddRange(points.GetRange(pointStart, pointCount));
-
 							await scope.Step(ct: ct);
 						}
 					}
@@ -68,32 +65,39 @@ namespace PCG.Octree
 			await UniTaskEditor.SwitchToEditorThread();
 		}
 
-		private async UniTask Process(List<PointData>[] pointsList, List<PointData>[] otherPointsList, float diameter, CancellationToken ct)
+		private async UniTask Process(PcgPointCloud[] pointsList, PcgPointCloud[] otherPointsList, float diameter, CancellationToken ct)
 		{
 			await UniTask.SwitchToThreadPool();
 
-			var flatPoints = new List<PointData>();
-			List<PointData>[] finalPointsList;
+			var totalCount = pointsList.TotalCount();
+			var flatPoints = new List<PointData>(totalCount);
+			var flatClouds = new List<PcgPointCloud>(totalCount);
+			var flatIndices = new List<int>(totalCount);
+			foreach (PcgPointCloud cloud in pointsList)
+			{
+				if (cloud == null || cloud.Count == 0)
+					continue;
+
+				for (int idx = 0; idx < cloud.Count; idx++)
+				{
+					flatPoints.Add(cloud[idx]);
+					flatClouds.Add(cloud);
+					flatIndices.Add(idx);
+				}
+
+				if (ct.IsCancellationRequested)
+					return;
+			}
+
+			List<int> candidateIndices;
 
 			if (Data.RemoveThemselves)
 			{
-				var totalCount = pointsList.TotalCount();
-				flatPoints.Capacity = totalCount;
-				foreach (List<PointData> points in pointsList)
-				{
-					if (points == null)
-						continue;
-					flatPoints.AddRange(points);
-
-					if (ct.IsCancellationRequested)
-						return;
-				}
-
 				var batchCount = math.min(16, math.max(1, totalCount / 100000));
 				var batchPointsCount = flatPoints.Count / batchCount + 1;
 
-				var resultsList = new List<PointData>[batchCount];
-				var nearPointsList = new List<PointData>[batchCount];
+				var resultsList = new List<int>[batchCount];
+				var nearPointsList = new List<int>[batchCount];
 				var tasks = new List<UniTask>(batchCount);
 
 				for (int i = 0; i < batchCount; i++)
@@ -101,8 +105,8 @@ namespace PCG.Octree
 					var pointStart = i * batchPointsCount;
 					var pointCount = math.min(batchPointsCount, flatPoints.Count - i * batchPointsCount);
 
-					resultsList[i] = new List<PointData>(pointCount);
-					nearPointsList[i] = new List<PointData>(pointCount / 10 + 10);
+					resultsList[i] = new List<int>(pointCount);
+					nearPointsList[i] = new List<int>(pointCount / 10 + 10);
 					tasks.Add(ProcessOnce(flatPoints, pointStart, pointCount, diameter, resultsList[i],
 						nearPointsList[i], ct));
 
@@ -116,30 +120,35 @@ namespace PCG.Octree
 				if (ct.IsCancellationRequested)
 					return;
 
-				foreach (var nearPoints in nearPointsList)
+				foreach (var nearIndices in nearPointsList)
 				{
-					NearPoints.Value.AddRange(nearPoints);
+					foreach (var idx in nearIndices)
+						NearPoints.Value.AppendFrom(flatClouds[idx], flatIndices[idx]);
 				}
 
-				finalPointsList = resultsList;
+				candidateIndices = new List<int>(flatPoints.Count);
+				foreach (var indices in resultsList)
+					candidateIndices.AddRange(indices);
 			}
 			else
 			{
-				finalPointsList = pointsList;
+				candidateIndices = new List<int>(flatPoints.Count);
+				for (int i = 0; i < flatPoints.Count; i++)
+					candidateIndices.Add(i);
 			}
 
-			var finalPointsCount = finalPointsList.TotalCount();
+			var finalPointsCount = candidateIndices.Count;
 			var otherPointsCount = otherPointsList.TotalCount();
 			var pointsBySide = math.sqrt(finalPointsCount + otherPointsCount);
 			if (pointsBySide <= 0)
 				return;
 
 			var nodeSize = math.max(0.5f, Data.WorldSize / pointsBySide * 2.5f);
-			var octree = new PointOctree<PointData>(Data.WorldSize, Data.WorldCenter, nodeSize);
+			var octree = new PointOctree<int>(Data.WorldSize, Data.WorldCenter, nodeSize);
 
 			if (otherPointsCount > 0)
 			{
-				foreach (List<PointData> otherPoints in otherPointsList)
+				foreach (PcgPointCloud otherPoints in otherPointsList)
 				{
 					if (ct.IsCancellationRequested)
 						return;
@@ -150,7 +159,7 @@ namespace PCG.Octree
 					for (int i = 0; i < otherPoints.Count; i++)
 					{
 						var point = otherPoints[i];
-						octree.Add(point, point.Position);
+						octree.Add(i, point.Position);
 					}
 				}
 			}
@@ -158,15 +167,11 @@ namespace PCG.Octree
 			ct.ThrowIfCancellationRequested();
 
 			{
-				flatPoints.Clear();
-				flatPoints.Capacity = finalPointsCount;
-				flatPoints.AddRange(finalPointsList.Where(p => p != null).SelectMany(p => p));
-
 				var batchCount = math.min(16, math.max(1, finalPointsCount / 5000));
-				var batchPointsCount = flatPoints.Count / batchCount + 1;
+				var batchPointsCount = candidateIndices.Count / batchCount + 1;
 
-				var resultsList = new List<PointData>[batchCount];
-				var nearPointsList = new List<PointData>[batchCount];
+				var resultsList = new List<int>[batchCount];
+				var nearPointsList = new List<int>[batchCount];
 				var tasks = new List<UniTask>(batchCount);
 
 				for (int i = 0; i < batchCount; i++)
@@ -175,23 +180,32 @@ namespace PCG.Octree
 						return;
 
 					var pointStart = i * batchPointsCount;
-					var pointCount = math.min(batchPointsCount, flatPoints.Count - i * batchPointsCount);
+					var pointCount = math.min(batchPointsCount, candidateIndices.Count - i * batchPointsCount);
 
-					resultsList[i] = new List<PointData>(pointCount);
-					nearPointsList[i] = new List<PointData>(pointCount / 10 + 10);
-					tasks.Add(FinalProcess(flatPoints, pointStart, pointCount, octree, diameter, resultsList[i],
+					resultsList[i] = new List<int>(pointCount);
+					nearPointsList[i] = new List<int>(pointCount / 10 + 10);
+					tasks.Add(FinalProcess(flatPoints, candidateIndices, pointStart, pointCount, octree, diameter, resultsList[i],
 						nearPointsList[i], ct));
 				}
 
 				await UniTask.WhenAll(tasks);
 				tasks.Clear();
 
-				Results.Value.AddRange(resultsList.SelectMany(p => p));
-				NearPoints.Value.AddRange(nearPointsList.SelectMany(p => p));
+				foreach (var indices in resultsList)
+				{
+					foreach (var idx in indices)
+						Results.Value.AppendFrom(flatClouds[idx], flatIndices[idx]);
+				}
+
+				foreach (var indices in nearPointsList)
+				{
+					foreach (var idx in indices)
+						NearPoints.Value.AppendFrom(flatClouds[idx], flatIndices[idx]);
+				}
 			}
 		}
 
-		private async UniTask FinalProcess(List<PointData> finalPoints, int start, int count, PointOctree<PointData> octree, float diameter, List<PointData> results, List<PointData> nearPoints, CancellationToken ct)
+		private async UniTask FinalProcess(List<PointData> flatPoints, List<int> candidateIndices, int start, int count, PointOctree<int> octree, float diameter, List<int> results, List<int> nearPoints, CancellationToken ct)
 		{
 			await UniTask.SwitchToThreadPool();
 
@@ -200,31 +214,32 @@ namespace PCG.Octree
 				if (ct.IsCancellationRequested)
 					return;
 
-				var point = finalPoints[j];
+				var globalIndex = candidateIndices[j];
+				var point = flatPoints[globalIndex];
 
 				if (IsIntersectsLite(point, octree, diameter))
 				{
-					nearPoints.Add(point);
+					nearPoints.Add(globalIndex);
 
 					if (Data.RemoveThemselves)
 					{
 						await UniTask.SwitchToMainThread();
-						octree.Add(point, point.Position);
+						octree.Add(globalIndex, point.Position);
 						await UniTask.SwitchToThreadPool();
 					}
 				}
 				else
-					results.Add(point);
+					results.Add(globalIndex);
 			}
 		}
 
-		private async UniTask ProcessOnce(List<PointData> points, int start, int count, float diameter, List<PointData> results, List<PointData> nearPoints, CancellationToken ct)
+		private async UniTask ProcessOnce(List<PointData> points, int start, int count, float diameter, List<int> results, List<int> nearPoints, CancellationToken ct)
 		{
 			await UniTask.SwitchToThreadPool();
 
 			var pointsBySide = Mathf.Sqrt(points.Count);
 			var nodeSize = math.min(Data.WorldSize, math.max(0.5f, Data.WorldSize / pointsBySide * 2.5f));
-			var octree = new PointOctree<PointData>(Data.WorldSize, Data.WorldCenter, nodeSize);
+			var octree = new PointOctree<int>(Data.WorldSize, Data.WorldCenter, nodeSize);
 
 			for (int i = start; i < start + count; ++i)
 			{
@@ -232,10 +247,10 @@ namespace PCG.Octree
 
 				try
 				{
-					if (IsIntersects(point, octree, diameter))
-						nearPoints.Add(point);
+					if (IsIntersects(i, point, octree, diameter))
+						nearPoints.Add(i);
 					else
-						results.Add(point);
+						results.Add(i);
 				}
 				catch (Exception e)
 				{
@@ -247,7 +262,7 @@ namespace PCG.Octree
 			}
 		}
 
-		private bool IsIntersects(PointData point, PointOctree<PointData> octree, float diameter)
+		private bool IsIntersects(int index, PointData point, PointOctree<int> octree, float diameter)
 		{
 			if (Data.UseScale)
 				diameter *= point.Scale;
@@ -257,13 +272,13 @@ namespace PCG.Octree
 
 			if (Data.RemoveThemselves)
 			{
-				octree.Add(point, point.Position);
+				octree.Add(index, point.Position);
 			}
 
 			return false;
 		}
 
-		private bool IsIntersectsLite(PointData point, PointOctree<PointData> octree, float diameter)
+		private bool IsIntersectsLite(PointData point, PointOctree<int> octree, float diameter)
 		{
 			if (Data.UseScale)
 				diameter *= point.Scale;

@@ -14,7 +14,7 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("Splines to project onto the terrain.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Terrain the knots are projected onto; empty keeps the splines unchanged.", Tags = new[] { "terrain" })]
@@ -41,6 +41,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Projected splines.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }

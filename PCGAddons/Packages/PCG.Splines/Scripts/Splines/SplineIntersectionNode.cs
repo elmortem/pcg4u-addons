@@ -13,7 +13,7 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("World-space splines forming the network.", Tags = new[] { "splines", "source", "network" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Maximum geometric error of a junction position, in world units. Drives adaptive curve subdivision.", Tags = new[] { "tolerance", "accuracy", "world" })]
@@ -33,7 +33,7 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Input splines with eligible open endpoints snapped onto neighbouring splines.", Tags = new[] { "spline", "snap", "network", "results" })]
-		public List<Spline> SnappedSplines => default;
+		public PcgSplineSet SnappedSplines => default;
 
 		[Output]
 		[PcgMemberInfo("Topology of the network: junctions with valency and exact incident cuts.", Tags = new[] { "topology", "junction", "cuts" })]
@@ -41,6 +41,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Junction positions as points for preview and generic point nodes.", Tags = new[] { "points", "junction", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 	}
 }

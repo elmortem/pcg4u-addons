@@ -1,14 +1,28 @@
-using System.Collections.Generic;
 using PCG.Exec;
-using UnityEngine.Splines;
+using PCG.Splines;
 
 namespace PCG.Polygons
 {
-	public sealed class SplinesToRegionAdapter : PcgPortAdapter<List<Spline>, RegionSet>
+	public sealed class SplinesToRegionAdapter : PcgPortAdapter<PcgSplineSet, RegionSet>
 	{
-		protected override RegionSet Convert(List<Spline> value, PcgNodeExecutor consumer)
+		protected override RegionSet Convert(PcgSplineSet value, PcgNodeExecutor consumer)
 		{
-			return SplineRegionConvert.SplinesToRegions(value, SplineRegionConvert.DefaultMaxSegmentLength);
+			var regions = SplineRegionConvert.SplinesToRegions(value.Splines, SplineRegionConvert.DefaultMaxSegmentLength);
+			if (regions.Count != value.Count)
+				return regions;
+
+			var result = new RegionSet
+			{
+				PlaneY = regions.PlaneY
+			};
+
+			for (int i = 0; i < regions.Regions.Count; i++)
+			{
+				result.Regions.Add(regions.Regions[i]);
+				result.Attributes.AppendRow(value.Attributes, i);
+			}
+
+			return result;
 		}
 	}
 }

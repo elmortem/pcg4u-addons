@@ -12,14 +12,14 @@ namespace PCG.Splines
 	{
 		[Output]
 		[PcgMemberInfo("Closed splines from the input.", Tags = new[] { "spline", "closed", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 
 		[Output]
 		[PcgMemberInfo("Open splines from the input.", Tags = new[] { "spline", "open" })]
-		public List<Spline> OpenedSplines => default;
+		public PcgSplineSet OpenedSplines => default;
 
 		[Input]
 		[PcgMemberInfo("Splines to split by closed state.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 	}
 }

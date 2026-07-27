@@ -12,7 +12,7 @@ You can have multiple Instancers on one GameObject - each handles its own Instan
 
 ## Built-in Instancers
 
-* [[GameObjectInstanceMaker|PCG/Instances/Game-Object-Instance-Maker]] - spawns prefabs from GameObjectInstanceData
+* [[GameObjectInstanceMaker|PCG/Instances/Game-Object-Instance-Maker]] - spawns prefabs from GameObjectInstanceData; applies the non-uniform `Scale3` multiplier on top of the point scale
 * [[TerrainDetailInstanceMaker|PCG/Instances/Terrain-Detail-Instance-Maker]] - places terrain grass/details from TerrainGrassDetailInstanceData
 
 ## Custom Instancers

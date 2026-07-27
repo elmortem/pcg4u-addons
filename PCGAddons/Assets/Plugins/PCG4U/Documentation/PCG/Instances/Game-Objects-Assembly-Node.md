@@ -6,7 +6,9 @@ element into a separate instance with per-element variations (position/angle/sca
 and random drop-out). If the prefab has no children, the prefab itself is placed on each
 point as a degenerate single-element collage.
 
-Output is a `List<GameObjectInstanceData>`, fully compatible with `GameObjectInstanceMaker`.
+Output is a `List<GameObjectInstanceData>`, fully compatible with `GameObjectInstanceMaker`. The node keeps the
+non-uniform local scale of each child element in `GameObjectInstanceData.Scale3`, so a child that is scaled
+unequally on its axes keeps its shape.
 
 ## Inputs
 

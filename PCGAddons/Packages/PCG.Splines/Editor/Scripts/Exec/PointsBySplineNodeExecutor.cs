@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using PCG.Points;
+using PCG.Splines;
 using PCG.Splines.Utilities;
 using PCG.Utilities;
 using Unity.Mathematics;
@@ -14,8 +15,8 @@ namespace PCG.SelectPoints
 {
 	public class PointsBySplineNodeExecutor : PcgAsyncPreviewNodeExecutor<PointsBySplineNode>, IPointsCount, IShowResults
 	{
-		public PcgOutput<List<PointData>> Results;
-		public PcgOutput<List<PointData>> Outsides;
+		public PcgOutput<PcgPointCloud> Results;
+		public PcgOutput<PcgPointCloud> Outsides;
 
 		public override bool IsEmpty => Results.Value == null || Outsides.Value == null;
 		public int PointsCount => ShowResults ? Results.Value?.Count??0 : Outsides.Value?.Count??0;
@@ -25,45 +26,73 @@ namespace PCG.SelectPoints
 		{
 			var pointsList = GetInputValues(nameof(Data.Points), Data.Points);
 			if (pointsList == null || pointsList.Length <= 0)
+			{
+				Results.Rent(0);
+				Outsides.Rent(0);
 				return;
+			}
 
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesList == null || splinesList.Length <= 0)
+			{
+				Results.Rent(0);
+				Outsides.Rent(0);
 				return;
+			}
 
 			var polygonsList = await BakePolygonsAsync(splinesList, 16, ct);
 
-			int totalCount = pointsList.TotalCount();
-			var pointsSnapshot = new List<PointData>(totalCount);
-			foreach (var points in pointsList)
+			var totalCount = pointsList.TotalCount();
+			var flatPoints = new List<PointData>(totalCount);
+			var flatClouds = new List<PcgPointCloud>(totalCount);
+			var flatIndices = new List<int>(totalCount);
+			foreach (PcgPointCloud cloud in pointsList)
 			{
-				if (points != null)
-					pointsSnapshot.AddRange(points);
+				if (cloud == null || cloud.Count == 0)
+					continue;
+
+				for (int idx = 0; idx < cloud.Count; idx++)
+				{
+					flatPoints.Add(cloud[idx]);
+					flatClouds.Add(cloud);
+					flatIndices.Add(idx);
+				}
 			}
 
-			var inside = new bool[pointsSnapshot.Count];
-			await PcgWorkerScheduler.RunIndexedAsync(pointsSnapshot.Count, index =>
+			if (flatPoints.Count == 0)
+			{
+				Results.Rent(0);
+				Outsides.Rent(0);
+				return;
+			}
+
+			var inside = new bool[flatPoints.Count];
+			await PcgWorkerScheduler.RunIndexedAsync(flatPoints.Count, index =>
 			{
 				ct.ThrowIfCancellationRequested();
-				inside[index] = CheckIntoPolygons(pointsSnapshot[index], polygonsList);
+				inside[index] = CheckIntoPolygons(flatPoints[index], polygonsList);
 			}, ct);
 
-			var results = new List<PointData>(totalCount);
-			var outsides = new List<PointData>(totalCount);
-			for (int i = 0; i < pointsSnapshot.Count; i++)
+			int insideCount = 0;
+			for (int i = 0; i < inside.Length; i++)
 			{
 				if (inside[i])
-					results.Add(pointsSnapshot[i]);
-				else
-					outsides.Add(pointsSnapshot[i]);
+					insideCount++;
 			}
 
-			Results.Value = results;
-			Outsides.Value = outsides;
+			Results.Rent(insideCount);
+			Outsides.Rent(flatPoints.Count - insideCount);
+			for (int i = 0; i < flatPoints.Count; i++)
+			{
+				if (inside[i])
+					Results.Value.AppendFrom(flatClouds[i], flatIndices[i]);
+				else
+					Outsides.Value.AppendFrom(flatClouds[i], flatIndices[i]);
+			}
 		}
 
 		private async UniTask<List<List<Vector2>>[]> BakePolygonsAsync(
-			List<Spline>[] splinesList, int resolution, CancellationToken ct)
+			PcgSplineSet[] splinesList, int resolution, CancellationToken ct)
 		{
 			var result = new List<List<Vector2>>[splinesList.Length];
 			using var scope = OperationScope.Start(this);
@@ -157,9 +186,9 @@ namespace PCG.SelectPoints
 			var gizmosOptions = GetGizmosOptions();
 
 			if (ShowResults)
-				GizmosUtility.DrawPoints(Results.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, Results.Value, gizmosOptions, transform);
 			else
-				GizmosUtility.DrawPoints(Outsides.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, Outsides.Value, gizmosOptions, transform);
 		}
 	}
 }

@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using UnityEngine;
 using UnityEngine.Splines;
 
@@ -6,6 +5,7 @@ namespace PCG.Splines.Utilities
 {
 	public static class SplinesUtility
 	{
+#if UNITY_EDITOR
 		public static bool IsInsideSpline(this Spline spline, Vector3 point)
 		{
 			if (spline == null || spline.Count < 3)
@@ -33,6 +33,40 @@ namespace PCG.Splines.Utilities
 
 			return inside;
 		}
+#endif
+
+		public static int GetContentHash(Spline spline)
+		{
+			unchecked
+			{
+				if (spline == null)
+					return 0;
+
+				int hash = spline.Count;
+				hash = (hash * 397) ^ spline.Closed.GetHashCode();
+				for (int k = 0; k < spline.Count; k++)
+				{
+					var knot = spline[k];
+					hash = (hash * 397) ^ knot.Position.GetHashCode();
+					hash = (hash * 397) ^ knot.TangentIn.GetHashCode();
+					hash = (hash * 397) ^ knot.TangentOut.GetHashCode();
+					hash = (hash * 397) ^ knot.Rotation.GetHashCode();
+					hash = (hash * 397) ^ (int)spline.GetTangentMode(k);
+				}
+
+				if (spline.TryGetFloatData(SplineWidthUtility.DataKey, out var widthData) && widthData != null)
+				{
+					hash = (hash * 397) ^ (int)widthData.PathIndexUnit;
+					hash = (hash * 397) ^ widthData.DefaultValue.GetHashCode();
+					foreach (var point in widthData)
+					{
+						hash = (hash * 397) ^ point.Index.GetHashCode();
+						hash = (hash * 397) ^ point.Value.GetHashCode();
+					}
+				}
+
+				return hash;
+			}
+		}
 	}
 }
-#endif

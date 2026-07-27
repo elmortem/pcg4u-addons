@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using PCG.Points;
 using UnityEngine.Splines;
 using PCG.GraphModel;
+using PCG.Splines;
 
 namespace PCG.SelectPoints
 {
@@ -13,18 +14,18 @@ namespace PCG.SelectPoints
 	{
 		[Output]
 		[PcgMemberInfo("Points inside the closed splines.", Tags = new[] { "points", "inside", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 
 		[Output]
 		[PcgMemberInfo("Points outside the closed splines.", Tags = new[] { "points", "outside" })]
-		public List<PointData> Outsides => default;
+		public PcgPointCloud Outsides => default;
 
 		[Input]
 		[PcgMemberInfo("Points to test against the splines.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Closed splines used as the selection region.", Tags = new[] { "spline", "region" })]
-		public List<Spline> Splines;
+		public PcgSplineSet Splines;
 	}
 }

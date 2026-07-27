@@ -75,9 +75,9 @@ PCGAddons/
 public class FooNode : PcgPreviewNode
 {
     public bool Enabled = true;            // параметр
-    [Input] public List<PointData> Points = new();
+    [Input] public PcgPointCloud Points = new();
     public float Radius = 1f;              // параметр
-    [Output] public List<PointData> Results => default;
+    [Output] public PcgPointCloud Results => default;
 }
 ```
 
@@ -107,6 +107,13 @@ public class FooNode : PcgPreviewNode
 
 ### 3.4 Типы точек и инстансов
 - `PCG.Points.PointData` — единица размещения: `Position` (Vector3), `Normal` (Vector3), `Angle` (float, вокруг Normal), `Scale` (float), `Density` (float, [0..1]).
+- `PCG.Points.PcgPointCloud` — тип порта точек: `List<PointData> Points` (геометрия) + `PcgAttributeSet Attributes` (именованные колонки, строка на точку). Инвариант: `Attributes.Count == Points.Count`. `List<PointData>` остаётся только у внутренних генераторов/накопителей (см. «Правило категорий» ниже) — портов `[Input]`/`[Output]` он больше не типизирует.
+  - API: `cloud[i]` (get/set), `cloud.Count`, `foreach` по точкам, `cloud.Points` (сырой список), `dst.AppendFrom(src, srcIndex)` (перенос точки с атрибутами), `dst.AppendFrom(src, srcIndex, modifiedPoint)` (перенос с заменой точки), `dst.Append(srcCloud)` (слияние облаков), `dst.Add(point)` (новая точка без источника), `Results.Rent(capacity)` (аренда из пула).
+  - **Правило категорий** (какой метод сборки выхода использовать): **Generator** (точки из не-точечного входа) — `Add`; **Derived-select** (выход — подмножество входа) — `AppendFrom(src, i)`; **Derived-transform** (те же точки, изменённые) — `AppendFrom(src, i, modified)`; **Merger** (несколько входов в один) — `Append(src)`; **Consumer** (точки только на входе) — тип входа меняется, выход не точки; **Internal** (локальная переменная/параметр утилиты, не порт) — остаётся `List<PointData>`. Использовать `Add` в Derived-ноде — дефект.
+  - Эталон миграции Derived-select с переносом атрибутов и параллельным счётом: `Assets/Plugins/PCG4U/PCG/HDRP/Scripts/SelectPoints/PointsByWaterSurfaceNode.cs` + `.../Editor/SelectPoints/PointsByWaterSurfaceNodeExecutor.cs` (ядро, открытый исходник).
+- `PCG.Splines.PcgSplineSet` — тип порта сплайнов (аддон `PCG.Splines`): `List<Spline> Splines` (геометрия) + `PcgAttributeSet Attributes` (строка на сплайн). Инвариант: `Attributes.Count == Splines.Count`. Правило категорий то же, что у точек (Generator — `Add`; Derived-select — `AppendFrom(src, i)`; Derived-transform — `AppendFrom(src, i, newSpline)`; Derived-fanout — `AppendFrom(src, i, piece)` на кусок; Merger — `Append(src)`; Internal — остаётся `List<Spline>`). Пула для сплайнов нет: `Results.Rent(...)` на сплайновых выходах не применяется. Разделение «канал или атрибут»: переменное вдоль сплайна живёт во встроенном канале Unity (`pcg.width`), постоянное на сплайн — в `Attributes`. Подробности и таблица «какая нода какие атрибуты пишет» — в [`SPLINES_MAP.md`](SPLINES_MAP.md).
+- `PCG.Polygons.RegionSet` — тип порта регионов: `List<Polygon2D> Regions` + `PcgAttributeSet Attributes` (строка на регион).
+- **Кеш значений.** `PCG.Cache.PcgCacheSerializerRegistry` держит `IPcgCacheSerializer` по `TypeId`. Занятые номера: `1`, `3` — ядро (`PcgPointCloudSerializer`, `PointListSerializer`), `2` — `RegionSetSerializer` (PCG.Polygons), `4` — `PcgSplineSetSerializer` (PCG.Splines). Регистрация — из `[InitializeOnLoadMethod]` в bootstrap-классе аддона. Для `SplineNetworkTopology` сериализатора нет, поэтому `SplineIntersectionNode` не кешируется.
 - `PCG.Points.GeneratePointMode` — Surface/Volume × Regular/Random.
 - `PCG.Points.ChangeDensityMode` — Set/Add/Mult (как менять плотность).
 - `PCG.Instances.InstanceData` — базовый тип «что породить» (наследуется аддонами).
@@ -117,7 +124,7 @@ public class FooNode : PcgPreviewNode
 
 ### 3.5 Значения графа — `PcgValue` (namespace `PCG.Values`)
 - `PcgValue` — обёртка ассета/данных для прокидывания в граф как переменной (методы вида `GetValue()`, `GetContentHash()`). Виртуальный `IsArray` (дефолт `false`) помечает тип как массив-значение: на границе сабграфа его порт становится мультивходовым и зеркалит несколько связей внутрь массивом, который внутренние ноды разворачивают фан-аутом. В аддонах помечены `SplinesValue` и `RegionSetValue` (в ядре — `PointsValue`).
-- `PcgPortAdapter` — адаптер типов между несовместимыми портами (напр. `List<GameObject>` → `List<Spline>`).
+- `PcgPortAdapter` — адаптер типов между несовместимыми портами (напр. `List<GameObject>` → `PcgSplineSet`, `PcgSplineSet` → `RegionSet`).
 - `CustomPcgNodeRenderer` (namespace `PCG.Editors`) — кастомный UI ноды в графе (кнопки и т.п.).
 
 ### 3.6 Категории нод ядра (из `Documentation/PCG/`)

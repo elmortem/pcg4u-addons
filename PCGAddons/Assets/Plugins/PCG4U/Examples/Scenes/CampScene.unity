@@ -276,6 +276,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GraphId: ebd7a94c566b4f47b1475c3cd38b49cf
+  AutoGenerate: 0
+  SubGraph: {fileID: 0}
+  SubGraphSyncedVersion: 0
   GraphData:
     Nodes:
     - rid: 7906782943574229059
@@ -364,11 +367,11 @@ MonoBehaviour:
     - rid: 7906782943574229059
       type: {class: ResultNode, ns: PCG, asm: PCG}
       data:
-        Id: 1
-        Position: {x: 483.35373, y: 590.1902}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 1
+        NodePosition: {x: 483.35373, y: 590.1902}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
     - rid: 7906782943574229060
       type: {class: TerrainObjectValue, ns: PCG.Values, asm: PCG}
       data:
@@ -393,20 +396,20 @@ MonoBehaviour:
     - rid: 7906782943574229065
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 3
-        Position: {x: -1082.8171, y: 210.08142}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 3
+        NodePosition: {x: -1082.8171, y: 210.08142}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: TerrainObject
     - rid: 7906782943574229066
       type: {class: TerrainSurfaceNode, ns: PCG.CreatePoints, asm: PCG}
       data:
-        Id: 4
-        Position: {x: -898.4163, y: 163.60645}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 4
+        NodePosition: {x: -898.4163, y: 163.60645}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
@@ -421,61 +424,57 @@ MonoBehaviour:
     - rid: 7906782943574229067
       type: {class: PointsNearPointsNode, ns: PCG.SelectPoints, asm: PCG}
       data:
-        Id: 5
-        Position: {x: -559.17633, y: 164.84763}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 5
+        NodePosition: {x: -559.17633, y: 164.84763}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
-        Points: []
-        OtherPoints: []
         Radius: 20
         RemoveThemselves: 0
         UseScale: 0
     - rid: 7906782943574229068
       type: {class: VariableNode, ns: PCG.Variables, asm: PCG}
       data:
-        Id: 6
-        Position: {x: -864.54175, y: 442.45255}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 6
+        NodePosition: {x: -864.54175, y: 442.45255}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         VariableId: ObjectToPoints
     - rid: 7906782943574229070
       type: {class: GameObjectsNode, ns: PCG.Instances, asm: PCG}
       data:
-        Id: 8
-        Position: {x: -461.22888, y: 512.2922}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 8
+        NodePosition: {x: -461.22888, y: 512.2922}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
         Enabled: 1
-        Points: []
         Prefab: {fileID: 6826043840502302781, guid: 3c56bc64242ca9b459f8ded5035caeed, type: 3}
     - rid: 7906782943574229071
       type: {class: TerrainGrassDetailNode, ns: PCG.Instances, asm: PCG}
       data:
-        Id: 9
-        Position: {x: -163.77527, y: 213.79645}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 9
+        NodePosition: {x: -163.77527, y: 213.79645}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
         Enabled: 1
-        Points: []
         DetailInfo:
           DetailPrefab: {fileID: 2958938191972331230, guid: 77374887a65f75d408d9b65262547691, type: 3}
           DetailTexture: {fileID: 0}
@@ -489,17 +488,16 @@ MonoBehaviour:
     - rid: 7906782943574229072
       type: {class: AroundPointsNode, ns: PCG.CreatePoints, asm: PCG}
       data:
-        Id: 10
-        Position: {x: -577.1782, y: 814.68835}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 10
+        NodePosition: {x: -577.1782, y: 814.68835}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
-        Points: []
         Radius: {x: 5, y: 20}
         Count: {x: 10, y: 10}
         AxesMult: {x: 1, y: 0, z: 1}
@@ -507,18 +505,17 @@ MonoBehaviour:
     - rid: 7906782943574229073
       type: {class: GameObjectWeightsNode, ns: PCG.Instances, asm: PCG}
       data:
-        Id: 11
-        Position: {x: 58.70526, y: 792.03613}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 11
+        NodePosition: {x: 58.70526, y: 792.03613}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
         Enabled: 1
-        Points: []
         Seed: 1149
         Weights:
         - Prefab: {fileID: 3948723440619480192, guid: b6d979d591fa6094aa05bc0bdee79d7d, type: 3}
@@ -532,17 +529,16 @@ MonoBehaviour:
     - rid: 7906782943574229074
       type: {class: ChangeAngleNode, ns: PCG.TransformPoints, asm: PCG}
       data:
-        Id: 12
-        Position: {x: -265.06912, y: 822.8801}
-        Collapsed: 0
-        Width: 220
-        Title: 
+        NodeId: 12
+        NodePosition: {x: -265.06912, y: 822.8801}
+        NodeCollapsed: 0
+        NodeWidth: 220
+        NodeTitle: 
         GizmosOptions:
           Override: 0
           Color: {r: 1, g: 1, b: 1, a: 1}
           PointSize: 1
         IsPreviewLocal: 0
-        Points: []
         Min: 0
         Max: 360
         Seed: 1156

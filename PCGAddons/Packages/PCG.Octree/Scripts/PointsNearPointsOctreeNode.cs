@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Points;
 using Unity.Mathematics;
@@ -13,11 +12,11 @@ namespace PCG.Octree
 	{
 		[Input]
 		[PcgMemberInfo("Points to test for nearby neighbors.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Points searched for as neighbors.", Tags = new[] { "points", "others" })]
-		public List<PointData> OtherPoints = new();
+		public PcgPointCloud OtherPoints = new();
 
 		[Input]
 		[PcgMemberInfo("Neighbor search radius.", Tags = new[] { "radius", "distance" })]
@@ -37,10 +36,10 @@ namespace PCG.Octree
 
 		[Output]
 		[PcgMemberInfo("Points with no neighbor in the radius.", Tags = new[] { "points", "far", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 
 		[Output]
 		[PcgMemberInfo("Points with a neighbor in the radius.", Tags = new[] { "points", "near" })]
-		public List<PointData> NearPoints => default;
+		public PcgPointCloud NearPoints => default;
 	}
 }

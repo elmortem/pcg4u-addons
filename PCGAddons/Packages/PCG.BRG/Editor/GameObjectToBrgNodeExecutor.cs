@@ -5,7 +5,9 @@ using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.GraphModel;
 using PCG.Instances;
+using PCG.Points;
 using PCG.Utilities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace PCG.BRG
@@ -42,6 +44,7 @@ namespace PCG.BRG
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
 			Results.Value = new List<BrgInstanceData>();
+			_tmpResults.Clear();
 
 			if (!Data.Enabled)
 				return;
@@ -67,6 +70,8 @@ namespace PCG.BRG
 						}
 
 						brgInstance.Points.Add(instance.Point);
+						var scale3Column = brgInstance.Points.Attributes.EnsureColumn<float3>(PcgPointAttributes.Scale3);
+						scale3Column.Values[brgInstance.Points.Count - 1] = instance.Scale3;
 
 						await scope.Step(ct: ct);
 					}
@@ -81,7 +86,7 @@ namespace PCG.BRG
 		{
 			var gizmosOptions = GetGizmosOptions();
 
-			GizmosUtility.DrawPoints(Results.Value.SelectMany(p => p.Points).ToList(), gizmosOptions, transform);
+			GizmosUtility.DrawPoints(Results.Value.SelectMany(p => p.Points.Points).ToList(), gizmosOptions, transform);
 		}
 	}
 }

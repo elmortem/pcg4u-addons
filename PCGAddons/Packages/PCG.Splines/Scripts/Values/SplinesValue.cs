@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using PCG.Splines.Utilities;
 using PCG.Values;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -12,7 +13,7 @@ namespace PCG.Splines
 	{
 		public List<SplineContainer> Containers = new();
 
-		public override Type ValueType => typeof(List<Spline>);
+		public override Type ValueType => typeof(PcgSplineSet);
 
 		public override bool IsArray => true;
 
@@ -46,7 +47,7 @@ namespace PCG.Splines
 				}
 			}
 
-			return result;
+			return new PcgSplineSet(result);
 		}
 
 		public override int GetContentHash()
@@ -63,28 +64,7 @@ namespace PCG.Splines
 						hash = (hash * 397) ^ container.transform.localToWorldMatrix.GetHashCode();
 						foreach (var spline in container.Splines)
 						{
-							hash = (hash * 397) ^ spline.Count;
-							hash = (hash * 397) ^ spline.Closed.GetHashCode();
-							for (int k = 0; k < spline.Count; k++)
-							{
-								var knot = spline[k];
-								hash = (hash * 397) ^ knot.Position.GetHashCode();
-								hash = (hash * 397) ^ knot.TangentIn.GetHashCode();
-								hash = (hash * 397) ^ knot.TangentOut.GetHashCode();
-								hash = (hash * 397) ^ knot.Rotation.GetHashCode();
-								hash = (hash * 397) ^ (int)spline.GetTangentMode(k);
-							}
-
-							if (spline.TryGetFloatData(SplineWidthUtility.DataKey, out var widthData) && widthData != null)
-							{
-								hash = (hash * 397) ^ (int)widthData.PathIndexUnit;
-								hash = (hash * 397) ^ widthData.DefaultValue.GetHashCode();
-								foreach (var point in widthData)
-								{
-									hash = (hash * 397) ^ point.Index.GetHashCode();
-									hash = (hash * 397) ^ point.Value.GetHashCode();
-								}
-							}
+							hash = (hash * 397) ^ SplinesUtility.GetContentHash(spline);
 						}
 					}
 				}

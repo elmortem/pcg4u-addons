@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PCG.GraphModel;
 using UnityEngine.Splines;
+using PCG.Splines;
 
 namespace PCG.Polygons.City
 {
@@ -12,7 +13,7 @@ namespace PCG.Polygons.City
 	{
 		[Input]
 		[PcgMemberInfo("Centerline splines used to build the corridor.", Tags = new[] { "spline", "road", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Full corridor width in world units.", Tags = new[] { "width", "road" })]

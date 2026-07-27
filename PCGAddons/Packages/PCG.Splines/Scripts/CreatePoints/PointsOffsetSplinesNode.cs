@@ -14,15 +14,15 @@ namespace PCG.CreatePoints
 	{
 		[Output]
 		[PcgMemberInfo("Points generated along the offset splines.", Tags = new[] { "points", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 
 		[Output]
 		[PcgMemberInfo("Points placed at spline corners.", Tags = new[] { "points", "corners" })]
-		public List<PointData> CornerPoints => default;
+		public PcgPointCloud CornerPoints => default;
 
 		[Input]
 		[PcgMemberInfo("Splines to place points along.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Sideways offset distance from the spline.", Tags = new[] { "offset", "distance" })]

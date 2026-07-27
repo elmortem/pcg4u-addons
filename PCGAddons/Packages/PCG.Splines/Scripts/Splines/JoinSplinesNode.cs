@@ -12,7 +12,7 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("Splines to join by their endpoints.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Maximum distance between endpoints to join.", Tags = new[] { "threshold", "distance" })]
@@ -20,6 +20,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Joined splines.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }

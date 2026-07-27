@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Splines;
 using PCG.GraphModel;
 using PCG.Points;
+using PCG.Splines;
 
 namespace PCG.TransformPoints
 {
@@ -14,11 +15,11 @@ namespace PCG.TransformPoints
 	{
 		[Input]
 		[PcgMemberInfo("Points whose density is changed.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Splines to measure the distance to.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Distance at which the density curve ends.", Tags = new[] { "radius", "distance" })]
@@ -33,6 +34,6 @@ namespace PCG.TransformPoints
 
 		[Output]
 		[PcgMemberInfo("Points with modified density.", Tags = new[] { "points", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 	}
 }

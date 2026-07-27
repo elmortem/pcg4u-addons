@@ -19,6 +19,6 @@ namespace PCG.BRG
 		/// <summary>
 		/// List of points defining transform matrices for instances.
 		/// </summary>
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 	}
 }

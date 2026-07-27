@@ -32,6 +32,17 @@ Maximum distance, in world units, for the fuzzy point cut mode. Ignored by the e
 
 Exact spline pieces. Every piece is open. Untouched knots keep their original position, tangents, tangent mode and tension; knots adjacent to a cut and new boundary knots are frozen so the shape is preserved exactly.
 
+## Attributes
+
+Each piece keeps the attribute row of the spline that it comes from. The node then writes four more attributes to each piece.
+
+* `sourceSplineIndex` — index of the source spline in the flattened input order.
+* `pieceIndex` — index of the piece in the source spline.
+* `startJunction` — index of the junction at the start of the piece. The value is `-1` if there is no junction.
+* `endJunction` — index of the junction at the end of the piece. The value is `-1` if there is no junction.
+
+The junction indices refer to the Topology input. Use them to find the two junctions that a road segment connects.
+
 ## Notes
 
 - A spline with no cuts is returned by reference, unchanged.

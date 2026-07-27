@@ -21,6 +21,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("The authored spline.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }

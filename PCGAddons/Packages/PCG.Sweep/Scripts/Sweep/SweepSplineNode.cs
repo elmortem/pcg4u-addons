@@ -20,7 +20,7 @@ namespace PCG.Sweep
 
 		[Input]
 		[PcgMemberInfo("Splines the profile is swept along.", Tags = new[] { "splines", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input(Connection = PcgConnectionType.Override)]
 		[PcgMemberInfo("Optional profile override reused from a Profile node.", Tags = new[] { "profile", "override" })]

@@ -33,6 +33,12 @@ Network topology: junctions with valency (number of unique incident branches) an
 
 Junction positions as points for preview and generic point nodes. In the preview, junction markers are sized and colored by valency (X, T and higher-order junctions are visually distinct).
 
+Each point carries two attributes: `junctionIndex` and `junctionValency`. Use `junctionValency` to make a difference between a simple corner and a large crossing.
+
+### SnappedSplines
+
+The network after the endpoint snap. Each spline keeps the attribute row of its source spline.
+
 ## Notes
 
 - An interior cut contributes two branches, an endpoint cut one; an X crossing has valency 4, a T junction valency 3.

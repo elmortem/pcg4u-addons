@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Points;
 
@@ -12,7 +11,7 @@ namespace PCG.TransformPoints
 	{
 		[Input]
 		[PcgMemberInfo("Terrain-projected points to stabilize.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Maximum terrain slope where points are retained.", Tags = new[] { "normal", "slope", "angle", "filter" })]
@@ -32,6 +31,6 @@ namespace PCG.TransformPoints
 
 		[Output]
 		[PcgMemberInfo("Slope-filtered points with reduced tilt and compensated root positions.", Tags = new[] { "points", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 	}
 }

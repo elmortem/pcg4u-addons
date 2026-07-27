@@ -14,7 +14,7 @@ namespace PCG.Splines.Surfaces
 {
 	public static class SplinePoints
 	{
-		public static async UniTask GetPoints(OperationScope scope, List<PointData> results, Spline spline, GeneratePointMode mode, int count, Vector3 offset, int seed, CancellationToken ct = default)
+		public static async UniTask GetPoints(OperationScope scope, List<PointData> results, List<float> resultTimes, List<float> resultDistances, Spline spline, GeneratePointMode mode, int count, Vector3 offset, int seed, CancellationToken ct = default)
 		{
 			if (spline == null)
 			{
@@ -28,21 +28,21 @@ namespace PCG.Splines.Surfaces
 			switch (mode)
 			{
 				case GeneratePointMode.SurfaceRegular:
-					await GetSurfaceRegularPoints(scope, results, spline, count, offset, ct);
+					await GetSurfaceRegularPoints(scope, results, resultTimes, resultDistances, spline, count, offset, ct);
 					break;
 				case GeneratePointMode.VolumeRegular:
-					await GetVolumeRegularPoints(scope, results, spline, count, offset, ct);
+					await GetVolumeRegularPoints(scope, results, resultTimes, resultDistances, spline, count, offset, ct);
 					break;
 				case GeneratePointMode.SurfaceRandom:
-					await GetSurfaceRandomPoints(scope, results, spline, count, offset, seed, ct);
+					await GetSurfaceRandomPoints(scope, results, resultTimes, resultDistances, spline, count, offset, seed, ct);
 					break;
 				case GeneratePointMode.VolumeRandom:
-					await GetVolumeRandomPoints(scope, results, spline, count, offset, seed, ct);
+					await GetVolumeRandomPoints(scope, results, resultTimes, resultDistances, spline, count, offset, seed, ct);
 					break;
 			}
 		}
 
-		public static async UniTask GetPointsByDistance(OperationScope scope, List<PointData> results, Spline spline, float distance, bool distribute, CancellationToken ct = default)
+		public static async UniTask GetPointsByDistance(OperationScope scope, List<PointData> results, List<float> resultTimes, List<float> resultDistances, Spline spline, float distance, bool distribute, CancellationToken ct = default)
 		{
 			if (spline == null)
 			{
@@ -89,12 +89,14 @@ namespace PCG.Splines.Surfaces
 					Scale = 1f,
 					Angle = Quaternion.LookRotation(tangent, upVector).eulerAngles.y
 				});
+				resultTimes.Add(t);
+				resultDistances.Add(pointDistance);
 
 				await scope.Step(ct: ct);
 			}
 		}
 
-		private static async UniTask GetSurfaceRegularPoints(OperationScope scope, List<PointData> results, Spline spline, int count, Vector3 offset, CancellationToken ct)
+		private static async UniTask GetSurfaceRegularPoints(OperationScope scope, List<PointData> results, List<float> resultTimes, List<float> resultDistances, Spline spline, int count, Vector3 offset, CancellationToken ct)
 		{
 			var length = spline.GetLength();
 			if (length <= 0f)
@@ -112,18 +114,20 @@ namespace PCG.Splines.Surfaces
 					Scale = 1f,
 					Angle = Quaternion.LookRotation(tangent, upVector).eulerAngles.y
 				});
+				resultTimes.Add(t);
+				resultDistances.Add(distance);
 
 				await scope.Step(ct: ct);
 			}
 		}
 
-		private static async UniTask GetVolumeRegularPoints(OperationScope scope, List<PointData> results, Spline spline, int count, Vector3 offset, CancellationToken ct)
+		private static async UniTask GetVolumeRegularPoints(OperationScope scope, List<PointData> results, List<float> resultTimes, List<float> resultDistances, Spline spline, int count, Vector3 offset, CancellationToken ct)
 		{
 			if (!spline.Closed)
 				return;
 
 			count = math.min(count, PCG.MaxListPoints);
-			
+
 			float3 splineUp = float3.zero;
 			float curving = 0f;
 			for (var i = 0; i < spline.Count; i++)
@@ -135,14 +139,14 @@ namespace PCG.Splines.Surfaces
 					curving += 1f;
 			}
 			var broking = 1f - curving / spline.Count;
-				
+
 			var bounds = spline.GetBounds();
 
 			var sizeCount = Mathf.RoundToInt(Mathf.Sqrt(count * (2f - broking)));
 
 			var sizeWidth = bounds.size.x / sizeCount;
 			var sizeHeight = bounds.size.z / sizeCount;
-			
+
 			for (int i = 0; i < sizeCount; i++)
 			{
 				for (int j = 0; j < sizeCount; j++)
@@ -152,14 +156,16 @@ namespace PCG.Splines.Surfaces
 					if (spline.IsInsideSpline(point))
 					{
 						results.Add(new PointData { Position = point, Normal = splineUp, Scale = 1f });
+						resultTimes.Add(-1f);
+						resultDistances.Add(-1f);
 					}
-					
+
 					await scope.Step(ct: ct);
 				}
 			}
 		}
 
-		private static async UniTask GetSurfaceRandomPoints(OperationScope scope, List<PointData> results, Spline spline, int count,
+		private static async UniTask GetSurfaceRandomPoints(OperationScope scope, List<PointData> results, List<float> resultTimes, List<float> resultDistances, Spline spline, int count,
 			Vector3 offset, int seed, CancellationToken ct)
 		{
 			var random = PcgRandom.Create(seed);
@@ -168,7 +174,8 @@ namespace PCG.Splines.Surfaces
 
 			for (int i = 0; i < count; i++)
 			{
-				spline.Evaluate(random.NextFloat(), out var point, out var tangent, out var upVector);
+				var t = random.NextFloat();
+				spline.Evaluate(t, out var point, out var tangent, out var upVector);
 				results.Add(new PointData
 				{
 					Position = offset + (Vector3)point,
@@ -176,17 +183,19 @@ namespace PCG.Splines.Surfaces
 					Scale = 1f,
 					Angle = Quaternion.LookRotation(tangent, upVector).eulerAngles.y
 				});
+				resultTimes.Add(t);
+				resultDistances.Add(spline.ConvertIndexUnit(t, PathIndexUnit.Normalized, PathIndexUnit.Distance));
 
 				await scope.Step(ct: ct);
 			}
 		}
 
-		private static async UniTask GetVolumeRandomPoints(OperationScope scope, List<PointData> results, Spline spline, int count,
+		private static async UniTask GetVolumeRandomPoints(OperationScope scope, List<PointData> results, List<float> resultTimes, List<float> resultDistances, Spline spline, int count,
 			Vector3 offset, int seed, CancellationToken ct)
 		{
 			if (!spline.Closed)
 				return;
-			
+
 			count = math.min(count, PCG.MaxListPoints);
 
 			var random = PcgRandom.Create(seed);
@@ -206,6 +215,8 @@ namespace PCG.Splines.Surfaces
 				if (spline.IsInsideSpline(point))
 				{
 					results.Add(new PointData { Position = point + offset, Normal = splineUp, Scale = 1f });
+					resultTimes.Add(-1f);
+					resultDistances.Add(-1f);
 				}
 
 				await scope.Step(ct: ct);

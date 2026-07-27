@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -17,7 +16,7 @@ namespace PCG.Mazes
 	public class MazeMstGraphNodeExecutor : PcgAsyncPreviewNodeExecutor<MazeMstGraphNode>
 	{
 		public PcgOutput<Graph> Result;
-		public PcgOutput<List<PointData>> EndPoints;
+		public PcgOutput<PcgPointCloud> EndPoints;
 
 		public override bool IsEmpty => Result.Value == null || EndPoints.Value == null;
 
@@ -67,7 +66,7 @@ namespace PCG.Mazes
 			var gizmosOptions = GetGizmosOptions();
 
 			GraphGizmoUtility.DrawGraph(Result.Value, gizmosOptions, transform);
-			GizmosUtility.DrawPoints(EndPoints.Value, gizmosOptions, transform);
+			GizmosUtility.DrawPoints(this, EndPoints.Value, gizmosOptions, transform);
 		}
 	}
 }

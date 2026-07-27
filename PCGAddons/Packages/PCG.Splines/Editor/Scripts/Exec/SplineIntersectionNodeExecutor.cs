@@ -15,8 +15,8 @@ namespace PCG.Splines
 	public class SplineIntersectionNodeExecutor : PcgAsyncPreviewNodeExecutor<SplineIntersectionNode>, INodeInfo, IPointsCount
 	{
 		public PcgOutput<SplineNetworkTopology> Topology;
-		public PcgOutput<List<PointData>> Results;
-		public PcgOutput<List<Spline>> SnappedSplines;
+		public PcgOutput<PcgPointCloud> Results;
+		public PcgOutput<PcgSplineSet> SnappedSplines;
 
 		public override bool IsEmpty => Results.Value == null || Results.Value.Count == 0;
 		public int PointsCount => Results.Value?.Count ?? 0;
@@ -31,8 +31,22 @@ namespace PCG.Splines
 			{
 				Topology.Value = new SplineNetworkTopology();
 				Results.Rent(0);
-				SnappedSplines.Value = new List<Spline>();
+				SnappedSplines.Value = new PcgSplineSet();
 				return;
+			}
+
+			var flatSets = new List<PcgSplineSet>(flat.Count);
+			var flatIndices = new List<int>(flat.Count);
+			foreach (var splines in splinesList)
+			{
+				if (splines == null)
+					continue;
+
+				for (int i = 0; i < splines.Splines.Count; i++)
+				{
+					flatSets.Add(splines);
+					flatIndices.Add(i);
+				}
 			}
 
 			var tolerance = GetInputValue(nameof(Data.IntersectionTolerance), Data.IntersectionTolerance);
@@ -42,7 +56,13 @@ namespace PCG.Splines
 			var snapped = endpointSnapDistance > 0f
 				? await SnapEndpointsAsync(flat, endpointSnapDistance, maxHeight, ct)
 				: flat;
-			SnappedSplines.Value = new List<Spline>(snapped);
+			var snappedSet = new PcgSplineSet(snapped.Count);
+			for (int i = 0; i < snapped.Count; i++)
+			{
+				snappedSet.AppendFrom(flatSets[i], flatIndices[i], snapped[i]);
+			}
+
+			SnappedSplines.Value = snappedSet;
 
 			var snapshots = new SplineSnapshot[snapped.Count];
 			using (var scope = OperationScope.Start(this))
@@ -81,6 +101,14 @@ namespace PCG.Splines
 					Scale = 1f,
 					Density = 1f
 				});
+			}
+
+			var junctionIndexColumn = Results.Value.Attributes.EnsureColumn<int>(SplineAttributes.JunctionIndex);
+			var junctionValencyColumn = Results.Value.Attributes.EnsureColumn<int>(SplineAttributes.JunctionValency);
+			for (int i = 0; i < junctions.Count; i++)
+			{
+				junctionIndexColumn.Values[i] = i;
+				junctionValencyColumn.Values[i] = junctions[i].Valency;
 			}
 		}
 
@@ -166,7 +194,7 @@ namespace PCG.Splines
 
 			var gizmosOptions = GetGizmosOptions();
 			Gizmos.color = gizmosOptions.Color;
-			GizmosUtility.DrawPoints(Results.Value, gizmosOptions, transform);
+			GizmosUtility.DrawPoints(this, Results.Value, gizmosOptions, transform);
 
 			if (Topology.Value == null)
 				return;

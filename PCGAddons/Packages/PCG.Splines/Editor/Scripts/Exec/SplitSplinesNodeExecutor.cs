@@ -14,7 +14,7 @@ namespace PCG.Splines
 {
 	public class SplitSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<SplitSplinesNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null || Results.Value.Count == 0;
 
@@ -24,8 +24,22 @@ namespace PCG.Splines
 			var flat = SplineNetworkInput.Flatten(splinesList);
 			if (flat.Count == 0)
 			{
-				Results.Value = new List<Spline>();
+				Results.Value = new PcgSplineSet();
 				return;
+			}
+
+			var flatSets = new List<PcgSplineSet>(flat.Count);
+			var flatIndices = new List<int>(flat.Count);
+			foreach (var splines in splinesList)
+			{
+				if (splines == null)
+					continue;
+
+				for (int i = 0; i < splines.Splines.Count; i++)
+				{
+					flatSets.Add(splines);
+					flatIndices.Add(i);
+				}
 			}
 
 			var cutsTopology = GetInputValue(nameof(Data.Cuts), Data.Cuts);
@@ -39,12 +53,18 @@ namespace PCG.Splines
 
 			if (!hasCuts && !hasPoints)
 			{
-				var passList = new List<Spline>(flat.Count);
+				var passList = new PcgSplineSet(flat.Count);
+				var passSourceRow = new List<int>(flat.Count);
 				for (int i = 0; i < flat.Count; i++)
 				{
 					if (flat[i] != null)
-						passList.Add(flat[i]);
+					{
+						passList.AppendFrom(flatSets[i], flatIndices[i]);
+						passSourceRow.Add(i);
+					}
 				}
+
+				WritePieceAttributes(passList, passSourceRow, null, null);
 				Results.Value = passList;
 				return;
 			}
@@ -72,7 +92,10 @@ namespace PCG.Splines
 			if (solved.InvalidValues)
 				Debug.LogWarning("[Split Splines] NaN or infinite values in cuts or points were discarded.");
 
-			var results = new List<Spline>();
+			var results = new PcgSplineSet();
+			var sourceRow = new List<int>();
+			var pieceRow = new List<int>();
+			var incidenceRow = new List<SplinePieceIncidence>();
 			using var buildScope = OperationScope.Start(this);
 			for (int i = 0; i < flat.Count; i++)
 			{
@@ -83,10 +106,14 @@ namespace PCG.Splines
 				var pieces = solved.Pieces[i];
 				if (pieces == null)
 				{
-					results.Add(spline);
+					results.AppendFrom(flatSets[i], flatIndices[i]);
+					sourceRow.Add(i);
+					pieceRow.Add(0);
+					incidenceRow.Add(new SplinePieceIncidence { StartJunction = -1, EndJunction = -1 });
 					continue;
 				}
 
+				var incidence = solved.PieceIncidence[i];
 				for (int p = 0; p < pieces.Count; p++)
 				{
 					var piece = pieces[p];
@@ -100,25 +127,47 @@ namespace PCG.Splines
 						built.Add(instruction.Knot, instruction.Mode, instruction.Tension);
 						await buildScope.Step(ct: ct);
 					}
-					results.Add(built);
+
+					results.AppendFrom(flatSets[i], flatIndices[i], built);
+					sourceRow.Add(i);
+					pieceRow.Add(p);
+					incidenceRow.Add(incidence != null && p < incidence.Count
+						? incidence[p]
+						: new SplinePieceIncidence { StartJunction = -1, EndJunction = -1 });
 				}
 			}
 
+			WritePieceAttributes(results, sourceRow, pieceRow, incidenceRow);
 			Results.Value = results;
 		}
 
-		private static List<float3> FlattenPoints(List<PointData>[] pointsList)
+		private static void WritePieceAttributes(PcgSplineSet set, List<int> sourceRow, List<int> pieceRow, List<SplinePieceIncidence> incidenceRow)
+		{
+			var sourceColumn = set.Attributes.EnsureColumn<int>(SplineAttributes.SourceSplineIndex);
+			var pieceColumn = set.Attributes.EnsureColumn<int>(SplineAttributes.PieceIndex);
+			var startColumn = set.Attributes.EnsureColumn<int>(SplineAttributes.StartJunction);
+			var endColumn = set.Attributes.EnsureColumn<int>(SplineAttributes.EndJunction);
+			for (int i = 0; i < set.Count; i++)
+			{
+				sourceColumn.Values[i] = sourceRow[i];
+				pieceColumn.Values[i] = pieceRow != null ? pieceRow[i] : 0;
+				startColumn.Values[i] = incidenceRow != null ? incidenceRow[i].StartJunction : -1;
+				endColumn.Values[i] = incidenceRow != null ? incidenceRow[i].EndJunction : -1;
+			}
+		}
+
+		private static List<float3> FlattenPoints(PcgPointCloud[] pointsList)
 		{
 			var result = new List<float3>();
 			if (pointsList == null)
 				return result;
 
-			foreach (var list in pointsList)
+			foreach (var cloud in pointsList)
 			{
-				if (list == null)
+				if (cloud == null)
 					continue;
 
-				foreach (var point in list)
+				foreach (var point in cloud.Points)
 					result.Add(point.Position);
 			}
 
@@ -127,10 +176,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 	}
 }

@@ -14,11 +14,11 @@ namespace PCG.Splines
 	{
 		[Output]
 		[PcgMemberInfo("Closed splines generated around the points.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 
 		[Input]
 		[PcgMemberInfo("Points to enclose with a spline.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Random radius range of each enclosing spline.", Tags = new[] { "radius", "size" })]

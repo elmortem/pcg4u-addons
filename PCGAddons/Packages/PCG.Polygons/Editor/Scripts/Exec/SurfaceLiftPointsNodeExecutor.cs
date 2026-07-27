@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using PCG.Exec;
@@ -11,7 +10,7 @@ namespace PCG.Polygons.City
 {
 	public sealed class SurfaceLiftPointsNodeExecutor : PcgAsyncPreviewNodeExecutor<SurfaceLiftPointsNode>, IPointsCount
 	{
-		public PcgOutput<List<PointData>> Results;
+		public PcgOutput<PcgPointCloud> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 		public int PointsCount => Results.Value?.Count ?? 0;
@@ -21,31 +20,31 @@ namespace PCG.Polygons.City
 			var inputs = GetInputValues(nameof(Data.Points), Data.Points);
 			if (inputs == null || inputs.Length == 0)
 			{
-				Results.Value = new List<PointData>();
+				Results.Rent(0);
 				return UniTask.CompletedTask;
 			}
-			var output = new List<PointData>(inputs.TotalCount());
+
 			float height = GetInputValue(nameof(Data.Height), Data.Height);
-			foreach (List<PointData> points in inputs)
+			Results.Rent(inputs.TotalCount());
+			foreach (PcgPointCloud cloud in inputs)
 			{
-				if (points == null)
+				if (cloud == null)
 					continue;
-				for (int i = 0; i < points.Count; i++)
+				for (int i = 0; i < cloud.Count; i++)
 				{
 					ct.ThrowIfCancellationRequested();
-					PointData point = points[i];
+					PointData point = cloud[i];
 					point.Position += new float3(0f, height, 0f);
-					output.Add(point);
+					Results.Value.AppendFrom(cloud, i, point);
 				}
 			}
 
-			Results.Value = output;
 			return UniTask.CompletedTask;
 		}
 
 		public override void DrawPreview(Transform transform)
 		{
-			GizmosUtility.DrawPoints(Results.Value, GetGizmosOptions(), transform);
+			GizmosUtility.DrawPoints(this, Results.Value, GetGizmosOptions(), transform);
 		}
 	}
 }

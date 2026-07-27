@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using PCG.GraphModel;
 using UnityEngine.U2D;
 using Spline = UnityEngine.Splines.Spline;
+using PCG.Splines;
 
 namespace PCG.SpriteShapes
 {
@@ -16,7 +17,7 @@ namespace PCG.SpriteShapes
 
 		[Input]
 		[PcgMemberInfo("Splines that shape the sprite geometry.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Name of the created SpriteShape objects.", Tags = new[] { "name" })]

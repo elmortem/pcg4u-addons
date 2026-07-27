@@ -2,6 +2,7 @@
 
 Spawns GameObject instances at input points using a weighted list of prefabs.
 Each point selects a prefab according to the configured weights, optionally using a seed for reproducibility.
+If the points have a `scale3` attribute, the node applies this attribute as a non-uniform scale multiplier on the instance.
 
 ## Inputs
 

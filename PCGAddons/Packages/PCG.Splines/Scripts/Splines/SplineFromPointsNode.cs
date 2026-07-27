@@ -13,13 +13,13 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("Source points the spline passes through.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[PcgMemberInfo("Whether the resulting spline is closed into a loop.", Tags = new[] { "closed", "loop" })]
 		public bool Closed;
 
 		[Output]
 		[PcgMemberInfo("Splines generated from the points.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }

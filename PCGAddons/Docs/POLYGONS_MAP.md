@@ -17,7 +17,7 @@
 | Нода | Назначение | Input → Output |
 |---|---|---|
 | `SplineToRegionNode` | замкнутые сплайны → регионы (с ресемплом) | `Splines, MaxSegmentLength` → `Result: RegionSet` |
-| `RegionToSplineNode` | регионы → замкнутые сплайны (контур + дырки) | `Region` → `Splines: List<Spline>` |
+| `RegionToSplineNode` | регионы → замкнутые сплайны (контур + дырки) | `Region` → `Splines: PcgSplineSet` |
 | `PointsNearRegionsNode` | категория SelectPoints (`Scripts/SelectPoints/`, namespace `PCG.SelectPoints`); делит точки на близкие/далёкие от регионов: точка = диск радиуса `Radius` в XZ, рядом если центр внутри (`Contains`) или дистанция до границы `<= Radius` (`DistanceToBoundarySq`); 2D, `UseScale` масштабирует радиус; AABB-отсев регионов | `Points, Regions, Radius` → `Results, NearPoints` |
 
 ## Городские ноды (`Scripts/City/`, namespace `PCG.Polygons.City`)
@@ -27,11 +27,11 @@
 |---|---|---|
 | `SubdivideRegionNode` | BSP-нарезка регионов на кварталы (рекурсивный сплит по длинной оси с jitter); рёбра-резы → `cutDepth>=1`, регион → `depth` | `Region, MinSize, MaxDepth, SplitJitter, Seed` → `Blocks: RegionSet` |
 | `AssignRoadClassByDepthNode` | ширина ребру по классу глубины реза (`cutDepth`) через кривую `WidthByDepth` (нормировка `cutDepth/MaxDepth`); ширину получают только рёбра в диапазоне `MinDepth..MaxDepth`. Граница — класс `0`: `MinDepth=1` (дефолт) её исключает, `MinDepth=0` делает периметральной дорогой | `Blocks, WidthByDepth, MaxWidth, MinDepth, MaxDepth` → `Result: RegionSet` |
-| `BlocksToRoadsNode` | рёбра с атрибутом `Width` группирует по классам глубины, связывает в ломаные (`RoadPolylineBuilder`), оффсетит в ленты (`PolygonClipper.InflatePolylines`, join/cap по `Join`/`Cap`/`MiterLimit`) и сливает (`Union`) | `Blocks, Join, Cap, MiterLimit` → `Roads: RegionSet` |
+| `BlocksToRoadsNode` | рёбра с атрибутом `Width` группирует по классам глубины, связывает в ломаные (`RoadPolylineBuilder`), оффсетит в ленты (`PolygonClipper.InflatePolylines`, join/cap по `Join`/`Cap`/`MiterLimit`) и сливает (`Union`) | `Blocks, Join, Cap, MiterLimit` → `Roads: RegionSet, Centerlines: PcgSplineSet` |
 | `InsetRegionNode` | inset/outset каждого региона (`Inflate(Delta)`), переносит строку атрибутов региона | `Region, Delta` → `Result: RegionSet` |
 | `LotsFromBlockNode` | нарезка квартала на участки полосами вдоль длинной грани, пишет `lotId` | `Blocks, LotWidth` → `Lots: RegionSet` |
 | `PolygonBooleanNode` | булева операция над двумя наборами (Union/Intersection/Difference), новые рёбра помечает `boundary` | `A, B, Mode` → `Result: RegionSet` |
-| `RegionToPointsNode` | точки из регионов: Centroid (центроид площади) / Random / Grid, с отступом `Margin` (inset через `Inflate`); ориентация по ближайшему ребру дорог | `Region, Roads, Mode, Count, Spacing, Margin, Seed` → `Results: List<PointData>` |
+| `RegionToPointsNode` | точки из регионов: Centroid (центроид площади) / Random / Grid, с отступом `Margin` (inset через `Inflate`); ориентация по ближайшему ребру дорог; Generator-from-attributed-source — переносит `RegionSet.Attributes` региона-источника на каждую точку и пишет `regionIndex` | `Region, Roads, Mode, Count, Spacing, Margin, Seed` → `Results: PcgPointCloud` |
 | `RegionToMeshNode` | объединяет регионы (`Union`) и строит crack-free меш, задрапированный на террейн: restricted (2:1) quadtree по `MaxHeightError`/`MinCellSize`/`MaxCellSize`/`MaxDepth`, внутренние листы — transition-фаны, граничные — `Intersection`+CDT; без террейна (или `MaxCellSize<=0`) — один CDT на `PlaneY`. Материализуется через `MeshInstanceMaker` | `Region, Terrain, Offset, MaxHeightError, MinCellSize, MaxCellSize, MaxDepth, HeightOffset, UvScale, Name` → `Results: List<MeshInstanceData>` |
 
 ## Пресеты (`Presets/`)
@@ -40,7 +40,7 @@
 - `CityBlocks.asset` — кварталы города из замкнутого сплайна. Дороги: `SplineToRegion`(`MaxSegmentLength=2`) → `SubdivideRegion`(`MinSize=25,MaxDepth=6,Jitter=0.15`) → `AssignRoadClassByDepth`(`MaxWidth=8,MinDepth=1,MaxDepth=4`) → `BlocksToRoads`(Round/Butt) → `RegionToMesh`(`Name=Roads,HeightOffset=0.15`, `Terrain`/`Material`←пилюли) → выход `Roads`. Дома: `AssignRoadClass.Result` → `InsetRegion`(`Delta=-6`) → `LotsFromBlock`(`LotWidth=14`) → `RegionToPoints`(Centroid, `Margin=1`, `Roads`←`BlocksToRoads`) → `PointToTerrain`(Surface, `ProjectNormal=false`) → `GameObjectWeights`(`Houses`) → выход `Houses`. Переменные: `Splines, Terrain, Houses, RoadMaterial, Seed`.
 
 ## Опорные типы City (`Scripts/City/`)
-- `CityAttributes` (static) — имена атрибутов: `cutDepth` (класс глубины реза, `0` = граница), `width` (ширина дороги ребра), `boundary` (флаг ребра-границы из `PolygonBoolean`), `depth` (глубина рекурсии региона), `lotId`.
+- `CityAttributes` (static) — имена атрибутов: `cutDepth` (класс глубины реза, `0` = граница), `width` (ширина дороги ребра), `boundary` (флаг ребра-границы из `PolygonBoolean`), `depth` (глубина рекурсии региона), `lotId`, `regionIndex` (индекс региона-источника в `input.Regions`, пишет `RegionToPointsNode` на каждую сгенерированную точку).
 - `RegionToPointsMode` (enum) — Centroid / Random / Grid. `PolygonBooleanMode` (enum) — Union / Intersection / Difference.
 - `RoadJoinType` (enum) — Round / Miter / Square. `RoadCapType` (enum) — Butt / Square / Round. Маппятся на `JoinType` / `EndType` Clipper2 в `BlocksToRoadsNodeExecutor`.
 
@@ -62,12 +62,12 @@
 - `Clipper2/` — вендоренный Clipper2 (Boost License), входит в asmdef `PCG.Polygons`. Namespace `Clipper2ZLib` под `USINGZ` (иначе `Clipper2Lib`).
 
 ## Editor (`Editor/Scripts/Exec/`)
-- `SplineToRegionNodeExecutor` / `RegionToSplineNodeExecutor` — исполнители (превью через `RegionGizmoUtility` / `SplinesGizmoUtility`).
+- `SplineToRegionNodeExecutor` / `RegionToSplineNodeExecutor` — исполнители (превью через `RegionGizmoUtility` / `SplinesGizmoUtility`). `RegionToSpline` — мост атрибутов регион→сплайн: на каждый порождённый сплайн (контур региона и каждая его дырка) переносится строка атрибутов региона-источника (`lotId`, `depth`, `cutDepth`, `boundary`) и дописывается `regionIndex`. `SplineToRegion` переносит атрибуты в обратную сторону, когда число регионов совпало с числом сплайнов.
 - Исполнители городских нод: `SubdivideRegionNodeExecutor`, `AssignRoadClassByDepthNodeExecutor`, `BlocksToRoadsNodeExecutor`, `InsetRegionNodeExecutor`, `LotsFromBlockNodeExecutor`, `PolygonBooleanNodeExecutor`, `RegionToPointsNodeExecutor` (все в namespace `PCG.Polygons.City`, превью через `RegionGizmoUtility` / `GizmosUtility.DrawPoints`).
 - `RegionToMeshNodeExecutor` (namespace `PCG.Polygons.City`, `INodeInfo`/`IInstancesNode`) — строит меш через `RegionMeshBuilder.Build` и материализует его через host instance maker (`MeshInstanceMaker`); превью пустое, `NodeInfo` = число треугольников.
 - `PointsNearRegionsNodeExecutor` (namespace `PCG.SelectPoints`, `IPointsCount`/`IShowResults`) — сплит точек по близости к регионам; ленивый кэш AABB регионов (`_boundsMin`/`_boundsMax`) как ранний отсев; превью точек выбранного выхода через `GizmosUtility.DrawPoints`.
 - `RegionSetInput` (static, `Editor/Scripts/Exec/`) — чтение мультивхода `RegionSet`: `ReadCombinedAsync(executor, field, ct)` поверх `GetInputValues<RegionSet>`; 0 валидных связей → `null`, 1+ → новый изолированный `RegionSet` + `Append` каждого через ограниченный `PcgWorkerScheduler`, `PlaneY` от первого.
-- `SplinesToRegionAdapter` (`PcgPortAdapter`) — `List<Spline>` → `RegionSet` (автоконверсия с дефолтным разрешением).
+- `SplinesToRegionAdapter` (`PcgPortAdapter`) — `PcgSplineSet` → `RegionSet` (автоконверсия с дефолтным разрешением); если число регионов совпало с числом сплайнов, строки атрибутов сплайнов переезжают на регионы, иначе не переносятся.
 - `RegionSetSerializer` (`IPcgCacheSerializer`, `TypeId=2`) — value-cache регионов (блобы `float2[]` чанками + `PcgAttributeSetCacheIO`). Порядок: по региону геометрия → его `EdgeAttributes`; затем регион-уровневые `set.Attributes`.
 - `PcgPolygonsBootstrap` (`InitializeOnLoadMethod`) — регистрирует сериализатор в `PcgCacheSerializerRegistry`.
 - `RegionGizmoUtility` — отрисовка регионов (контуры + дырки) на высоте `PlaneY`.
@@ -78,7 +78,7 @@
 - `GraphToRegionsNode` извлекает ограниченные грани графа, отбрасывает области меньше `MinArea` и назначает `PlaneY`.
 - `RegionsToGraphNode` превращает внешние контуры и дырки регионов обратно в планарный граф.
 - `RoundRegionNode` скругляет выпуклые и вогнутые углы через Clipper offset с задаваемым мировым радиусом.
-- `BlocksToRoadsNode.Centerlines` отдаёт дорожные оси с width channel, согласованным с шириной соответствующего ребра.
+- `BlocksToRoadsNode.Centerlines` отдаёт дорожные оси с width channel, согласованным с шириной соответствующего ребра, и с атрибутами `roadClass` (класс глубины), `width` и `closed` на каждой оси.
 - `RegionExtrudeNode` создаёт раздельные top/side mesh instances и материалы. `TerrainMode` поддерживает `Planar`, `FollowTerrain` и `HighestPoint`; `TerrainOffset`, `BaseOffset`, `Height`, `UvScale` и `Collider` остаются явными параметрами графа.
 
 Полная цепочка квартала в демо: `Spline → SplinesToGraph → GraphToRegions → RoundRegion → RegionExtrude`.
@@ -89,7 +89,7 @@
 - `GraphToRegionsNode` извлекает ограниченные грани графа, отбрасывает области меньше `MinArea` и назначает `PlaneY`.
 - `RegionsToGraphNode` превращает внешние контуры и дырки регионов обратно в планарный граф.
 - `RoundRegionNode` скругляет выпуклые и вогнутые углы через Clipper offset с задаваемым мировым радиусом.
-- `BlocksToRoadsNode.Centerlines` отдаёт дорожные оси с width channel, согласованным с шириной соответствующего ребра.
+- `BlocksToRoadsNode.Centerlines` отдаёт дорожные оси с width channel, согласованным с шириной соответствующего ребра, и с атрибутами `roadClass` (класс глубины), `width` и `closed` на каждой оси.
 - `RegionExtrudeNode` создаёт раздельные top/side mesh instances и материалы. `TerrainMode` поддерживает `Planar`, `FollowTerrain` и `HighestPoint`; `TerrainOffset`, `BaseOffset`, `Height`, `UvScale` и `Collider` остаются явными параметрами графа.
 
 Полная цепочка квартала в демо: `Spline → SplinesToGraph → GraphToRegions → RoundRegion → RegionExtrude`.

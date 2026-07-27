@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.Splines;
 using PCG.GraphModel;
 using PCG.Points;
+using PCG.Splines;
 
 namespace PCG.CreatePoints
 {
@@ -15,11 +16,11 @@ namespace PCG.CreatePoints
 	{
 		[Output]
 		[PcgMemberInfo("Points generated along the splines.", Tags = new[] { "points", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 
 		[Input]
 		[PcgMemberInfo("Splines to place points along.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines;
+		public PcgSplineSet Splines;
 
 		[Input]
 		[PcgMemberInfo("Arc-length spacing between points.", Tags = new[] { "distance", "spacing" })]

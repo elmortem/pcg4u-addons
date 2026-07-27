@@ -14,7 +14,7 @@ namespace PCG.Splines
 {
 	public class RandomSplineNodeExecutor : PcgAsyncPreviewNodeExecutor<RandomSplineNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 
@@ -28,7 +28,7 @@ namespace PCG.Splines
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Results.Value = new List<Spline>();
+			Results.Value = new PcgSplineSet();
 
 			var pointsList = GetInputValues(nameof(Data.Points), Data.Points);
 			if (pointsList == null || pointsList.Length <= 0)
@@ -40,7 +40,7 @@ namespace PCG.Splines
 				if (points == null || points.Count <= 0)
 					continue;
 
-				flatPoints.AddRange(points);
+				flatPoints.AddRange(points.Points);
 			}
 
 			if (flatPoints.Count <= 1)
@@ -98,10 +98,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 	}
 }

@@ -14,13 +14,13 @@ namespace PCG.Splines
 {
 	public class SplineFromPointsNodeExecutor : PcgAsyncPreviewNodeExecutor<SplineFromPointsNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Results.Value = new List<Spline>();
+			Results.Value = new PcgSplineSet();
 
 			var pointsList = GetInputValues(nameof(Data.Points), Data.Points);
 			if (pointsList == null || pointsList.Length <= 0)
@@ -28,7 +28,7 @@ namespace PCG.Splines
 
 			using (var scope = OperationScope.Start(this))
 			{
-				foreach (var points in pointsList)
+				foreach (PcgPointCloud points in pointsList)
 				{
 					if (points == null || points.Count <= 1)
 						continue;
@@ -51,10 +51,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PCG.GraphModel;
 using UnityEngine.Splines;
+using PCG.Splines;
 
 namespace PCG.Polygons
 {
@@ -16,6 +17,6 @@ namespace PCG.Polygons
 
 		[Output]
 		[PcgMemberInfo("Contour and hole splines of the regions.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Splines => default;
+		public PcgSplineSet Splines => default;
 	}
 }

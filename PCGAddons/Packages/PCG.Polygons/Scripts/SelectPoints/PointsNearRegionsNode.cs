@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Points;
 using PCG.Polygons;
@@ -13,15 +12,15 @@ namespace PCG.SelectPoints
 	{
 		[Output]
 		[PcgMemberInfo("Points far from the regions.", Tags = new[] { "points", "far", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 
 		[Output]
 		[PcgMemberInfo("Points near the regions.", Tags = new[] { "points", "near" })]
-		public List<PointData> NearPoints => default;
+		public PcgPointCloud NearPoints => default;
 
 		[Input]
 		[PcgMemberInfo("Points to test against the regions.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Regions to measure the distance to.", Tags = new[] { "region", "source" })]

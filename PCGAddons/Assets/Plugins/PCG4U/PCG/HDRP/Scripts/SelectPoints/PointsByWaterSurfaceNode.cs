@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Points;
 using UnityEngine.Rendering.HighDefinition;
@@ -15,7 +14,7 @@ namespace PCG.SelectPoints
 	{
 		[Input]
 		[PcgMemberInfo("Points to separate.", Tags = new[] { "points", "input" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 		[Input]
 		[PcgMemberInfo("HDRP water surface that defines the water level.", Tags = new[] { "water", "surface", "hdrp" })]
 		public WaterSurface WaterSurface;
@@ -25,9 +24,9 @@ namespace PCG.SelectPoints
 
 		[Output]
 		[PcgMemberInfo("Points at or above the offset water level.", Tags = new[] { "points", "water", "above" })]
-		public List<PointData> AboveWater => default;
+		public PcgPointCloud AboveWater => default;
 		[Output]
 		[PcgMemberInfo("Points below the offset water level.", Tags = new[] { "points", "water", "below" })]
-		public List<PointData> BelowWater => default;
+		public PcgPointCloud BelowWater => default;
 	}
 }

@@ -14,8 +14,8 @@ namespace PCG.CreatePoints
 {
 	public class PointsOffsetSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<PointsOffsetSplinesNode>, IPointsCount, IShowResults
 	{
-		public PcgOutput<List<PointData>> Results;
-		public PcgOutput<List<PointData>> CornerPoints;
+		public PcgOutput<PcgPointCloud> Results;
+		public PcgOutput<PcgPointCloud> CornerPoints;
 
 		public override bool IsEmpty => Results.Value == null || CornerPoints.Value == null;
 		public int PointsCount => ShowResults ? (Results.Value?.Count ?? 0) : (CornerPoints.Value?.Count ?? 0);
@@ -23,8 +23,8 @@ namespace PCG.CreatePoints
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Results.Value = new List<PointData>();
-			CornerPoints.Value = new List<PointData>();
+			Results.Value = new PcgPointCloud();
+			CornerPoints.Value = new PcgPointCloud();
 
 			var offset = GetInputValue(nameof(Data.Offset), Data.Offset);
 			var distance = GetInputValue(nameof(Data.Distance), Data.Distance);
@@ -39,6 +39,9 @@ namespace PCG.CreatePoints
 			if (splinesList == null || splinesList.Length <= 0)
 				return;
 
+			var results = new OffsetPointBuffer();
+			var corners = new OffsetPointBuffer();
+			int flatIndex = 0;
 			using (var scope = OperationScope.Start(this))
 			{
 				foreach (var splines in splinesList)
@@ -46,11 +49,17 @@ namespace PCG.CreatePoints
 					if (splines == null || splines.Count <= 0)
 						continue;
 
-					foreach (var spline in splines)
+					for (int s = 0; s < splines.Splines.Count; s++)
 					{
+						var spline = splines.Splines[s];
 						if (spline.Count <= 1)
+						{
+							flatIndex++;
 							continue;
+						}
 
+						int resultsStart = results.Points.Count;
+						int cornersStart = corners.Points.Count;
 						var length = spline.GetLength();
 
 						if (Data.Spacing == SplineSpacingMode.Distance)
@@ -61,7 +70,7 @@ namespace PCG.CreatePoints
 								var margin = (length - total * distance) * 0.5f;
 								for (int i = 0; i < total; i++)
 								{
-									EvaluateAndAdd(spline, margin + (i + 0.5f) * distance, offset, Results.Value);
+									EvaluateAndAdd(spline, margin + (i + 0.5f) * distance, offset, results);
 									await scope.Step(ct: ct);
 								}
 							}
@@ -69,7 +78,7 @@ namespace PCG.CreatePoints
 							{
 								for (float dist = 0f; dist <= length; dist += distance)
 								{
-									EvaluateAndAdd(spline, dist, offset, Results.Value);
+									EvaluateAndAdd(spline, dist, offset, results);
 									await scope.Step(ct: ct);
 								}
 							}
@@ -82,7 +91,7 @@ namespace PCG.CreatePoints
 								var step = length / total;
 								for (int i = 0; i < total; i++)
 								{
-									EvaluateAndAdd(spline, (i + 0.5f) * step, offset, Results.Value);
+									EvaluateAndAdd(spline, (i + 0.5f) * step, offset, results);
 									await scope.Step(ct: ct);
 								}
 							}
@@ -92,7 +101,7 @@ namespace PCG.CreatePoints
 								var step = total == 1 ? 0f : length / lastIndex;
 								for (int i = 0; i < total; i++)
 								{
-									EvaluateAndAdd(spline, i * step, offset, Results.Value);
+									EvaluateAndAdd(spline, i * step, offset, results);
 									await scope.Step(ct: ct);
 								}
 							}
@@ -105,7 +114,7 @@ namespace PCG.CreatePoints
 							{
 								for (int i = 0; i < steps; i++)
 								{
-									EvaluateAndAdd(spline, (i + 0.5f) * step, offset, Results.Value);
+									EvaluateAndAdd(spline, (i + 0.5f) * step, offset, results);
 									await scope.Step(ct: ct);
 								}
 							}
@@ -114,7 +123,7 @@ namespace PCG.CreatePoints
 								var lastIndex = spline.Closed ? steps - 1 : steps;
 								for (int i = 0; i <= lastIndex; i++)
 								{
-									EvaluateAndAdd(spline, i * step, offset, Results.Value);
+									EvaluateAndAdd(spline, i * step, offset, results);
 									await scope.Step(ct: ct);
 								}
 							}
@@ -123,33 +132,42 @@ namespace PCG.CreatePoints
 						for (int k = 0; k < spline.Count; k++)
 						{
 							var knotT = SplineUtility.ConvertIndexUnit(spline, k, PathIndexUnit.Knot, PathIndexUnit.Normalized);
-							EvaluateAndAddAtT(spline, knotT, offset, CornerPoints.Value);
+							var knotDistance = SplineUtility.ConvertIndexUnit(spline, knotT, PathIndexUnit.Normalized, PathIndexUnit.Distance);
+							EvaluateAndAddAtT(spline, knotT, knotDistance, offset, corners);
 							await scope.Step(ct: ct);
 						}
+
+						results.FillSource(resultsStart, splines, s, flatIndex);
+						corners.FillSource(cornersStart, splines, s, flatIndex);
+						flatIndex++;
 					}
 				}
 			}
+
+			Results.Value = results.BuildCloud(true);
+			CornerPoints.Value = corners.BuildCloud(false);
 		}
 
-		private void EvaluateAndAdd(Spline spline, float dist, float offset, List<PointData> target)
+		private void EvaluateAndAdd(Spline spline, float dist, float offset, OffsetPointBuffer target)
 		{
 			var t = SplineUtility.ConvertIndexUnit(spline, dist, PathIndexUnit.Distance, PathIndexUnit.Normalized);
-			EvaluateAndAddAtT(spline, math.clamp(t, 0f, 1f), offset, target);
+			EvaluateAndAddAtT(spline, math.clamp(t, 0f, 1f), dist, offset, target);
 		}
 
-		private void EvaluateAndAddAtT(Spline spline, float t, float offset, List<PointData> target)
+		private void EvaluateAndAddAtT(Spline spline, float t, float dist, float offset, OffsetPointBuffer target)
 		{
 			spline.Evaluate(t, out var point, out var tangent, out var upVector);
+			var width = SplineWidthUtility.Evaluate(spline, t, 0f);
 			var effectiveOffset = offset;
 
 			if (Data.UseSplineWidth)
 			{
-				effectiveOffset += SplineWidthUtility.Evaluate(spline, t, 0f) * Data.WidthMultiplier;
+				effectiveOffset += width * Data.WidthMultiplier;
 			}
 
 			if (math.abs(effectiveOffset) < 0.0001f)
 			{
-				AddPoint(target, point, tangent, upVector);
+				AddPoint(target, point, tangent, upVector, t, dist, width, 0);
 				return;
 			}
 
@@ -157,24 +175,28 @@ namespace PCG.CreatePoints
 
 			if (Data.BothSides)
 			{
-				AddPoint(target, point + offsetDirection * math.abs(effectiveOffset), tangent, upVector);
-				AddPoint(target, point - offsetDirection * math.abs(effectiveOffset), tangent, upVector);
+				AddPoint(target, point + offsetDirection * math.abs(effectiveOffset), tangent, upVector, t, dist, width, 1);
+				AddPoint(target, point - offsetDirection * math.abs(effectiveOffset), tangent, upVector, t, dist, width, -1);
 			}
 			else
 			{
-				AddPoint(target, point + offsetDirection * effectiveOffset, tangent, upVector);
+				AddPoint(target, point + offsetDirection * effectiveOffset, tangent, upVector, t, dist, width, 0);
 			}
 		}
 
-		private void AddPoint(List<PointData> target, float3 pos, float3 tangent, float3 upVector)
+		private void AddPoint(OffsetPointBuffer target, float3 pos, float3 tangent, float3 upVector, float t, float dist, float width, int side)
 		{
-			target.Add(new PointData
+			target.Points.Add(new PointData
 			{
 				Position = pos,
 				Normal = Data.UpNormal ? Vector3.up : upVector,
 				Scale = 1f,
 				Angle = Data.NoRotation ? 0f : Quaternion.LookRotation(tangent, upVector).eulerAngles.y
 			});
+			target.Times.Add(t);
+			target.Distances.Add(dist);
+			target.Widths.Add(width);
+			target.Sides.Add(side);
 		}
 
 		public override void DrawPreview(Transform transform)
@@ -182,9 +204,9 @@ namespace PCG.CreatePoints
 			var gizmosOptions = GetGizmosOptions();
 
 			if (ShowResults)
-				GizmosUtility.DrawPoints(Results.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, Results.Value, gizmosOptions, transform);
 			else
-				GizmosUtility.DrawPoints(CornerPoints.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, CornerPoints.Value, gizmosOptions, transform);
 		}
 	}
 }

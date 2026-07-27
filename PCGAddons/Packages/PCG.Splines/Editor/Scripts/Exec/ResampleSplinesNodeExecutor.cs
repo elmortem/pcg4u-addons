@@ -12,13 +12,13 @@ namespace PCG.Splines
 {
 	public class ResampleSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<ResampleSplinesNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Results.Value = new List<Spline>();
+			Results.Value = new PcgSplineSet();
 
 			var step = GetInputValue(nameof(Data.Step), Data.Step);
 
@@ -33,12 +33,13 @@ namespace PCG.Splines
 					if (splines == null)
 						continue;
 
-					foreach (var spline in splines)
+					for (int s = 0; s < splines.Splines.Count; s++)
 					{
+						var spline = splines.Splines[s];
 						if (spline.Count <= 1)
 							continue;
 
-						Results.Value.Add(await SplineResampleUtility.ResampleAsync(spline, step, scope, ct));
+						Results.Value.AppendFrom(splines, s, await SplineResampleUtility.ResampleAsync(spline, step, scope, ct));
 					}
 				}
 			}
@@ -46,10 +47,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 	}
 }

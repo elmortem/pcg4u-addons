@@ -23,3 +23,12 @@ When enabled, the step is adjusted so that points fit the spline exactly: on an 
 ### Results
 
 The list of generated points.
+
+## Attributes
+
+Each point gets the attribute row of the spline that it comes from. The node then adds the position of the point on that spline.
+
+* `splineIndex` — index of the source spline in the flattened input order.
+* `splineT` — normalized position along the spline, from 0 to 1.
+* `splineDistance` — distance along the spline, in world units.
+* `splineWidth` — width of the spline at that position, from the `pcg.width` channel.

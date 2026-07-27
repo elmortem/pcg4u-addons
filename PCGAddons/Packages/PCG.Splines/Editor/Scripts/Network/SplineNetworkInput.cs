@@ -5,7 +5,7 @@ namespace PCG.Splines
 {
 	public static class SplineNetworkInput
 	{
-		public static List<Spline> Flatten(List<Spline>[] splinesList)
+		public static List<Spline> Flatten(PcgSplineSet[] splinesList)
 		{
 			var result = new List<Spline>();
 			if (splinesList == null)
@@ -16,7 +16,7 @@ namespace PCG.Splines
 				if (splines == null)
 					continue;
 
-				foreach (var spline in splines)
+				foreach (var spline in splines.Splines)
 					result.Add(spline);
 			}
 

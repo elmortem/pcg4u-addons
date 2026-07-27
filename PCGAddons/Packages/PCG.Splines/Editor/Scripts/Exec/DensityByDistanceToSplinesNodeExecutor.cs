@@ -13,7 +13,7 @@ namespace PCG.TransformPoints
 {
 	public class DensityByDistanceToSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<DensityByDistanceToSplinesNode>, IPointsCount
 	{
-		public PcgOutput<List<PointData>> Results;
+		public PcgOutput<PcgPointCloud> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 		public int PointsCount => Results.Value?.Count ?? 0;
@@ -22,21 +22,41 @@ namespace PCG.TransformPoints
 		{
 			var pointsList = GetInputValues(nameof(Data.Points), Data.Points);
 			if (pointsList == null || pointsList.Length <= 0)
+			{
+				Results.Rent(0);
 				return;
+			}
 
 			var radius = GetInputValue(nameof(Data.Radius), Data.Radius);
 
-			var results = new List<PointData>(pointsList.TotalCount());
-			foreach (var points in pointsList)
+			var totalCount = pointsList.TotalCount();
+			var flatPoints = new List<PointData>(totalCount);
+			var flatClouds = new List<PcgPointCloud>(totalCount);
+			var flatIndices = new List<int>(totalCount);
+			foreach (PcgPointCloud cloud in pointsList)
 			{
-				if (points == null || points.Count <= 0)
+				if (cloud == null || cloud.Count == 0)
 					continue;
-				results.AddRange(points);
+
+				for (int idx = 0; idx < cloud.Count; idx++)
+				{
+					flatPoints.Add(cloud[idx]);
+					flatClouds.Add(cloud);
+					flatIndices.Add(idx);
+				}
+			}
+
+			if (flatPoints.Count == 0)
+			{
+				Results.Rent(0);
+				return;
 			}
 
 			if (radius < 0.0001f)
 			{
-				Results.Value = results;
+				Results.Rent(flatPoints.Count);
+				for (int i = 0; i < flatPoints.Count; i++)
+					Results.Value.AppendFrom(flatClouds[i], flatIndices[i]);
 				return;
 			}
 
@@ -87,7 +107,7 @@ namespace PCG.TransformPoints
 					list.Add(i);
 				}
 
-				var output = new List<PointData>(results);
+				var output = new List<PointData>(flatPoints);
 				for (int i = 0; i < output.Count; i++)
 				{
 					ct.ThrowIfCancellationRequested();
@@ -136,7 +156,9 @@ namespace PCG.TransformPoints
 				return output;
 			}, ct);
 
-			Results.Value = computed;
+			Results.Rent(flatPoints.Count);
+			for (int i = 0; i < flatPoints.Count; i++)
+				Results.Value.AppendFrom(flatClouds[i], flatIndices[i], computed[i]);
 		}
 
 		public override void DrawPreview(Transform transform)

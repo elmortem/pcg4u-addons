@@ -8,11 +8,11 @@
 
 | Нода | Назначение | Input → Output |
 |---|---|---|
-| `GridGraphNode` | граф-сетка | `Size: Vector2Int, CellSize: Vector2` → `Result: Graph, CenterPoints: List<PointData>` |
-| `DeloneGraphNode` | граф триангуляции Делоне по точкам | `Points, MinDistance, MinRatio` → `Result: Graph, CenterPoints` |
-| `MazeMstGraphNode` | лабиринт через MST (алгоритм Прима) | `Graph, Seed` → `Result: Graph, EndPoints: List<PointData>` |
+| `GridGraphNode` | граф-сетка | `Size: Vector2Int, CellSize: Vector2` → `Result: Graph, CenterPoints: PcgPointCloud` |
+| `DeloneGraphNode` | граф триангуляции Делоне по точкам | `Points: PcgPointCloud, MinDistance, MinRatio` → `Result: Graph, CenterPoints: PcgPointCloud` |
+| `MazeMstGraphNode` | лабиринт через MST (алгоритм Прима) | `Graph, Seed` → `Result: Graph, EndPoints: PcgPointCloud` |
 | `GraphMinusGraphNode` | вычитание графов (удаление пересекающихся рёбер) | `Graph, Minus` → `Result: Graph` |
-| `GraphToSplineNode` | рёбра графа → bezier-сплайны | `Graph, AutoSmooth` → `Splines: List<Spline>` |
+| `GraphToSplineNode` | рёбра графа → bezier-сплайны | `Graph, AutoSmooth` → `Splines: PcgSplineSet` (атрибуты `sourceSplineIndex`, `startJunction`, `endJunction`, `weight`) |
 
 ## Опорные типы (`Scripts/Graphs/`)
 - `Graph` — контейнер `List<GraphNode>` + `List<GraphEdge>` (методы FindNode/FindEdge/Clear). Это **value-тип, передаваемый между нодами**.

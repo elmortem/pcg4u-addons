@@ -1,6 +1,9 @@
 ## Description
 Addon for working with Unity Splines. Provides nodes for creating, modifying, and selecting points based on splines.
 
+## Data types
+* [[Pcg Spline Set|PCG.Splines/Splines/Pcg-Spline-Set]]
+
 ## Nodes
 
 ### Splines
@@ -29,6 +32,21 @@ Addon for working with Unity Splines. Provides nodes for creating, modifying, an
 ### Create Points
 * [[Points Offset Splines Node|PCG.Splines/CreatePoints/Points-Offset-Splines-Node]]
 * [[Splines Surface Node|PCG.Splines/CreatePoints/Splines-Surface-Node]]
+
+## Attributes on splines
+
+Every spline port carries a `PcgSplineSet`. The set holds the splines and a table of named attributes, with one row for each spline. The attributes move along the graph, so a downstream node can select or change points by the properties of the source spline.
+
+Two examples:
+
+* Put lamps only along the main streets. Use the `roadClass` attribute that Blocks To Roads writes.
+* Put a bench only on one side of the road. Use the `splineSide` attribute that Points Offset Splines writes.
+
+A node that makes points from a spline copies the attribute row of that spline to each new point. The node also adds the position of the point along the spline.
+
+Keep this rule: a value that changes along the spline goes to an embedded Unity channel, for example `pcg.width`. A value that is constant for the full spline goes to an attribute.
+
+Refer to [[Pcg Spline Set|PCG.Splines/Splines/Pcg-Spline-Set]] for the full list of names.
 
 ## Spline To Terrain
 

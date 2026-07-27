@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Mazes.Graphs;
 using PCG.Points;
@@ -13,7 +12,7 @@ namespace PCG.Mazes
 	{
 		[Input]
 		[PcgMemberInfo("Points to triangulate.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Minimum distance between graph vertices.", Tags = new[] { "distance", "min" })]
@@ -29,6 +28,6 @@ namespace PCG.Mazes
 
 		[Output]
 		[PcgMemberInfo("Points at the center of each triangle.", Tags = new[] { "points", "centers" })]
-		public List<PointData> CenterPoints => default;
+		public PcgPointCloud CenterPoints => default;
 	}
 }

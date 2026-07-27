@@ -12,7 +12,7 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("Splines that receive the width channel.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Absolute profile width in world units.", Tags = new[] { "width", "world" })]
@@ -20,6 +20,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Copied splines carrying the width channel.", Tags = new[] { "spline", "width", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }

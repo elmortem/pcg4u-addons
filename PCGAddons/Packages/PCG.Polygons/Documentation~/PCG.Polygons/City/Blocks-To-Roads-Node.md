@@ -28,3 +28,17 @@ Miter length limit, used when Join is Miter.
 ### Roads
 
 The merged road ribbons as a region set.
+
+### Centerlines
+
+The centerline of each road as a spline. Each centerline carries the road width in the embedded `pcg.width` channel, because the width can change along a road.
+
+## Attributes
+
+The node writes three attributes to each centerline.
+
+* `roadClass` — the depth class of the edges that made the road. Assign Road Class By Depth uses the same class to set the width.
+* `width` — the width of the road, in world units. The value is constant for the full centerline.
+* `closed` — true if the centerline is a loop.
+
+Use `roadClass` to make a difference between a main street and a small street downstream. For example, put lamps only along the roads with a low class value.

@@ -2,7 +2,7 @@
   "displayName": "PCG Batch Renderer Group",
   "name": "com.elmortem.pcg.brg",
   "author": "Makar Osokin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "unity": "2022.3",
   "description": "Batch Renderer Group addon for PCG.",
   "keywords": [
@@ -24,7 +24,7 @@
   ],
   "category": "Utility",
   "dependencies": {
-    "com.elmortem.brg": "0.0.1",
+    "com.elmortem.brg": "0.0.2",
     "com.unity.mathematics": "1.2.6"
   }
 }

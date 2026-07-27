@@ -16,7 +16,7 @@ namespace PCG.Mazes
 	public class DeloneGraphNodeExecutor : PcgAsyncPreviewNodeExecutor<DeloneGraphNode>, IPointsCount, IShowCenterPoints
 	{
 		public PcgOutput<Graph> Result;
-		public PcgOutput<List<PointData>> CenterPoints;
+		public PcgOutput<PcgPointCloud> CenterPoints;
 
 		public override bool IsEmpty => Result.Value == null || CenterPoints.Value == null;
 		public int PointsCount => CenterPoints.Value?.Count ?? 0;
@@ -38,9 +38,9 @@ namespace PCG.Mazes
 			{
 				var triPoints = new List<Vector2>();
 				float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, maxY = float.MinValue;
-				foreach (var points in pointsList)
+				foreach (PcgPointCloud cloud in pointsList)
 				{
-					foreach (var point in points)
+					foreach (var point in cloud)
 					{
 						var p = new Vector2(point.Position.x, point.Position.z);
 						triPoints.Add(p);
@@ -139,7 +139,7 @@ namespace PCG.Mazes
 
 			if (ShowCenterPoints)
 			{
-				GizmosUtility.DrawPoints(CenterPoints.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, CenterPoints.Value, gizmosOptions, transform);
 			}
 		}
 	}

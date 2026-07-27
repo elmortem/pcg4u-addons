@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Points;
 
@@ -12,7 +11,7 @@ namespace PCG.Polygons.City
 	{
 		[Input]
 		[PcgMemberInfo("Points to lift.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("World-space vertical offset applied to every point.", Tags = new[] { "height", "lift", "offset" })]
@@ -20,6 +19,6 @@ namespace PCG.Polygons.City
 
 		[Output]
 		[PcgMemberInfo("Lifted points.", Tags = new[] { "points", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 	}
 }

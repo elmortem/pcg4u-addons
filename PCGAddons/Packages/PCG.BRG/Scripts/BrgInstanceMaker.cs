@@ -90,13 +90,14 @@ namespace PCG.BRG
 								rotation *= yRotation;
 								var rot = rotation.eulerAngles;
 								
+								var scale3 = brgData.Points.GetScale3(j);
 								var scale = point.Scale;
 
 								items.Add(new BrgItem
 								{
 									Position = pos,
 									Rotation = rot,
-									Scale = new Vector3(scale, scale, scale),
+									Scale = new Vector3(scale * scale3.x, scale * scale3.y, scale * scale3.z),
 									Color = new Color(1f, 1f, 1f, 1f)
 								});
 								

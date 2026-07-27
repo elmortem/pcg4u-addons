@@ -12,7 +12,7 @@ namespace PCG.Splines
 {
 	public class SplineNodeExecutor : PcgSyncPreviewNodeExecutor<SplineNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		private SplineContainer _editContainer;
 
@@ -36,7 +36,7 @@ namespace PCG.Splines
 
 		protected override void DoCompute()
 		{
-			Results.Value = Data.Splines;
+			Results.Value = new PcgSplineSet(Data.Splines);
 		}
 
 		public override int GetVersionSalt()
@@ -159,9 +159,12 @@ namespace PCG.Splines
 			if (_editContainer != null)
 				return;
 
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines);
 		}
 	}
 }

@@ -18,3 +18,7 @@ Maximum length of a contour segment. Curves are resampled to keep segments withi
 ### Result
 
 The region set built from the splines.
+
+## Attributes
+
+Each region gets the attribute row of its source spline. The node moves the rows only if the number of regions is equal to the number of splines. If the node discarded an open spline or a degenerate contour, the counts are different and the regions get empty rows.

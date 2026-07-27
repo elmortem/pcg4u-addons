@@ -26,7 +26,24 @@ namespace PCG.Polygons
 
 			using (var scope = OperationScope.Start(this))
 			{
-				Result.Value = SplineRegionConvert.SplinesToRegions(splines, maxSegmentLength);
+				var regions = SplineRegionConvert.SplinesToRegions(splines.Splines, maxSegmentLength);
+				if (regions.Count == splines.Count)
+				{
+					var withAttributes = new RegionSet
+					{
+						PlaneY = regions.PlaneY
+					};
+
+					for (int i = 0; i < regions.Regions.Count; i++)
+					{
+						withAttributes.Regions.Add(regions.Regions[i]);
+						withAttributes.Attributes.AppendRow(splines.Attributes, i);
+					}
+
+					regions = withAttributes;
+				}
+
+				Result.Value = regions;
 				await scope.Step(ct: ct);
 			}
 		}

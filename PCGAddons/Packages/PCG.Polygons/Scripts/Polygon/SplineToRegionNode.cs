@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PCG.GraphModel;
 using UnityEngine.Splines;
+using PCG.Splines;
 
 namespace PCG.Polygons
 {
@@ -12,7 +13,7 @@ namespace PCG.Polygons
 	{
 		[Input(Connection = PcgConnectionType.Override)]
 		[PcgMemberInfo("Closed splines to convert into regions.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Maximum edge length used when resampling the contour.", Tags = new[] { "segment", "resample" })]

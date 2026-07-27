@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.GraphModel;
+using PCG.Splines;
 using PCG.Utilities;
 using UnityEngine.U2D;
 using Spline = UnityEngine.Splines.Spline;
@@ -36,7 +37,7 @@ namespace PCG.SpriteShapes
 
 			using (var scope = OperationScope.Start(this))
 			{
-				foreach (List<Spline> splines in splinesList)
+				foreach (PcgSplineSet splines in splinesList)
 				{
 					if (splines == null || splines.Count <= 0)
 						continue;

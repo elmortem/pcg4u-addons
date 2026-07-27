@@ -13,11 +13,11 @@ namespace PCG.Splines
 	{
 		[Output]
 		[PcgMemberInfo("Splines with displaced knots.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 
 		[Input]
 		[PcgMemberInfo("Splines to displace.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Minimum per-axis displacement.", Tags = new[] { "min", "range" })]

@@ -13,7 +13,7 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("Splines to offset.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Sideways offset distance in world units.", Tags = new[] { "offset", "distance" })]
@@ -25,6 +25,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Offset splines.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }

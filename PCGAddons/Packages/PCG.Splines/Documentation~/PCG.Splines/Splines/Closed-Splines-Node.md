@@ -21,3 +21,7 @@ The output list containing only open splines (Spline.Closed = false).
 
 The output list containing only closed splines (Spline.Closed = true).
 
+## Attributes
+
+Each output spline keeps the attribute row of its source spline. The node also writes the `closed` attribute. The value is `true` on the Results output and `false` on the OpenedSplines output.
+

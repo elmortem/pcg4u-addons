@@ -12,7 +12,7 @@ namespace PCG.Splines
 	{
 		[Output]
 		[PcgMemberInfo("Splines found in the scene.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 
 		[Input]
 		[PcgMemberInfo("Object name to search for; empty matches any name.", Tags = new[] { "name", "filter" })]

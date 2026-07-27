@@ -13,7 +13,7 @@ namespace PCG.Splines
 {
 	public class FindSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<FindSplinesNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		private readonly List<SplineContainer> _sources = new();
 
@@ -124,10 +124,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 	}
 }

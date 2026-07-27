@@ -64,12 +64,13 @@ Spline (замкнутый контур города)
 `LotsFromBlock`: `Blocks` (= ужатые кварталы), `LotWidth = 12` → `Lots`.
 Режет каждый квартал поперёк вдоль длинной стороны на лоты шириной ~`LotWidth`.
 
-`RegionToPoints`: `Region` = `Lots`, `Roads` = `Roads` (из шага 5), `Mode`, `Count`, `Spacing`, `Seed`, `Margin` → `Results` (List<PointData>).
+`RegionToPoints`: `Region` = `Lots`, `Roads` = `Roads` (из шага 5), `Mode`, `Count`, `Spacing`, `Seed`, `Margin` → `Results` (`PcgPointCloud`).
 
 - `Mode = Centroid` — один дом по центру лота (для плотной фронтальной застройки).
 - `Mode = Grid` / `Random` — несколько точек на лот (`Spacing` / `Count`).
 - `Margin` — отступ от границ лота (для всех режимов).
 - `Roads` подключён → точки разворачиваются лицом к ближайшей дороге (`PointData.Angle`).
+- `RegionToPoints` переносит атрибуты региона-источника (`Lots.Attributes`) на каждую точку и дописывает `regionIndex` (индекс лота в `Lots.Regions`). До инстансера и `PointToTerrain` доезжают: `lotId` (пришёл от `LotsFromBlock`) и `regionIndex` (новый, от `RegionToPoints`).
 
 ### 7. Дома и рельеф
 
@@ -83,6 +84,27 @@ Spline (замкнутый контур города)
 - `MeshAlongSpline` — лофт профиля вдоль сплайна (`RegionToSpline(Roads)` → бордюр; та же нода — заборы/стены). Отдельный ТДД.
 
 Сейчас дорожная сеть существует только как 2D-`RegionSet` (`Roads`) на плоскости `PlaneY`. «Roads» в графе — это выходной порт `BlocksToRoads`, а не нода.
+
+## Атрибуты на дорожных сплайнах и на точках вдоль них
+
+Сплайны несут `PcgAttributeSet`, строка на сплайн (тип порта — `PcgSplineSet`). Что доезжает до дорожной сети:
+
+- `BlocksToRoads.Centerlines` — на каждой оси: `roadClass` (класс глубины реза, тот же ключ, по которому `AssignRoadClassByDepth` назначал ширину), `width` (та же ширина, что записана во встроенный канал `pcg.width`), `closed`.
+- `RegionToSpline` — на каждый сплайн переносит строку атрибутов региона-источника (`lotId`, `depth`, `cutDepth`, `boundary`) и дописывает `regionIndex`.
+- `SplitSplines` — на каждый кусок: строка исходной оси плюс `sourceSplineIndex`, `pieceIndex`, `startJunction`, `endJunction`.
+- `SplineIntersection.Results` (точки перекрёстков) — `junctionIndex`, `junctionValency`.
+
+Ноды точек вдоль сплайна (`PointsOffsetSplines`, `SplinePointsByDistance`, `SplinesSurface`) переносят строку сплайна на каждую порождённую точку и дописывают `splineIndex`, `splineT`, `splineDistance`, `splineWidth`; `PointsOffsetSplines` добавляет `splineSide` (`+1`/`-1` при `BothSides`, иначе `0`).
+
+Что на этом можно строить, не заводя новых нод:
+
+- фонари только вдоль магистралей — `PointsByAttribute` по `roadClass` на выходе `Roadside Lamps`;
+- выбор префаба дома по классу улицы — `GameObjectsByAttribute` по `roadClass`, доехавшему через `RegionToSpline`/`RegionToPoints`;
+- разная плотность мусорок по ширине дороги — `AttributeMath`/`AttributeRemap` по `splineWidth`;
+- односторонняя расстановка (парковка только справа) — фильтр по `splineSide`;
+- декор на перекрёстках по загруженности — `junctionValency`.
+
+Важное правило: переменное вдоль сплайна (ширина) живёт во встроенном канале Unity `pcg.width`, постоянное на сплайн — в `Attributes`. Колонка `width` дублирует канал только как константу на всю ось.
 
 ## Быстрый минимум
 

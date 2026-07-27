@@ -12,7 +12,7 @@ namespace PCG.Polygons.City
 {
 	public class RegionToPointsNodeExecutor : PcgAsyncPreviewNodeExecutor<RegionToPointsNode>, IPointsCount
 	{
-		public PcgOutput<List<PointData>> Results;
+		public PcgOutput<PcgPointCloud> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 		public int PointsCount => Results.Value?.Count ?? 0;
@@ -22,7 +22,7 @@ namespace PCG.Polygons.City
 			var input = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Region), ct);
 			if (input == null)
 			{
-				Results.Value = new List<PointData>();
+				Results.Value = new PcgPointCloud();
 				return;
 			}
 
@@ -40,6 +40,7 @@ namespace PCG.Polygons.City
 			var work = PcgWorkerScheduler.RunAsync(() =>
 			{
 				var output = new List<PointData>(input.Count);
+				var sourceRegionRow = new List<int>(input.Count);
 				var noBuildZones = exclusions != null && exclusions.Count > 0
 					? PolygonClipper.Inflate(exclusions.Regions, math.max(0f, footprintClearance))
 					: null;
@@ -52,6 +53,7 @@ namespace PCG.Polygons.City
 					if (pieces.Count == 0)
 						continue;
 
+					int start = output.Count;
 					switch (mode)
 					{
 						case RegionToPointsMode.Centroid:
@@ -64,19 +66,35 @@ namespace PCG.Polygons.City
 							RegionFill.FillGridBlocking(output, pieces, input.PlaneY, spacing, gridJitter, seed + i, ct);
 							break;
 					}
+
+					for (int k = start; k < output.Count; k++)
+						sourceRegionRow.Add(i);
 				}
 
 				OrientToNearestEdge(output, edgeSource);
-				return output;
+				return (output, sourceRegionRow);
 			}, ct);
 			while (work.Status == UniTaskStatus.Pending)
 			{
 				PcgComputeSystem.ReportProgress(this);
 				await UniTask.Delay(250, cancellationToken: ct);
 			}
-			var results = await work;
+			var (output, sourceRegionRow) = await work;
 
-			Results.Value = results;
+			var cloud = new PcgPointCloud(output.Count);
+			for (int k = 0; k < output.Count; k++)
+			{
+				cloud.Points.Add(output[k]);
+				cloud.Attributes.AppendRow(input.Attributes, sourceRegionRow[k]);
+			}
+
+			var regionIndexColumn = cloud.Attributes.EnsureColumn<int>(CityAttributes.RegionIndex);
+			for (int k = 0; k < output.Count; k++)
+			{
+				regionIndexColumn.Values[k] = sourceRegionRow[k];
+			}
+
+			Results.Value = cloud;
 		}
 
 		private static List<Polygon2D> Inset(Polygon2D polygon, float margin)
@@ -215,7 +233,7 @@ namespace PCG.Polygons.City
 		public override void DrawPreview(Transform transform)
 		{
 			var gizmosOptions = GetGizmosOptions();
-			GizmosUtility.DrawPoints(Results.Value, gizmosOptions, transform);
+			GizmosUtility.DrawPoints(this, Results.Value, gizmosOptions, transform);
 		}
 	}
 }

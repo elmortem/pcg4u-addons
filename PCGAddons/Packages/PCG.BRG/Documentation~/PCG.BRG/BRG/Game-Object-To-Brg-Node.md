@@ -29,3 +29,9 @@ Output BRG instance data grouped by prefab.
 #### Remarks
 The output list contains BRG instance data grouped by prefab.
 
+## Notes
+
+The node copies the non-uniform scale of each instance into the `scale3` attribute of the point cloud. Thus an assembly that uses a non-uniform scale keeps its shape when BatchRendererGroup renders it.
+
+The per-instance color is not available. The renderer uses white for all instances.
+

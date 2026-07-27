@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Points;
 
@@ -51,6 +50,6 @@ namespace PCG.Polygons.City
 
 		[Output]
 		[PcgMemberInfo("Points generated inside the regions.", Tags = new[] { "points", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 	}
 }

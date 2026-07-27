@@ -14,7 +14,7 @@ namespace PCG.Splines
 {
 	public class SmoothSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<SmoothSplinesNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 
@@ -26,7 +26,7 @@ namespace PCG.Splines
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesList == null || splinesList.Length <= 0)
 			{
-				Results.Value = new List<Spline>();
+				Results.Value = new PcgSplineSet();
 				return;
 			}
 
@@ -38,8 +38,9 @@ namespace PCG.Splines
 					if (splines == null)
 						continue;
 
-					foreach (var spline in splines)
+					for (int s = 0; s < splines.Splines.Count; s++)
 					{
+						var spline = splines.Splines[s];
 						if (spline == null)
 							continue;
 
@@ -49,7 +50,7 @@ namespace PCG.Splines
 							positions[k] = spline[k].Position;
 							await scope.Step(ct: ct);
 						}
-						snapshots.Add(new SmoothInput(spline, positions, spline.Closed));
+						snapshots.Add(new SmoothInput(spline, positions, spline.Closed, splines, s));
 					}
 				}
 			}
@@ -81,14 +82,14 @@ namespace PCG.Splines
 				smoothed[index] = positions;
 			}, ct);
 
-			var results = new List<Spline>(snapshots.Count);
+			var results = new PcgSplineSet(snapshots.Count);
 			using (var scope = OperationScope.Start(this))
 			{
 				for (int i = 0; i < snapshots.Count; i++)
 				{
 					if (smoothed[i] == null)
 					{
-						results.Add(snapshots[i].Original);
+						results.AppendFrom(snapshots[i].SourceSet, snapshots[i].SourceIndex, snapshots[i].Original);
 						continue;
 					}
 
@@ -98,7 +99,7 @@ namespace PCG.Splines
 						result.Add(new BezierKnot(position, float3.zero, float3.zero), TangentMode.AutoSmooth);
 						await scope.Step(ct: ct);
 					}
-					results.Add(result);
+					results.AppendFrom(snapshots[i].SourceSet, snapshots[i].SourceIndex, result);
 				}
 			}
 
@@ -107,10 +108,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 
 		private sealed class SmoothInput
@@ -118,12 +122,16 @@ namespace PCG.Splines
 			public readonly Spline Original;
 			public readonly float3[] Positions;
 			public readonly bool Closed;
+			public readonly PcgSplineSet SourceSet;
+			public readonly int SourceIndex;
 
-			public SmoothInput(Spline original, float3[] positions, bool closed)
+			public SmoothInput(Spline original, float3[] positions, bool closed, PcgSplineSet sourceSet, int sourceIndex)
 			{
 				Original = original;
 				Positions = positions;
 				Closed = closed;
+				SourceSet = sourceSet;
+				SourceIndex = sourceIndex;
 			}
 		}
 	}

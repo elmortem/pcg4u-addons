@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Mazes.Graphs;
 using UnityEngine.Splines;
+using PCG.Splines;
 
 namespace PCG.Mazes.Splines
 {
@@ -20,6 +21,6 @@ namespace PCG.Mazes.Splines
 
 		[Output]
 		[PcgMemberInfo("Splines generated from the graph edges.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Splines => default;
+		public PcgSplineSet Splines => default;
 	}
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Mazes.Graphs;
 using UnityEngine.Splines;
+using PCG.Splines;
 
 namespace PCG.Polygons.Convert
 {
@@ -13,7 +14,7 @@ namespace PCG.Polygons.Convert
 	{
 		[Input]
 		[PcgMemberInfo("Splines to convert into graph edges.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Maximum sampled edge length along curved splines.", Tags = new[] { "segment", "length", "accuracy" })]

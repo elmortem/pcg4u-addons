@@ -12,7 +12,7 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("Splines to resample.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Arc-length spacing between resampled knots.", Tags = new[] { "step", "spacing" })]
@@ -20,6 +20,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Resampled splines.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using PCG.Exec;
@@ -15,7 +14,7 @@ namespace PCG.Mazes
 	public class GridGraphNodeExecutor : PcgAsyncPreviewNodeExecutor<GridGraphNode>, IPointsCount
 	{
 		public PcgOutput<Graph> Result;
-		public PcgOutput<List<PointData>> CenterPoints;
+		public PcgOutput<PcgPointCloud> CenterPoints;
 
 		public override bool IsEmpty => Result.Value == null || CenterPoints.Value == null;
 		public int PointsCount => CenterPoints.Value?.Count ?? 0;
@@ -62,7 +61,7 @@ namespace PCG.Mazes
 
 			if (ShowCenterPoints)
 			{
-				GizmosUtility.DrawPoints(CenterPoints.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, CenterPoints.Value, gizmosOptions, transform);
 			}
 		}
 	}

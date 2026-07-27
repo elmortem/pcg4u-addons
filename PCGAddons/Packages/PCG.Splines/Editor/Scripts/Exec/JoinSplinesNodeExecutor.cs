@@ -14,13 +14,13 @@ namespace PCG.Splines
 {
 	public class JoinSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<JoinSplinesNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
-			Results.Value = new List<Spline>();
+			Results.Value = new PcgSplineSet();
 
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesList == null || splinesList.Length <= 0)
@@ -29,6 +29,8 @@ namespace PCG.Splines
 			var threshold = math.max(0f, GetInputValue(nameof(Data.Threshold), Data.Threshold));
 			var thresholdSq = threshold * threshold;
 			var chains = new List<List<float3>>();
+			var chainSets = new List<PcgSplineSet>();
+			var chainIndices = new List<int>();
 
 			using (var scope = OperationScope.Start(this))
 			{
@@ -37,14 +39,15 @@ namespace PCG.Splines
 					if (splines == null)
 						continue;
 
-					foreach (var spline in splines)
+					for (int s = 0; s < splines.Splines.Count; s++)
 					{
+						var spline = splines.Splines[s];
 						if (spline.Count <= 1)
 							continue;
 
 						if (spline.Closed)
 						{
-							Results.Value.Add(spline);
+							Results.Value.AppendFrom(splines, s);
 							continue;
 						}
 
@@ -52,6 +55,8 @@ namespace PCG.Splines
 						for (int k = 0; k < spline.Count; k++)
 							chain.Add(spline[k].Position);
 						chains.Add(chain);
+						chainSets.Add(splines);
+						chainIndices.Add(s);
 
 						await scope.Step(ct: ct);
 					}
@@ -60,7 +65,11 @@ namespace PCG.Splines
 				while (chains.Count > 0)
 				{
 					var current = chains[0];
+					var currentSet = chainSets[0];
+					var currentIndex = chainIndices[0];
 					chains.RemoveAt(0);
+					chainSets.RemoveAt(0);
+					chainIndices.RemoveAt(0);
 
 					var merged = true;
 					while (merged)
@@ -96,6 +105,8 @@ namespace PCG.Splines
 							}
 
 							chains.RemoveAt(i);
+							chainSets.RemoveAt(i);
+							chainIndices.RemoveAt(i);
 							merged = true;
 							break;
 						}
@@ -114,7 +125,7 @@ namespace PCG.Splines
 					foreach (var position in current)
 						result.Add(new BezierKnot(position, float3.zero, float3.zero), TangentMode.AutoSmooth);
 
-					Results.Value.Add(result);
+					Results.Value.AppendFrom(currentSet, currentIndex, result);
 				}
 			}
 		}
@@ -133,10 +144,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 	}
 }

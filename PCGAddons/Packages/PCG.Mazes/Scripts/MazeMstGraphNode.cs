@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Mazes.Graphs;
 using PCG.Points;
@@ -25,6 +24,6 @@ namespace PCG.Mazes
 
 		[Output]
 		[PcgMemberInfo("Points at the maze dead ends.", Tags = new[] { "points", "ends" })]
-		public List<PointData> EndPoints => default;
+		public PcgPointCloud EndPoints => default;
 	}
 }

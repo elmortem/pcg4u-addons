@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using PCG.Exec;
 using PCG.GraphModel;
 using PCG.Polygons.Utilities;
+using PCG.Splines;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -29,11 +30,11 @@ namespace PCG.Polygons.City
 
 			if (inputs != null)
 			{
-				foreach (List<Spline> splines in inputs)
+				foreach (PcgSplineSet splines in inputs)
 				{
 					if (splines == null)
 						continue;
-					foreach (Spline spline in splines)
+					foreach (Spline spline in splines.Splines)
 					{
 						ct.ThrowIfCancellationRequested();
 						float length = spline.GetLength();

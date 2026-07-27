@@ -16,11 +16,11 @@ namespace PCG.Splines
 	{
 		[Output]
 		[PcgMemberInfo("Random splines generated from the points.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 
 		[Input]
 		[PcgMemberInfo("Points used as spline endpoints.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Up axis used to orient the splines.", Tags = new[] { "up", "axis" })]

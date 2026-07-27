@@ -4,6 +4,7 @@
     "references": [
         "PCG",
         "PCG.Mazes",
+        "PCG.Splines",
         "Unity.Mathematics",
         "Unity.Splines",
         "UniTask"

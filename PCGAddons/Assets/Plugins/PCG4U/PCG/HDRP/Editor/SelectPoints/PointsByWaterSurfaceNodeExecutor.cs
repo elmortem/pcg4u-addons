@@ -12,8 +12,8 @@ namespace PCG.SelectPoints
 {
 	public class PointsByWaterSurfaceNodeExecutor : PcgAsyncPreviewNodeExecutor<PointsByWaterSurfaceNode>, IPointsCount, IShowResults
 	{
-		public PcgOutput<List<PointData>> AboveWater;
-		public PcgOutput<List<PointData>> BelowWater;
+		public PcgOutput<PcgPointCloud> AboveWater;
+		public PcgOutput<PcgPointCloud> BelowWater;
 
 		public override bool IsEmpty => AboveWater.Value == null || BelowWater.Value == null;
 		public int PointsCount => ShowResults ? (AboveWater.Value?.Count ?? 0) : (BelowWater.Value?.Count ?? 0);
@@ -29,16 +29,23 @@ namespace PCG.SelectPoints
 				return;
 			}
 
-			var allPoints = new List<PointData>(pointsList.TotalCount<PointData>());
-			foreach (var points in pointsList)
+			var flatPoints = new List<PointData>(pointsList.TotalCount());
+			var flatClouds = new List<PcgPointCloud>(pointsList.TotalCount());
+			var flatIndices = new List<int>(pointsList.TotalCount());
+			foreach (PcgPointCloud cloud in pointsList)
 			{
-				if (points == null || points.Count == 0)
+				if (cloud == null || cloud.Count == 0)
 					continue;
 
-				allPoints.AddRange(points);
+				for (int idx = 0; idx < cloud.Count; idx++)
+				{
+					flatPoints.Add(cloud[idx]);
+					flatClouds.Add(cloud);
+					flatIndices.Add(idx);
+				}
 			}
 
-			if (allPoints.Count == 0)
+			if (flatPoints.Count == 0)
 			{
 				AboveWater.Rent(0);
 				BelowWater.Rent(0);
@@ -60,13 +67,13 @@ namespace PCG.SelectPoints
 				? (float4x4)hostTransform.localToWorldMatrix
 				: float4x4.identity;
 
-			var total = allPoints.Count;
+			var total = flatPoints.Count;
 			var batchSize = PCG.MaxGeneratePoints;
 			var batchCount = math.max(4, (int)math.ceil((float)total / batchSize));
 			batchSize = (int)math.ceil((float)total / batchCount);
 
-			var aboveBatches = new List<PointData>[batchCount];
-			var belowBatches = new List<PointData>[batchCount];
+			var aboveBatches = new List<int>[batchCount];
+			var belowBatches = new List<int>[batchCount];
 			var tasks = new List<UniTask>(batchCount);
 
 			int batchIndex = 0;
@@ -74,7 +81,7 @@ namespace PCG.SelectPoints
 			while (start < total)
 			{
 				int end = math.min(start + batchSize, total);
-				tasks.Add(ProcessBatch(allPoints, start, end, waterLevel, localToWorld,
+				tasks.Add(ProcessBatch(flatPoints, start, end, waterLevel, localToWorld,
 					aboveBatches, belowBatches, batchIndex, ct));
 				start = end;
 				batchIndex++;
@@ -91,26 +98,32 @@ namespace PCG.SelectPoints
 				belowCount += belowBatches[i]?.Count ?? 0;
 			}
 
-			var aboveWater = AboveWater.Rent(aboveCount);
-			var belowWater = BelowWater.Rent(belowCount);
+			AboveWater.Rent(aboveCount);
+			BelowWater.Rent(belowCount);
 			for (int i = 0; i < batchCount; i++)
 			{
 				if (aboveBatches[i] != null)
-					aboveWater.AddRange(aboveBatches[i]);
+				{
+					foreach (var idx in aboveBatches[i])
+						AboveWater.Value.AppendFrom(flatClouds[idx], flatIndices[idx]);
+				}
 
 				if (belowBatches[i] != null)
-					belowWater.AddRange(belowBatches[i]);
+				{
+					foreach (var idx in belowBatches[i])
+						BelowWater.Value.AppendFrom(flatClouds[idx], flatIndices[idx]);
+				}
 			}
 		}
 
 		private async UniTask ProcessBatch(List<PointData> points, int start, int end, float waterLevel,
-			float4x4 localToWorld, List<PointData>[] aboveBatches, List<PointData>[] belowBatches,
+			float4x4 localToWorld, List<int>[] aboveBatches, List<int>[] belowBatches,
 			int batchIndex, CancellationToken ct)
 		{
 			await UniTask.SwitchToThreadPool();
 
-			var aboveWater = new List<PointData>();
-			var belowWater = new List<PointData>();
+			var aboveWater = new List<int>();
+			var belowWater = new List<int>();
 
 			for (int i = start; i < end; i++)
 			{
@@ -123,9 +136,9 @@ namespace PCG.SelectPoints
 				var point = points[i];
 				var worldPosition = math.transform(localToWorld, point.Position);
 				if (worldPosition.y >= waterLevel)
-					aboveWater.Add(point);
+					aboveWater.Add(i);
 				else
-					belowWater.Add(point);
+					belowWater.Add(i);
 			}
 
 			aboveBatches[batchIndex] = aboveWater;

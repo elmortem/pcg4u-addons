@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using PCG.GraphModel;
 using PCG.Mazes.Graphs;
 using PCG.Points;
@@ -26,6 +25,6 @@ namespace PCG.Mazes
 
 		[Output]
 		[PcgMemberInfo("Points at the center of each cell.", Tags = new[] { "points", "centers" })]
-		public List<PointData> CenterPoints => default;
+		public PcgPointCloud CenterPoints => default;
 	}
 }

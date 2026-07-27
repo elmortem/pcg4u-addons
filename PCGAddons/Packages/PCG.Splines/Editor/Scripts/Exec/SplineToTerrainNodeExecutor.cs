@@ -14,7 +14,7 @@ namespace PCG.Splines
 {
 	public class SplineToTerrainNodeExecutor : PcgAsyncPreviewNodeExecutor<SplineToTerrainNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 
@@ -28,24 +28,25 @@ namespace PCG.Splines
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesList == null || splinesList.Length == 0)
 			{
-				Results.Value = new List<Spline>();
+				Results.Value = new PcgSplineSet();
 				return;
 			}
 
 			if (terrain == null)
 			{
-				var passthrough = new List<Spline>();
+				var passthrough = new PcgSplineSet();
 				foreach (var splines in splinesList)
 				{
 					if (splines == null)
 						continue;
 
-					foreach (var spline in splines)
+					for (int s = 0; s < splines.Splines.Count; s++)
 					{
+						var spline = splines.Splines[s];
 						if (spline == null || spline.Count < 2)
 							continue;
 
-						passthrough.Add(spline);
+						passthrough.AppendFrom(splines, s);
 					}
 				}
 
@@ -56,6 +57,8 @@ namespace PCG.Splines
 			var resample = Data.Resample;
 			var alignToTerrainNormal = Data.AlignToTerrainNormal;
 			var copies = new List<Spline>();
+			var sourceSets = new List<PcgSplineSet>();
+			var sourceIndices = new List<int>();
 			var positions = new List<float3[]>();
 			float minX = float.MaxValue;
 			float minZ = float.MaxValue;
@@ -69,8 +72,9 @@ namespace PCG.Splines
 					if (splines == null)
 						continue;
 
-					foreach (var spline in splines)
+					for (int s = 0; s < splines.Splines.Count; s++)
 					{
+						var spline = splines.Splines[s];
 						if (spline == null || spline.Count < 2)
 							continue;
 
@@ -92,6 +96,8 @@ namespace PCG.Splines
 						}
 
 						copies.Add(copy);
+						sourceSets.Add(splines);
+						sourceIndices.Add(s);
 						positions.Add(knotPositions);
 						await scope.Step(ct: ct);
 					}
@@ -100,7 +106,7 @@ namespace PCG.Splines
 
 			if (copies.Count == 0)
 			{
-				Results.Value = new List<Spline>();
+				Results.Value = new PcgSplineSet();
 				return;
 			}
 
@@ -150,7 +156,7 @@ namespace PCG.Splines
 				}
 			}, ct);
 
-			var results = new List<Spline>(copies.Count);
+			var results = new PcgSplineSet(copies.Count);
 			using (var scope = OperationScope.Start(this))
 			{
 				for (int s = 0; s < copies.Count; s++)
@@ -179,7 +185,7 @@ namespace PCG.Splines
 						}
 					}
 
-					results.Add(copy);
+					results.AppendFrom(sourceSets[s], sourceIndices[s], copy);
 				}
 			}
 
@@ -229,10 +235,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 	}
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine.Splines;
 using PCG.Points;
 using PCG.GraphModel;
+using PCG.Splines;
 
 namespace PCG.SelectPoints
 {
@@ -13,19 +14,19 @@ namespace PCG.SelectPoints
 	{
 		[Output]
 		[PcgMemberInfo("Points far from the splines.", Tags = new[] { "points", "far", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 
 		[Output]
 		[PcgMemberInfo("Points near the splines.", Tags = new[] { "points", "near" })]
-		public List<PointData> NearPoints => default;
+		public PcgPointCloud NearPoints => default;
 
 		[Input]
 		[PcgMemberInfo("Points to test against the splines.", Tags = new[] { "points", "source" })]
-		public List<PointData> Points = new();
+		public PcgPointCloud Points = new();
 
 		[Input]
 		[PcgMemberInfo("Splines to measure the distance to.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines;
+		public PcgSplineSet Splines;
 
 		[Input]
 		[PcgMemberInfo("Maximum distance to count a point as near.", Tags = new[] { "distance", "radius" })]

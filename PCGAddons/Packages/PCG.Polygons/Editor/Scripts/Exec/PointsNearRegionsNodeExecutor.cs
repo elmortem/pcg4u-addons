@@ -13,8 +13,8 @@ namespace PCG.SelectPoints
 {
 	public class PointsNearRegionsNodeExecutor : PcgAsyncPreviewNodeExecutor<PointsNearRegionsNode>, IPointsCount, IShowResults
 	{
-		public PcgOutput<List<PointData>> Results;
-		public PcgOutput<List<PointData>> NearPoints;
+		public PcgOutput<PcgPointCloud> Results;
+		public PcgOutput<PcgPointCloud> NearPoints;
 
 		public override bool IsEmpty => Results.Value == null || NearPoints.Value == null;
 		public int PointsCount => ShowResults ? Results.Value?.Count ?? 0 : NearPoints.Value?.Count ?? 0;
@@ -24,21 +24,45 @@ namespace PCG.SelectPoints
 		{
 			var radius = GetInputValue(nameof(Data.Radius), Data.Radius);
 			if (radius < 0.0001f)
+			{
+				Results.Rent(0);
+				NearPoints.Rent(0);
 				return;
+			}
 
 			var pointsList = GetInputValues(nameof(Data.Points), Data.Points);
 			if (pointsList == null || pointsList.Length <= 0)
+			{
+				Results.Rent(0);
+				NearPoints.Rent(0);
 				return;
+			}
 
 			var regions = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Regions), ct);
 			var hasRegions = regions != null && regions.Count > 0;
 
-			int totalCount = pointsList.TotalCount();
-			var pointsSnapshot = new List<PointData>(totalCount);
-			foreach (var points in pointsList)
+			var totalCount = pointsList.TotalCount();
+			var flatPoints = new List<PointData>(totalCount);
+			var flatClouds = new List<PcgPointCloud>(totalCount);
+			var flatIndices = new List<int>(totalCount);
+			foreach (PcgPointCloud cloud in pointsList)
 			{
-				if (points != null)
-					pointsSnapshot.AddRange(points);
+				if (cloud == null || cloud.Count == 0)
+					continue;
+
+				for (int idx = 0; idx < cloud.Count; idx++)
+				{
+					flatPoints.Add(cloud[idx]);
+					flatClouds.Add(cloud);
+					flatIndices.Add(idx);
+				}
+			}
+
+			if (flatPoints.Count == 0)
+			{
+				Results.Rent(0);
+				NearPoints.Rent(0);
+				return;
 			}
 
 			var boundsMin = new float2[hasRegions ? regions.Regions.Count : 0];
@@ -47,26 +71,30 @@ namespace PCG.SelectPoints
 				regions.Regions[i].GetBounds(out boundsMin[i], out boundsMax[i]);
 
 			var useScale = Data.UseScale;
-			var nearMask = new bool[pointsSnapshot.Count];
-			await PcgWorkerScheduler.RunIndexedAsync(pointsSnapshot.Count, index =>
+			var nearMask = new bool[flatPoints.Count];
+			await PcgWorkerScheduler.RunIndexedAsync(flatPoints.Count, index =>
 			{
 				ct.ThrowIfCancellationRequested();
-				if (hasRegions && CheckNearRegion(pointsSnapshot[index], regions, boundsMin, boundsMax, radius, useScale))
+				if (hasRegions && CheckNearRegion(flatPoints[index], regions, boundsMin, boundsMax, radius, useScale))
 					nearMask[index] = true;
 			}, ct);
 
-			var results = new List<PointData>(totalCount);
-			var nearPoints = new List<PointData>(totalCount / 10 + 10);
-			for (int i = 0; i < pointsSnapshot.Count; i++)
+			int nearCount = 0;
+			for (int i = 0; i < nearMask.Length; i++)
 			{
 				if (nearMask[i])
-					nearPoints.Add(pointsSnapshot[i]);
-				else
-					results.Add(pointsSnapshot[i]);
+					nearCount++;
 			}
 
-			Results.Value = results;
-			NearPoints.Value = nearPoints;
+			Results.Rent(flatPoints.Count - nearCount);
+			NearPoints.Rent(nearCount);
+			for (int i = 0; i < flatPoints.Count; i++)
+			{
+				if (nearMask[i])
+					NearPoints.Value.AppendFrom(flatClouds[i], flatIndices[i]);
+				else
+					Results.Value.AppendFrom(flatClouds[i], flatIndices[i]);
+			}
 		}
 
 		private static bool CheckNearRegion(
@@ -106,9 +134,9 @@ namespace PCG.SelectPoints
 			var gizmosOptions = GetGizmosOptions();
 
 			if (ShowResults)
-				GizmosUtility.DrawPoints(Results.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, Results.Value, gizmosOptions, transform);
 			else
-				GizmosUtility.DrawPoints(NearPoints.Value, gizmosOptions, transform);
+				GizmosUtility.DrawPoints(this, NearPoints.Value, gizmosOptions, transform);
 		}
 	}
 }

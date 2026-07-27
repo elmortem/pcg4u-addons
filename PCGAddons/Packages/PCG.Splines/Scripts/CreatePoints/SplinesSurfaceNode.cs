@@ -5,6 +5,7 @@ using UnityEngine.Splines;
 using PCG.Modes;
 using PCG.GraphModel;
 using PCG.Points;
+using PCG.Splines;
 
 namespace PCG.CreatePoints
 {
@@ -17,11 +18,11 @@ namespace PCG.CreatePoints
 	{
 		[Output]
 		[PcgMemberInfo("Points generated inside the closed splines.", Tags = new[] { "points", "results" })]
-		public List<PointData> Results => default;
+		public PcgPointCloud Results => default;
 
 		[Input]
 		[PcgMemberInfo("Closed splines defining the fill area.", Tags = new[] { "spline", "region" })]
-		public List<Spline> Splines;
+		public PcgSplineSet Splines;
 
 		[Input]
 		[PcgMemberInfo("World-space offset applied to the fill area.", Tags = new[] { "offset", "position" })]

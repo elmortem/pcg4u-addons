@@ -8,6 +8,8 @@ PCG4U provides a visual graph-based system for procedural generation. It lets yo
 * **Node-based workflow** - visual graph editor for building generation logic
 * **ScriptableObject graphs** - reusable generation assets
 * **Scene integration** - MonoBehaviour component to bridge graphs and scene
+* **Point attributes** - named per-point data with nodes to write, compute, filter and sort by it
+* **Point bounds** - an oriented box on each point, with a prune that keeps apart the points of different streams by priority
 * **Extensible system** - create custom nodes, instancers, and data types
 * **Performance optimized** - node caching, async execution, preview controls
 * **Multiple addons** - Splines, Mazes, SpriteShapes, Octree, BRG support

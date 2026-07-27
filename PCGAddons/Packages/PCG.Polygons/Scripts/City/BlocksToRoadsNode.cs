@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PCG.GraphModel;
 using UnityEngine.Splines;
+using PCG.Splines;
 
 namespace PCG.Polygons.City
 {
@@ -33,6 +34,6 @@ namespace PCG.Polygons.City
 
 		[Output]
 		[PcgMemberInfo("Road centerlines carrying their absolute width channel.", Tags = new[] { "spline", "roads", "centerline", "width" })]
-		public List<Spline> Centerlines => default;
+		public PcgSplineSet Centerlines => default;
 	}
 }

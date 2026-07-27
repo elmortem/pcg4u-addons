@@ -15,14 +15,14 @@ namespace PCG.Polygons.City
 	public class BlocksToRoadsNodeExecutor : PcgAsyncPreviewNodeExecutor<BlocksToRoadsNode>
 	{
 		public PcgOutput<RegionSet> Roads;
-		public PcgOutput<List<Spline>> Centerlines;
+		public PcgOutput<PcgSplineSet> Centerlines;
 
 		public override bool IsEmpty => Roads.Value == null && Centerlines.Value == null;
 
 		protected override async UniTask DoComputeAsync(CancellationToken ct)
 		{
 			Roads.Value = new RegionSet();
-			Centerlines.Value = new List<Spline>();
+			Centerlines.Value = new PcgSplineSet();
 
 			var input = await RegionSetInput.ReadCombinedAsync(this, nameof(Data.Blocks), ct);
 			if (input == null)
@@ -49,8 +49,8 @@ namespace PCG.Polygons.City
 					var openPaths = new List<float2[]>();
 					var closedPaths = new List<float2[]>();
 					RoadPolylineBuilder.Chain(segments, openPaths, closedPaths);
-					AddCenterlineData(openPaths, false, width, centerlines);
-					AddCenterlineData(closedPaths, true, width, centerlines);
+					AddCenterlineData(openPaths, false, width, pair.Key, centerlines);
+					AddCenterlineData(closedPaths, true, width, pair.Key, centerlines);
 
 					var ribbons = PolygonClipper.InflatePolylines(openPaths, closedPaths, width * 0.5f, joinType, endType, miterLimit);
 					parts.AddRange(ribbons);
@@ -67,26 +67,36 @@ namespace PCG.Polygons.City
 				return new RoadComputeResult(roads, centerlines);
 			}, ct);
 
-			var centerlineSplines = new List<Spline>(computed.Centerlines.Count);
+			var centerlineSplines = new PcgSplineSet(computed.Centerlines.Count);
 			for (int i = 0; i < computed.Centerlines.Count; i++)
 				AddCenterline(computed.Centerlines[i], input.PlaneY, centerlineSplines);
+
+			var roadClassColumn = centerlineSplines.Attributes.EnsureColumn<int>(CityAttributes.RoadClass);
+			var widthColumn = centerlineSplines.Attributes.EnsureColumn<float>(CityAttributes.Width);
+			var closedColumn = centerlineSplines.Attributes.EnsureColumn<bool>(SplineAttributes.Closed);
+			for (int i = 0; i < computed.Centerlines.Count; i++)
+			{
+				roadClassColumn.Values[i] = computed.Centerlines[i].RoadClass;
+				widthColumn.Values[i] = computed.Centerlines[i].Width;
+				closedColumn.Values[i] = computed.Centerlines[i].Closed;
+			}
 
 			Roads.Value = computed.Roads;
 			Centerlines.Value = centerlineSplines;
 		}
 
-		private static void AddCenterlineData(List<float2[]> paths, bool closed, float width, List<CenterlineData> results)
+		private static void AddCenterlineData(List<float2[]> paths, bool closed, float width, int roadClass, List<CenterlineData> results)
 		{
 			for (int p = 0; p < paths.Count; p++)
 			{
 				var path = paths[p];
 				if (path == null || path.Length < 2)
 					continue;
-				results.Add(new CenterlineData(path, closed, width));
+				results.Add(new CenterlineData(path, closed, width, roadClass));
 			}
 		}
 
-		private static void AddCenterline(CenterlineData data, float planeY, List<Spline> results)
+		private static void AddCenterline(CenterlineData data, float planeY, PcgSplineSet results)
 		{
 			var spline = new Spline
 			{
@@ -108,12 +118,14 @@ namespace PCG.Polygons.City
 			public readonly float2[] Path;
 			public readonly bool Closed;
 			public readonly float Width;
+			public readonly int RoadClass;
 
-			public CenterlineData(float2[] path, bool closed, float width)
+			public CenterlineData(float2[] path, bool closed, float width, int roadClass)
 			{
 				Path = path;
 				Closed = closed;
 				Width = width;
+				RoadClass = roadClass;
 			}
 		}
 

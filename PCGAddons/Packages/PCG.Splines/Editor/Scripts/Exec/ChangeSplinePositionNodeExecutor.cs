@@ -13,7 +13,7 @@ namespace PCG.Splines
 {
 	public class ChangeSplinePositionNodeExecutor : PcgAsyncPreviewNodeExecutor<ChangeSplinePositionNode>
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
 		public override bool IsEmpty => Results.Value == null;
 
@@ -30,7 +30,7 @@ namespace PCG.Splines
 			var splinesList = GetInputValues(nameof(Data.Splines), Data.Splines);
 			if (splinesList == null || splinesList.Length <= 0)
 			{
-				Results.Value = new List<Spline>();
+				Results.Value = new PcgSplineSet();
 				return;
 			}
 
@@ -39,17 +39,24 @@ namespace PCG.Splines
 			var seed = GetInputValue(nameof(Data.Seed), Data.Seed);
 
 			var flatSplines = new List<Spline>();
+			var flatSets = new List<PcgSplineSet>();
+			var flatIndices = new List<int>();
 			foreach (var splines in splinesList)
 			{
 				if (splines != null)
 				{
-					flatSplines.AddRange(splines);
+					for (int i = 0; i < splines.Splines.Count; i++)
+					{
+						flatSplines.Add(splines.Splines[i]);
+						flatSets.Add(splines);
+						flatIndices.Add(i);
+					}
 				}
 			}
 
 			if (flatSplines.Count <= 0)
 			{
-				Results.Value = new List<Spline>();
+				Results.Value = new PcgSplineSet();
 				return;
 			}
 
@@ -92,7 +99,7 @@ namespace PCG.Splines
 				modifiedKnots[index] = output;
 			}, ct);
 
-			var results = new List<Spline>(snapshots.Length);
+			var results = new PcgSplineSet(snapshots.Length);
 			using (var scope = OperationScope.Start(this))
 			{
 				for (int i = 0; i < snapshots.Length; i++)
@@ -104,7 +111,7 @@ namespace PCG.Splines
 						spline.Add(modifiedKnots[i][knotIndex], snapshot.Modes[knotIndex]);
 						await scope.Step(ct: ct);
 					}
-					results.Add(spline);
+					results.AppendFrom(flatSets[i], flatIndices[i], spline);
 				}
 			}
 
@@ -113,10 +120,13 @@ namespace PCG.Splines
 
 		public override void DrawPreview(Transform transform)
 		{
+			if (Results.Value == null)
+				return;
+
 			var gizmosOptions = GetGizmosOptions();
 
 			Gizmos.color = gizmosOptions.Color;
-			SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 		}
 
 		private sealed class SplineInputSnapshot

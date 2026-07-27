@@ -11,9 +11,9 @@ namespace PCG.Splines
 {
 	public class ClosedSplinesNodeExecutor : PcgAsyncPreviewNodeExecutor<ClosedSplinesNode>, IShowResults
 	{
-		public PcgOutput<List<Spline>> Results;
+		public PcgOutput<PcgSplineSet> Results;
 
-		public PcgOutput<List<Spline>> OpenedSplines;
+		public PcgOutput<PcgSplineSet> OpenedSplines;
 
 		public override bool IsEmpty => Results.Value == null || OpenedSplines.Value == null;
 		public bool ShowResults { get; set; } = true;
@@ -32,14 +32,17 @@ namespace PCG.Splines
 				if (splines == null || splines.Count <= 0)
 					continue;
 
-				foreach (var spline in splines)
+				for (int i = 0; i < splines.Splines.Count; i++)
 				{
-					if (spline.Closed)
-						Results.Value.Add(spline);
+					if (splines.Splines[i].Closed)
+						Results.Value.AppendFrom(splines, i);
 					else
-						OpenedSplines.Value.Add(spline);
+						OpenedSplines.Value.AppendFrom(splines, i);
 				}
 			}
+
+			WriteClosed(Results.Value, true);
+			WriteClosed(OpenedSplines.Value, false);
 
 			return UniTask.CompletedTask;
 		}
@@ -54,9 +57,18 @@ namespace PCG.Splines
 			Gizmos.color = gizmosOptions.Color;
 
 			if (ShowResults)
-				SplinesGizmoUtility.DrawGizmos(Results.Value, transform);
+				SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
 			else
-				SplinesGizmoUtility.DrawGizmos(OpenedSplines.Value, transform);
+				SplinesGizmoUtility.DrawGizmos(OpenedSplines.Value.Splines, transform);
+		}
+
+		private static void WriteClosed(PcgSplineSet set, bool closed)
+		{
+			var column = set.Attributes.EnsureColumn<bool>(SplineAttributes.Closed);
+			for (int i = 0; i < set.Count; i++)
+			{
+				column.Values[i] = closed;
+			}
 		}
 	}
 }

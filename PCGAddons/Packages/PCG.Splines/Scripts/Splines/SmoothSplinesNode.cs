@@ -12,7 +12,7 @@ namespace PCG.Splines
 	{
 		[Input]
 		[PcgMemberInfo("Splines to smooth.", Tags = new[] { "spline", "source" })]
-		public List<Spline> Splines = new();
+		public PcgSplineSet Splines = new();
 
 		[Input]
 		[PcgMemberInfo("Number of smoothing iterations.", Tags = new[] { "iterations", "count" })]
@@ -24,6 +24,6 @@ namespace PCG.Splines
 
 		[Output]
 		[PcgMemberInfo("Smoothed splines.", Tags = new[] { "spline", "results" })]
-		public List<Spline> Results => default;
+		public PcgSplineSet Results => default;
 	}
 }
