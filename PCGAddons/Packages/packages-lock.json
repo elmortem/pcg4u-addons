@@ -7,6 +7,15 @@
       "dependencies": {},
       "hash": "9057452c86079e4265228480b1439442894d5078"
     },
+    "com.elmortem.agentbridge": {
+      "version": "https://github.com/elmortem/unitycoworkbridge.git?path=/AgentBridgeUnity/Packages/com.elmortem.agentbridge#roslyn-cli",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.33"
+      },
+      "hash": "9b0749fa88f60d915d5ebc2a09173bd82e599cdd"
+    },
     "com.elmortem.brg": {
       "version": "https://github.com/elmortem/brg.git?path=Packages/BRG",
       "depth": 0,
@@ -15,15 +24,6 @@
         "com.unity.mathematics": "1.2.6"
       },
       "hash": "ca69dae2fd3fa53b77edef129684f07cbb178d79"
-    },
-    "com.elmortem.coworkbridge": {
-      "version": "https://github.com/elmortem/unitycoworkbridge.git?path=CoworkBridge",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.test-framework": "1.1.33"
-      },
-      "hash": "b3c0fd115d0cbfb0e616ed163ef356158b9d3db2"
     },
     "com.elmortem.delone": {
       "version": "https://github.com/elmortem/triangulation-delone.git?path=Packages/triangulation-delone",

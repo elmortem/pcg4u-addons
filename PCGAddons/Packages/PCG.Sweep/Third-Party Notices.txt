@@ -1,0 +1,54 @@
+THIRD-PARTY NOTICES
+
+This file identifies third-party software used by this PCG4U addon. External dependencies are installed separately through Unity Package Manager.
+
+UniTask
+Version: 2.5.11 or newer compatible version
+Source: https://github.com/Cysharp/UniTask
+License: MIT License
+Status: External dependency. Not bundled in this package.
+
+The MIT License (MIT)
+
+Copyright (c) 2019 Yoshifumi Kawai / Cysharp, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Unity Mathematics
+Package: com.unity.mathematics 1.2.6
+Copyright: Unity Technologies
+License: Unity Companion License for Unity-dependent projects
+License URL: https://unity.com/legal/licenses/unity-companion-license
+Status: External Unity Registry package. Not bundled in this package.
+
+Unity Splines
+Package: com.unity.splines 2.8.2
+Copyright: Unity Technologies ApS
+License: Unity Companion License for Unity-dependent projects
+License URL: https://unity.com/legal/licenses/unity-companion-license
+Status: External Unity Registry package. Not bundled in this package.
+
+PCG4U Polygons
+Package: com.elmortem.pcg.polygons 0.0.5
+Author: Makar Osokin
+Status: External publisher-owned package. It contains Clipper2 and related HashCode.cs third-party code. See the PCG4U Polygons Third-Party Notices.txt file for the Boost Software License 1.0, MIT License, and BSD 2-Clause License texts.
+
+Manifold
+Status: Not included and not used. Obsolete Manifold binaries from an earlier implementation were removed from this package.
+
