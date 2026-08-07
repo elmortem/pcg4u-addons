@@ -50,7 +50,10 @@ namespace PCG.Polygons
 					for (int p = 0; p < current.Count; p++)
 					{
 						computed.Regions.Add(current[p]);
-						computed.Attributes.AppendRow(input.Attributes, i);
+						if (i < input.Attributes.Count)
+							computed.Attributes.AppendRow(input.Attributes, i);
+						else
+							computed.Attributes.AddRow();
 					}
 					ct.ThrowIfCancellationRequested();
 				}

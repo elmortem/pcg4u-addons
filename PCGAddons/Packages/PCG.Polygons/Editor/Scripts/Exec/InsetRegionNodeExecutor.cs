@@ -40,7 +40,10 @@ namespace PCG.Polygons.City
 					for (int j = 0; j < inflated.Count; j++)
 					{
 						computed.Regions.Add(inflated[j]);
-						computed.Attributes.AppendRow(input.Attributes, i);
+						if (i < input.Attributes.Count)
+							computed.Attributes.AppendRow(input.Attributes, i);
+						else
+							computed.Attributes.AddRow();
 					}
 				}
 

@@ -31,6 +31,8 @@ PCGAddons/
 │  │  ├─ Setup/                   ← мастер первичной настройки + каталог extras (исходники)
 │  │  ├─ Documentation/PCG/       ← .md-документация по всем нодам ядра (по категориям)
 │  │  └─ Examples/                ← демо-сцены (Forest, Grass, Sample), модели, префабы, террейны
+│  ├─ Examples/                   ← демо-сцены проекта; актуальная — CityForestV4 (см. её README.md)
+│  ├─ ThirdParty/                 ← сторонние паки (CC0), у каждого SOURCE.md + License.txt
 │  ├─ Scenes/SampleScene.unity    ← рабочая сцена проекта
 │  ├─ Settings/                   ← HDRenderPipelineAsset
 │  ├─ Resources/Memcpy.compute    ← compute-шейдер (используется BRG-инстансингом)
@@ -198,5 +200,7 @@ public class FooNode : PcgPreviewNode
 2. **Исполнитель** в `Packages/PCG.X/Editor/.../MyNodeExecutor.cs`: наследуй `PcgAsyncPreviewNodeExecutor<MyNode>`, поле `PcgOutput<...> Results;`, реализуй `DoComputeAsync` (через `OperationScope` + `scope.Step`) и `DrawPreview`, переопредели `IsEmpty`.
 3. Входы читай через `GetInputValues(nameof(Data.Field), Data.Field)`; результат в `Results.Value`.
 4. Для UI-инфо в шапке ноды реализуй `INodeInfo`; для переключения превью — `IShowResults`/`IPointsCount`.
+4a. **Длинные вычисления пампят прогресс.** Если тело ноды — один `PcgWorkerScheduler.RunAsync`, который может считаться дольше 10 секунд, не жди его простым `await`: ядро убьёт ноду watchdog'ом «no progress for longer than 10 s». Крути цикл ожидания с `PcgComputeSystem.ReportProgress(this)` и `await UniTask.Delay(250, cancellationToken: ct)`, пока `work.Status == UniTaskStatus.Pending`. Образцы: `RegionToMeshNodeExecutor`, `LotFrontagePointsNodeExecutor`.
+4b. **Тесты.** Новая нода = тесты в `Packages/PCG.X/Tests/Editor/` (asmdef `PCG.X.Tests` по образцу `PCG.Polygons.Tests`). Тестируй чистый солвер из `Scripts/`, а не исполнитель — исполнителю нужен живой граф. Прогон: `agentbridge tests --mode EditMode --assembly PCG.X.Tests`.
 5. Новые типы данных инстансов наследуй от `InstanceData` + сделай `InstanceMakerBase` для материализации в сцену.
 6. Соблюдай правила из `CLAUDE.md` (табы, public-поля с большой буквы без атрибута сериализации, кэш `GetComponent` полем, классы по отдельным файлам, без комментариев).

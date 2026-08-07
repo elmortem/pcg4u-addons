@@ -171,7 +171,12 @@ namespace PCG.CreatePoints
 				return;
 			}
 
-			var offsetDirection = math.normalize(math.cross(tangent, upVector));
+			var cross = math.cross(tangent, upVector);
+			var crossLengthSq = math.lengthsq(cross);
+			if (crossLengthSq < 1e-10f || !math.isfinite(crossLengthSq))
+				return;
+
+			var offsetDirection = cross * math.rsqrt(crossLengthSq);
 
 			if (Data.BothSides)
 			{

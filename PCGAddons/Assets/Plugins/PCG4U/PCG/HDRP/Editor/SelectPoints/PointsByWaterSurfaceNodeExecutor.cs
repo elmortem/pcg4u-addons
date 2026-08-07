@@ -32,6 +32,9 @@ namespace PCG.SelectPoints
 			var flatPoints = new List<PointData>(pointsList.TotalCount());
 			var flatClouds = new List<PcgPointCloud>(pointsList.TotalCount());
 			var flatIndices = new List<int>(pointsList.TotalCount());
+
+			using var scope = OperationScope.Start(this);
+
 			foreach (PcgPointCloud cloud in pointsList)
 			{
 				if (cloud == null || cloud.Count == 0)
@@ -42,6 +45,8 @@ namespace PCG.SelectPoints
 					flatPoints.Add(cloud[idx]);
 					flatClouds.Add(cloud);
 					flatIndices.Add(idx);
+					if (scope.ShouldYield(ct: ct))
+						await scope.YieldAsync(ct);
 				}
 			}
 
@@ -106,12 +111,16 @@ namespace PCG.SelectPoints
 				{
 					foreach (var idx in aboveBatches[i])
 						AboveWater.Value.AppendFrom(flatClouds[idx], flatIndices[idx]);
+
+					await scope.Step(aboveBatches[i].Count, 1, ct);
 				}
 
 				if (belowBatches[i] != null)
 				{
 					foreach (var idx in belowBatches[i])
 						BelowWater.Value.AppendFrom(flatClouds[idx], flatIndices[idx]);
+
+					await scope.Step(belowBatches[i].Count, 1, ct);
 				}
 			}
 		}

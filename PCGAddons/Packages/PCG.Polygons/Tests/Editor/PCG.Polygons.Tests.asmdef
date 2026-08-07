@@ -1,0 +1,23 @@
+{
+	"name": "PCG.Polygons.Tests",
+	"rootNamespace": "PCG.Polygons.Tests",
+	"references": [
+		"UnityEngine.TestRunner",
+		"UnityEditor.TestRunner",
+		"PCG.Polygons",
+		"Unity.Mathematics"
+	],
+	"includePlatforms": [
+		"Editor"
+	],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": false,
+	"defineConstraints": [
+		"UNITY_INCLUDE_TESTS"
+	],
+	"versionDefines": [],
+	"noEngineReferences": false
+}

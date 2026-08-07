@@ -55,7 +55,7 @@ namespace PCG.Polygons.City
 				heightSampler = p => window.TrySampleHeight(p.x, p.y, out float sampled) ? sampled : planeY;
 			}
 
-			var data = await PcgWorkerScheduler.RunAsync(
+			var work = PcgWorkerScheduler.RunAsync(
 				() => RegionMeshBuilder.BuildFromHeightSampler(
 					region,
 					heightSampler,
@@ -66,6 +66,13 @@ namespace PCG.Polygons.City
 					heightOffset,
 					uvScale),
 				ct);
+			while (work.Status == UniTaskStatus.Pending)
+			{
+				PcgComputeSystem.ReportProgress(this);
+				await UniTask.Delay(250, cancellationToken: ct);
+			}
+
+			var data = await work;
 
 			Results.Value.Add(new MeshInstanceData
 			{

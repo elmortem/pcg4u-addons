@@ -1,0 +1,24 @@
+{
+	"name": "PCG.Octree.Tests",
+	"rootNamespace": "PCG.Octree.Tests",
+	"references": [
+		"UnityEngine.TestRunner",
+		"UnityEditor.TestRunner",
+		"PCG.Octree",
+		"Octree",
+		"Unity.Mathematics"
+	],
+	"includePlatforms": [
+		"Editor"
+	],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": false,
+	"defineConstraints": [
+		"UNITY_INCLUDE_TESTS"
+	],
+	"versionDefines": [],
+	"noEngineReferences": false
+}

@@ -7,6 +7,8 @@ namespace PCG.Polygons.City
 		public const string Boundary = "boundary";
 		public const string Depth = "depth";
 		public const string LotId = "lotId";
+		public const string LotArea = "lotArea";
+		public const string LotWidth = "lotWidth";
 		public const string RegionIndex = "regionIndex";
 		public const string RoadClass = "roadClass";
 	}

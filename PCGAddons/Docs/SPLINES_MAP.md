@@ -73,6 +73,8 @@ First-class тип для передачи пересечений между н�
 - `SplineIntersectionNode.EndpointSnapDistance` предварительно объединяет близкие концы ветвей и отдаёт исправленную сеть через `SnappedSplines`; `Topology` и `Results` вычисляются уже по ней.
 - Типовая дорожная цепочка: `Spline → SplineWidth → SplineToTerrain → SplineIntersection.SnappedSplines → Sweep`.
 
+**Вырожденный frame при оффсете точек.** `PointsOffsetSplinesNode` берёт боковое направление как `cross(tangent, up)`. На сплайнах, спроецированных на террейн с `AlignToTerrainNormal`, эти два вектора в отдельных узлах становятся коллинеарными, и нормализация нулевого вектора даёт NaN — точка уезжает в `(NaN, y, NaN)`, а Unity потом сыплет `transform.localPosition assign attempt is not valid` на каждый инстанс. Исполнитель проверяет `lengthsq(cross)` на порог и конечность и **пропускает** такую станцию вместо того, чтобы породить битую точку. Любая новая нода, строящая боковой frame из tangent×up, обязана делать ту же проверку.
+
 ## PcgSplineSet — атрибуты на сплайнах
 
 Тип порта сплайнов — `PcgSplineSet` (`Scripts/Splines/PcgSplineSet.cs`, неймспейс `PCG.Splines`): `List<Spline> Splines` (геометрия) + `PcgAttributeSet Attributes` (именованные колонки, строка на сплайн). Инвариант: `Attributes.Count == Splines.Count`, проверяется через `IsValid()`. Форма и смысл — те же, что у `PcgPointCloud` для точек и `RegionSet` для регионов.

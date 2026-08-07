@@ -58,6 +58,15 @@
         "com.elmortem.pcg.splines": "0.0.6"
       }
     },
+    "com.elmortem.pcg.mcp": {
+      "version": "https://github.com/elmortem/pcg4u-mcp.git?path=PCG4UMCPUnity/Packages/PCG.Mcp",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+      },
+      "hash": "8cf5c8ce8ba2c4ff6fefbb2ae535f19f772f5a22"
+    },
     "com.elmortem.pcg.octree": {
       "version": "file:PCG.Octree",
       "depth": 0,
@@ -230,6 +239,13 @@
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.4",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
