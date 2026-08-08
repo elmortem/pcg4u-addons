@@ -1,6 +1,8 @@
 # PCG.Splines — сплайны (Unity.Splines)
 
 > Аддон PCG4U. Базовые контракты ядра, раскладку папок и чек-лист новой ноды см. в [`PROJECT_MAP.md`](PROJECT_MAP.md).
+>
+> Установка: `https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Splines#com.elmortem.pcg.splines/<version>`, где `<version>` — значение из `package.json`. Правила веток, версий и тегов — раздел 9 `PROJECT_MAP.md`.
 
 **Структура аддона:** `Scripts/` — рантайм-ноды и опорные типы (asmdef `PCG.Splines`); `Editor/` — исполнители и редакторские адаптеры (asmdef `PCG.Splines.Editor`); `Documentation~/` — справка. Ссылается на `PCG`, `PCG.Editors`, `PCG.Gizmos.Editor` (DLL), `Unity.Mathematics`, `UniTask`.
 

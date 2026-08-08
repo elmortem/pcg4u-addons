@@ -1,6 +1,8 @@
 # PCG.Octree — пространственный поиск точек
 
 > Аддон PCG4U. Базовые контракты ядра, раскладку папок и чек-лист новой ноды см. в [`PROJECT_MAP.md`](PROJECT_MAP.md).
+>
+> Установка: `https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Octree#com.elmortem.pcg.octree/<version>`, где `<version>` — значение из `package.json`. Правила веток, версий и тегов — раздел 9 `PROJECT_MAP.md`.
 
 **Структура аддона:** `Scripts/` — рантайм-ноды и опорные типы (asmdef `PCG.Octree`); `Editor/` — исполнители (asmdef `PCG.Octree.Editor`); `Tests/Editor/` — EditMode-тесты солверов (asmdef `PCG.Octree.Tests`). Зависит от `Octree` (`com.elmortem.octree`), `Unity.Burst`, `Unity.Mathematics`.
 

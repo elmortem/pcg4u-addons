@@ -56,6 +56,8 @@ PCGAddons/
 └─ *.csproj / PCGAddons.sln       ← генерируются Unity, не редактируются вручную
 ```
 
+Папка `PCGAddons/` лежит внутри git-репозитория `pcg4u-addons`. Уровнем выше, в корне репозитория, — `.github/workflows/tag-packages.yml` (автотегирование версий пакетов, см. раздел 9).
+
 Внешние git-зависимости ядра (см. `manifest.json`): `com.elmortem.brg`, `com.elmortem.octree`, `com.elmortem.delone`, `com.cysharp.unitask`.
 
 ---
@@ -204,3 +206,43 @@ public class FooNode : PcgPreviewNode
 4b. **Тесты.** Новая нода = тесты в `Packages/PCG.X/Tests/Editor/` (asmdef `PCG.X.Tests` по образцу `PCG.Polygons.Tests`). Тестируй чистый солвер из `Scripts/`, а не исполнитель — исполнителю нужен живой граф. Прогон: `agentbridge tests --mode EditMode --assembly PCG.X.Tests`.
 5. Новые типы данных инстансов наследуй от `InstanceData` + сделай `InstanceMakerBase` для материализации в сцену.
 6. Соблюдай правила из `CLAUDE.md` (табы, public-поля с большой буквы без атрибута сериализации, кэш `GetComponent` полем, классы по отдельным файлам, без комментариев).
+
+---
+
+## 9. Релизы, версии и установка
+
+### 9.1 Ветки
+- `develop` — повседневная работа. Все изменения аддонов идут сюда.
+- `main` — состояние, совместимое с ядром PCG4U, публично доступным в Asset Store.
+- Мерж `develop` → `main` делается только после того, как соответствующий релиз ядра прошёл апрув и стал доступен пользователям.
+
+### 9.2 Версии
+- Каждый мерж в `main`, который меняет содержимое пакета, сопровождается бампом `version` в `package.json` этого пакета.
+- Новый номер версии аддона прописывается в `dependencies` зависимых аддонов. Зависимости внутри репозитория: `PCG.Mazes`, `PCG.SpriteShapes`, `PCG.Sweep` и `PCG.Polygons` зависят от `com.elmortem.pcg.splines`; `PCG.Polygons` — ещё и от `com.elmortem.pcg.mazes`; `PCG.Sweep` — ещё и от `com.elmortem.pcg.polygons`.
+
+### 9.3 Автотегирование
+`.github/workflows/tag-packages.yml` в корне репозитория ставит теги вида `<packageName>/<version>`.
+- Триггеры: push в `main` по путям `PCGAddons/Packages/**/package.json`, плюс ручной `workflow_dispatch`.
+- Экшен читает `name` и `version` из каждого `PCGAddons/Packages/*/package.json`, берёт только пакеты `com.elmortem.*`, и создаёт тег, если такого ещё нет. Существующие теги не двигаются.
+- Руками теги в этом репозитории не ставятся.
+
+### 9.4 Установка пакета по тегу
+```
+https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/<Папка>#<packageName>/<version>
+```
+Например: `https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Splines#com.elmortem.pcg.splines/0.0.7`.
+
+| Аддон | Папка | Имя пакета |
+|---|---|---|
+| PCG.Splines | `PCGAddons/Packages/PCG.Splines` | `com.elmortem.pcg.splines` |
+| PCG.Mazes | `PCGAddons/Packages/PCG.Mazes` | `com.elmortem.pcg.mazes` |
+| PCG.Polygons | `PCGAddons/Packages/PCG.Polygons` | `com.elmortem.pcg.polygons` |
+| PCG.Sweep | `PCGAddons/Packages/PCG.Sweep` | `com.elmortem.pcg.sweep` |
+| PCG.SpriteShapes | `PCGAddons/Packages/PCG.SpriteShapes` | `com.elmortem.pcg.spriteshapes` |
+| PCG.Octree | `PCGAddons/Packages/PCG.Octree` | `com.elmortem.pcg.octree` |
+| PCG.BRG | `PCGAddons/Packages/PCG.BRG` | `com.elmortem.pcg.brg` |
+
+Номер версии бери из `package.json` пакета — карты аддонов версии не дублируют.
+
+### 9.5 Внешние репозитории зависимостей
+`com.elmortem.delone`, `com.elmortem.octree` и `com.elmortem.brg` живут в отдельных репозиториях и тегов не имеют — они ставятся с ветки. Автотегирование на них не распространяется.

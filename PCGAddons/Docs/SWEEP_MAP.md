@@ -1,6 +1,8 @@
 # PCG.Sweep — меш выметанием 2D-профиля вдоль сплайнов
 
 > Аддон PCG4U. Базовые контракты ядра, раскладку папок и чек-лист новой ноды см. в [`PROJECT_MAP.md`](PROJECT_MAP.md).
+>
+> Установка: `https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Sweep#com.elmortem.pcg.sweep/<version>`, где `<version>` — значение из `package.json`. Правила веток, версий и тегов — раздел 9 `PROJECT_MAP.md`.
 
 `Scripts/` содержит runtime-ноды и типы профиля (`PCG.Sweep`), `Editor/` — исполнители и mesh builders (`PCG.Sweep.Editors`).
 

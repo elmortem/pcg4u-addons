@@ -1,6 +1,8 @@
 # PCG.Polygons — 2D-полигоны и регионы
 
 > Аддон PCG4U. Базовые контракты ядра, раскладку папок и чек-лист новой ноды см. в [`PROJECT_MAP.md`](PROJECT_MAP.md).
+>
+> Установка: `https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Polygons#com.elmortem.pcg.polygons/<version>`, где `<version>` — значение из `package.json`. Правила веток, версий и тегов — раздел 9 `PROJECT_MAP.md`.
 
 **Структура аддона:** `Scripts/` — рантайм-ноды и опорные типы (asmdef `PCG.Polygons`); `Editor/` — исполнители и редакторские адаптеры (asmdef `PCG.Polygons.Editor`); `Tests/Editor/` — EditMode-тесты солверов (asmdef `PCG.Polygons.Tests`); `Documentation~/` — справка.
 
