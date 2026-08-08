@@ -24,7 +24,7 @@
   "dependencies": {
     "com.unity.mathematics": "1.2.6",
     "com.unity.splines": "2.8.2",
-    "com.elmortem.pcg.splines": "0.0.6",
+    "com.elmortem.pcg.splines": "0.0.7",
     "com.elmortem.pcg.mazes": "0.0.3"
   }
 }
