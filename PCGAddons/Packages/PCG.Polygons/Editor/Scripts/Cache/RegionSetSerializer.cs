@@ -13,14 +13,11 @@ namespace PCG.Polygons
 
 		public int TypeId => 2;
 
+		public bool RequiresMainThread => true;
+
 		public bool CanHandle(Type type)
 		{
 			return type == typeof(RegionSet);
-		}
-
-		public object Snapshot(object value)
-		{
-			return ((RegionSet)value).Clone();
 		}
 
 		public void Write(BinaryWriter writer, object value)

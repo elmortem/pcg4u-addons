@@ -13,7 +13,8 @@ namespace PCG.Polygons
 		public Dictionary<(int, int, int), QuadLeaf> Leaves = new();
 
 		private IList<Polygon2D> _merged;
-		private List<(float2 A, float2 B, float2 Min, float2 Max)> _segments;
+		private SegmentGrid _segmentGrid;
+		private readonly List<int> _candidateBuffer = new();
 		private Func<float2, float> _sampleHeight;
 		private float _maxHeightError;
 
@@ -39,17 +40,10 @@ namespace PCG.Polygons
 			tree._maxHeightError = maxHeightError;
 			tree.Origin = new float2(math.floor(boundsMin.x / maxCellSize) * maxCellSize, math.floor(boundsMin.y / maxCellSize) * maxCellSize);
 
-			tree._segments = new List<(float2, float2, float2, float2)>();
-			for (int i = 0; i < merged.Count; i++)
-			{
-				var poly = merged[i];
-				tree.CollectSegments(poly.Outer);
-				for (int h = 0; h < poly.Holes.Count; h++)
-					tree.CollectSegments(poly.Holes[h]);
-			}
-
 			int cols = (int)math.ceil((boundsMax.x - tree.Origin.x) / maxCellSize);
 			int rows = (int)math.ceil((boundsMax.y - tree.Origin.y) / maxCellSize);
+			tree._segmentGrid = SegmentGrid.Build(merged, tree.Origin, maxCellSize, cols, rows);
+
 			for (int iz = 0; iz < rows; iz++)
 				for (int ix = 0; ix < cols; ix++)
 					tree.Subdivide(0, ix, iz);
@@ -58,22 +52,10 @@ namespace PCG.Polygons
 			return tree;
 		}
 
-		private void CollectSegments(float2[] ring)
-		{
-			for (int i = 0; i < ring.Length; i++)
-			{
-				float2 a = ring[i];
-				float2 b = ring[(i + 1) % ring.Length];
-				float2 lo = math.min(a, b);
-				float2 hi = math.max(a, b);
-				_segments.Add((a, b, lo, hi));
-			}
-		}
-
 		private void Subdivide(int depth, int ix, int iz)
 		{
-			var pending = new Stack<(int Depth, int Ix, int Iz)>();
-			pending.Push((depth, ix, iz));
+			var pending = new Stack<(int Depth, int Ix, int Iz, CellClass Inherited)>();
+			pending.Push((depth, ix, iz, CellClass.None));
 			while (pending.Count > 0)
 			{
 				var cell = pending.Pop();
@@ -81,7 +63,7 @@ namespace PCG.Polygons
 				float2 min = CellMin(cell.Depth, cell.Ix, cell.Iz);
 				float2 max = min + cs;
 
-				var cls = Classify(min, max);
+				var cls = Classify(min, max, cell.Inherited);
 				if (cls == CellClass.Outside)
 					continue;
 
@@ -94,13 +76,14 @@ namespace PCG.Polygons
 
 				if (split)
 				{
+					var childInherited = _candidateBuffer.Count == 0 ? cls : CellClass.None;
 					int childDepth = cell.Depth + 1;
 					int childX = cell.Ix * 2;
 					int childZ = cell.Iz * 2;
-					pending.Push((childDepth, childX + 1, childZ + 1));
-					pending.Push((childDepth, childX, childZ + 1));
-					pending.Push((childDepth, childX + 1, childZ));
-					pending.Push((childDepth, childX, childZ));
+					pending.Push((childDepth, childX + 1, childZ + 1, childInherited));
+					pending.Push((childDepth, childX, childZ + 1, childInherited));
+					pending.Push((childDepth, childX + 1, childZ, childInherited));
+					pending.Push((childDepth, childX, childZ, childInherited));
 					continue;
 				}
 
@@ -114,16 +97,21 @@ namespace PCG.Polygons
 			}
 		}
 
-		private CellClass Classify(float2 min, float2 max)
+		private CellClass Classify(float2 min, float2 max, CellClass inherited)
 		{
-			for (int i = 0; i < _segments.Count; i++)
+			_segmentGrid.CollectCandidates(min, max, _candidateBuffer);
+
+			for (int i = 0; i < _candidateBuffer.Count; i++)
 			{
-				var s = _segments[i];
+				var s = _segmentGrid.Segments[_candidateBuffer[i]];
 				if (s.Max.x < min.x || s.Min.x > max.x || s.Max.y < min.y || s.Min.y > max.y)
 					continue;
 				if (SegmentIntersectsRect(s.A, s.B, min, max))
 					return CellClass.Boundary;
 			}
+
+			if (inherited != CellClass.None)
+				return inherited;
 
 			float2 center = (min + max) * 0.5f;
 			return RegionContains(center) ? CellClass.Inside : CellClass.Outside;

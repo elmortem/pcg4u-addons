@@ -11,14 +11,11 @@ namespace PCG.Splines
 	{
 		public int TypeId => 4;
 
+		public bool RequiresMainThread => true;
+
 		public bool CanHandle(Type type)
 		{
 			return type == typeof(PcgSplineSet);
-		}
-
-		public object Snapshot(object value)
-		{
-			return ((PcgSplineSet)value).Clone();
 		}
 
 		public void Write(BinaryWriter writer, object value)

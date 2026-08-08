@@ -55,24 +55,41 @@ namespace PCG.Polygons.City
 				heightSampler = p => window.TrySampleHeight(p.x, p.y, out float sampled) ? sampled : planeY;
 			}
 
-			var work = PcgWorkerScheduler.RunAsync(
-				() => RegionMeshBuilder.BuildFromHeightSampler(
-					region,
-					heightSampler,
-					maxHeightError,
-					minCellSize,
-					maxCellSize,
-					maxDepth,
-					heightOffset,
-					uvScale),
+			RegionMeshPlan plan = null;
+			await PcgWorkerScheduler.RunWithProgressAsync(
+				this,
+				() =>
+				{
+					plan = RegionMeshBuilder.Plan(
+						region,
+						heightSampler,
+						maxHeightError,
+						minCellSize,
+						maxCellSize,
+						maxDepth,
+						heightOffset,
+						uvScale);
+				},
 				ct);
-			while (work.Status == UniTaskStatus.Pending)
+
+			List<float2[]>[] chunks = null;
+			if (!plan.FlatPath && plan.BoundaryRoots.Count > 0)
 			{
-				PcgComputeSystem.ReportProgress(this);
-				await UniTask.Delay(250, cancellationToken: ct);
+				chunks = new List<float2[]>[plan.BoundaryRoots.Count];
+				await PcgWorkerScheduler.RunIndexedWithProgressAsync(this, plan.BoundaryRoots.Count, index =>
+				{
+					chunks[index] = RegionMeshBuilder.BuildBoundaryChunk(plan, index, ct);
+				}, ct);
 			}
 
-			var data = await work;
+			var data = new RegionMeshData();
+			await PcgWorkerScheduler.RunWithProgressAsync(
+				this,
+				() =>
+				{
+					data = RegionMeshBuilder.Finish(plan, chunks ?? (IReadOnlyList<List<float2[]>>)Array.Empty<List<float2[]>>(), ct);
+				},
+				ct);
 
 			Results.Value.Add(new MeshInstanceData
 			{

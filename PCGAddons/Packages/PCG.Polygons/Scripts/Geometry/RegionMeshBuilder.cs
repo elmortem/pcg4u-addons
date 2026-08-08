@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace PCG.Polygons
 			Func<float2, float> heightSampler = terrain == null
 				? null
 				: p => SampleHeight(p, region.PlaneY, terrain, terrainPosition);
-			return BuildCore(region, heightSampler, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
+			return BuildSequential(region, heightSampler, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
 		}
 
 		public static RegionMeshData BuildFromHeightSampler(
@@ -25,10 +26,10 @@ namespace PCG.Polygons
 			float heightOffset,
 			float uvScale)
 		{
-			return BuildCore(region, heightSampler, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
+			return BuildSequential(region, heightSampler, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
 		}
 
-		private static RegionMeshData BuildCore(
+		public static RegionMeshPlan Plan(
 			RegionSet region,
 			Func<float2, float> heightSampler,
 			float maxHeightError,
@@ -40,26 +41,87 @@ namespace PCG.Polygons
 		{
 			var merged = PolygonClipper.Union(region.Regions, Array.Empty<Polygon2D>());
 
-			var triangles = new List<float2[]>();
-			if (merged.Count > 0)
+			var plan = new RegionMeshPlan
 			{
-				if (heightSampler == null || maxCellSize <= 0f)
-				{
-					triangles.AddRange(PolygonClipper.Triangulate(merged));
-				}
-				else
-				{
-					ComputeBounds(merged, out var boundsMin, out var boundsMax);
-					var tree = MeshQuadtree.Build(merged, boundsMin, boundsMax, maxCellSize, minCellSize, maxDepth, heightSampler, maxHeightError);
+				Merged = merged,
+				PlaneY = region.PlaneY,
+				HeightSampler = heightSampler,
+				HeightOffset = heightOffset,
+				UvScale = uvScale
+			};
 
-					foreach (var leaf in tree.Leaves.Values)
-					{
-						if (leaf.Boundary)
-							AppendBoundary(leaf, tree, merged, triangles);
-						else
-							AppendInterior(leaf, tree, triangles);
-					}
+			if (merged.Count <= 0)
+			{
+				plan.FlatPath = true;
+				plan.FlatTriangles = new List<float2[]>();
+				return plan;
+			}
+
+			if (heightSampler == null || maxCellSize <= 0f)
+			{
+				plan.FlatPath = true;
+				plan.FlatTriangles = PolygonClipper.Triangulate(merged);
+				return plan;
+			}
+
+			ComputeBounds(merged, out var boundsMin, out var boundsMax);
+			plan.Tree = MeshQuadtree.Build(merged, boundsMin, boundsMax, maxCellSize, minCellSize, maxDepth, heightSampler, maxHeightError);
+
+			plan.BoundaryBranch = new HashSet<(int Depth, int Ix, int Iz)>();
+			foreach (var leaf in plan.Tree.Leaves.Values)
+			{
+				if (!leaf.Boundary)
+					continue;
+
+				int depth = leaf.Depth;
+				int ix = leaf.Ix;
+				int iz = leaf.Iz;
+				while (plan.BoundaryBranch.Add((depth, ix, iz)) && depth > 0)
+				{
+					depth--;
+					ix >>= 1;
+					iz >>= 1;
 				}
+			}
+
+			var roots = new List<(int Ix, int Iz)>();
+			foreach (var key in plan.BoundaryBranch)
+			{
+				if (key.Depth == 0)
+					roots.Add((key.Ix, key.Iz));
+			}
+
+			roots.Sort(CompareRoots);
+			plan.BoundaryRoots = roots;
+			return plan;
+		}
+
+		public static List<float2[]> BuildBoundaryChunk(RegionMeshPlan plan, int rootIndex, CancellationToken ct)
+		{
+			var triangles = new List<float2[]>();
+			var root = plan.BoundaryRoots[rootIndex];
+			Descend(plan, 0, root.Ix, root.Iz, plan.Merged, triangles, ct);
+			return triangles;
+		}
+
+		public static RegionMeshData Finish(RegionMeshPlan plan, IReadOnlyList<List<float2[]>> boundaryChunks, CancellationToken ct)
+		{
+			var triangles = new List<float2[]>();
+			if (plan.FlatPath)
+			{
+				triangles.AddRange(plan.FlatTriangles);
+			}
+			else
+			{
+				foreach (var leaf in plan.Tree.Leaves.Values)
+				{
+					if (leaf.Boundary)
+						continue;
+					AppendInterior(leaf, plan.Tree, triangles);
+				}
+
+				for (int i = 0; i < boundaryChunks.Count; i++)
+					triangles.AddRange(boundaryChunks[i]);
 			}
 
 			var vertices = new List<Vector3>();
@@ -69,11 +131,14 @@ namespace PCG.Polygons
 
 			for (int i = 0; i < triangles.Count; i++)
 			{
+				if ((i & 1023) == 0)
+					ct.ThrowIfCancellationRequested();
+
 				var t = triangles[i];
 				EnsureCcw(ref t);
-				int i0 = Vertex(t[0], region.PlaneY, heightSampler, heightOffset, uvScale, vertices, uvs, map);
-				int i1 = Vertex(t[1], region.PlaneY, heightSampler, heightOffset, uvScale, vertices, uvs, map);
-				int i2 = Vertex(t[2], region.PlaneY, heightSampler, heightOffset, uvScale, vertices, uvs, map);
+				int i0 = Vertex(t[0], plan.PlaneY, plan.HeightSampler, plan.HeightOffset, plan.UvScale, vertices, uvs, map);
+				int i1 = Vertex(t[1], plan.PlaneY, plan.HeightSampler, plan.HeightOffset, plan.UvScale, vertices, uvs, map);
+				int i2 = Vertex(t[2], plan.PlaneY, plan.HeightSampler, plan.HeightOffset, plan.UvScale, vertices, uvs, map);
 				if (i0 == i1 || i1 == i2 || i2 == i0)
 					continue;
 				if (Vector3.Cross(vertices[i1] - vertices[i0], vertices[i2] - vertices[i0]).sqrMagnitude < 0.00000001f)
@@ -89,6 +154,77 @@ namespace PCG.Polygons
 				Uvs = uvs.ToArray(),
 				Triangles = indices.ToArray()
 			};
+		}
+
+		private static RegionMeshData BuildSequential(
+			RegionSet region,
+			Func<float2, float> heightSampler,
+			float maxHeightError,
+			float minCellSize,
+			float maxCellSize,
+			int maxDepth,
+			float heightOffset,
+			float uvScale)
+		{
+			var plan = Plan(region, heightSampler, maxHeightError, minCellSize, maxCellSize, maxDepth, heightOffset, uvScale);
+			var chunks = new List<List<float2[]>>();
+			if (!plan.FlatPath)
+			{
+				for (int i = 0; i < plan.BoundaryRoots.Count; i++)
+					chunks.Add(BuildBoundaryChunk(plan, i, CancellationToken.None));
+			}
+
+			return Finish(plan, chunks, CancellationToken.None);
+		}
+
+		private static int CompareRoots((int Ix, int Iz) a, (int Ix, int Iz) b)
+		{
+			if (a.Iz != b.Iz)
+				return a.Iz.CompareTo(b.Iz);
+			return a.Ix.CompareTo(b.Ix);
+		}
+
+		private static void Descend(RegionMeshPlan plan, int depth, int ix, int iz, List<Polygon2D> piece, List<float2[]> triangles, CancellationToken ct)
+		{
+			ct.ThrowIfCancellationRequested();
+
+			float cs = plan.Tree.CellSize(depth);
+			float2 min = plan.Tree.CellMin(depth, ix, iz);
+			float2 max = min + cs;
+
+			var cell = new Polygon2D();
+			cell.Outer = new[]
+			{
+				new float2(min.x, min.y),
+				new float2(max.x, min.y),
+				new float2(max.x, max.y),
+				new float2(min.x, max.y)
+			};
+
+			var clipped = PolygonClipper.Intersection(new List<Polygon2D> { cell }, piece);
+			if (clipped.Count == 0)
+				return;
+
+			if (plan.Tree.Leaves.TryGetValue((depth, ix, iz), out var leaf) && leaf.Boundary)
+			{
+				triangles.AddRange(PolygonClipper.Triangulate(clipped));
+				return;
+			}
+
+			int childDepth = depth + 1;
+			int childX = ix * 2;
+			int childZ = iz * 2;
+			DescendIfBranch(plan, childDepth, childX, childZ, clipped, triangles, ct);
+			DescendIfBranch(plan, childDepth, childX + 1, childZ, clipped, triangles, ct);
+			DescendIfBranch(plan, childDepth, childX, childZ + 1, clipped, triangles, ct);
+			DescendIfBranch(plan, childDepth, childX + 1, childZ + 1, clipped, triangles, ct);
+		}
+
+		private static void DescendIfBranch(RegionMeshPlan plan, int depth, int ix, int iz, List<Polygon2D> piece, List<float2[]> triangles, CancellationToken ct)
+		{
+			if (!plan.BoundaryBranch.Contains((depth, ix, iz)))
+				return;
+			Descend(plan, depth, ix, iz, piece, triangles, ct);
 		}
 
 		private static void ComputeBounds(List<Polygon2D> merged, out float2 min, out float2 max)
@@ -143,25 +279,6 @@ namespace PCG.Polygons
 				float2 q = ring[(i + 1) % ring.Count];
 				triangles.Add(new[] { c, p, q });
 			}
-		}
-
-		private static void AppendBoundary(QuadLeaf leaf, MeshQuadtree tree, List<Polygon2D> merged, List<float2[]> triangles)
-		{
-			float cs = tree.CellSize(leaf.Depth);
-			float2 min = tree.CellMin(leaf.Depth, leaf.Ix, leaf.Iz);
-			float2 max = min + cs;
-
-			var cell = new Polygon2D();
-			cell.Outer = new[]
-			{
-				new float2(min.x, min.y),
-				new float2(max.x, min.y),
-				new float2(max.x, max.y),
-				new float2(min.x, max.y)
-			};
-
-			var clipped = PolygonClipper.Intersection(new List<Polygon2D> { cell }, merged);
-			triangles.AddRange(PolygonClipper.Triangulate(clipped));
 		}
 
 		private static void EnsureCcw(ref float2[] t)

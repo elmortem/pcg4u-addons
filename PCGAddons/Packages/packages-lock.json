@@ -14,7 +14,7 @@
       "dependencies": {
         "com.unity.test-framework": "1.1.33"
       },
-      "hash": "9b0749fa88f60d915d5ebc2a09173bd82e599cdd"
+      "hash": "4efe1d211985ad2dbd64b71f6a1e55ba914f52c3"
     },
     "com.elmortem.brg": {
       "version": "https://github.com/elmortem/brg.git?path=Packages/BRG",
@@ -115,7 +115,7 @@
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
         "com.elmortem.pcg.splines": "0.0.6",
-        "com.elmortem.pcg.polygons": "0.0.5"
+        "com.elmortem.pcg.polygons": "0.0.6"
       }
     },
     "com.unity.2d.common": {
