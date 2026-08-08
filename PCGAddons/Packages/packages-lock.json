@@ -55,7 +55,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
-        "com.elmortem.pcg.splines": "0.0.6"
+        "com.elmortem.pcg.splines": "0.0.7"
       }
     },
     "com.elmortem.pcg.mcp": {
@@ -83,7 +83,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
-        "com.elmortem.pcg.splines": "0.0.6",
+        "com.elmortem.pcg.splines": "0.0.7",
         "com.elmortem.pcg.mazes": "0.0.3"
       }
     },
@@ -104,7 +104,7 @@
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
         "com.unity.2d.spriteshape": "9.1.0",
-        "com.elmortem.pcg.splines": "0.0.6"
+        "com.elmortem.pcg.splines": "0.0.7"
       }
     },
     "com.elmortem.pcg.sweep": {
@@ -114,7 +114,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
-        "com.elmortem.pcg.splines": "0.0.6",
+        "com.elmortem.pcg.splines": "0.0.7",
         "com.elmortem.pcg.polygons": "0.0.6"
       }
     },
