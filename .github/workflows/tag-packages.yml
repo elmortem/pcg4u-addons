@@ -1,0 +1,41 @@
+name: Tag packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "PCGAddons/Packages/**/package.json"
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Create missing tags
+        run: |
+          created=0
+          for manifest in PCGAddons/Packages/*/package.json; do
+            name=$(jq -r '.name' "$manifest")
+            version=$(jq -r '.version' "$manifest")
+            case "$name" in
+              com.elmortem.*) ;;
+              *) continue ;;
+            esac
+            tag="$name/$version"
+            if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+              continue
+            fi
+            git tag "$tag"
+            created=1
+          done
+          if [ "$created" = "1" ]; then
+            git push origin --tags
+          fi
