@@ -9,6 +9,7 @@ namespace PCG.Setup
 		public string DisplayName;
 		public string Description;
 		public string PackageName;
+		public string Version;
 		public string GitUrl;
 		public string OpenUpmVersion;
 		public List<PcgGitDependency> GitDependencies = new();

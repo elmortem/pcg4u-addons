@@ -15,6 +15,16 @@ namespace PCG.Setup
 			return true;
 		}
 
+		public static PcgExtrasPackageEntry FindEntry(PcgExtrasCatalog catalog, string packageName)
+		{
+			foreach (var candidate in catalog.Packages)
+			{
+				if (candidate.PackageName == packageName)
+					return candidate;
+			}
+			return null;
+		}
+
 		private static bool Collect(PcgExtrasPackageEntry entry, PcgExtrasCatalog catalog, HashSet<string> visited, List<string> identifiers)
 		{
 			foreach (var addonName in entry.AddonDependencies)
@@ -29,27 +39,27 @@ namespace PCG.Setup
 				}
 				if (!Collect(addonEntry, catalog, visited, identifiers))
 					return false;
-				if (!PcgPackageUtility.IsInstalled(addonName))
-					identifiers.Add(addonEntry.GitUrl);
+				if (NeedsInstall(addonEntry.PackageName, addonEntry.Version))
+					identifiers.Add(PcgPackageIdentifier.Build(addonEntry.GitUrl, addonEntry.PackageName, addonEntry.Version));
 			}
 			foreach (var gitDependency in entry.GitDependencies)
 			{
 				if (!visited.Add(gitDependency.PackageName))
 					continue;
-				if (!PcgPackageUtility.IsInstalled(gitDependency.PackageName))
-					identifiers.Add(gitDependency.GitUrl);
+				if (NeedsInstall(gitDependency.PackageName, gitDependency.Version))
+					identifiers.Add(PcgPackageIdentifier.Build(gitDependency.GitUrl, gitDependency.PackageName, gitDependency.Version));
 			}
 			return true;
 		}
 
-		private static PcgExtrasPackageEntry FindEntry(PcgExtrasCatalog catalog, string packageName)
+		private static bool NeedsInstall(string packageName, string version)
 		{
-			foreach (var candidate in catalog.Packages)
-			{
-				if (candidate.PackageName == packageName)
-					return candidate;
-			}
-			return null;
+			var installedVersion = PcgPackageUtility.GetInstalledVersion(packageName);
+			if (installedVersion == null)
+				return true;
+			if (string.IsNullOrEmpty(version))
+				return false;
+			return installedVersion != version;
 		}
 	}
 }

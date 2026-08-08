@@ -16,6 +16,7 @@ MonoBehaviour:
   - DisplayName: PCG Splines
     Description: 
     PackageName: com.elmortem.pcg.splines
+    Version: 0.0.7
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Splines
     OpenUpmVersion: 
     GitDependencies: []
@@ -23,6 +24,7 @@ MonoBehaviour:
   - DisplayName: PCG Sprite Shapes
     Description: 
     PackageName: com.elmortem.pcg.spriteshapes
+    Version: 0.0.3
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.SpriteShapes
     OpenUpmVersion: 
     GitDependencies: []
@@ -31,42 +33,51 @@ MonoBehaviour:
   - DisplayName: PCG Polygons
     Description: 
     PackageName: com.elmortem.pcg.polygons
+    Version: 0.0.6
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Polygons
     OpenUpmVersion: 
     GitDependencies: []
     AddonDependencies:
     - com.elmortem.pcg.splines
+    - com.elmortem.pcg.mazes
   - DisplayName: PCG Mazes
     Description: 
     PackageName: com.elmortem.pcg.mazes
+    Version: 0.0.3
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Mazes
     OpenUpmVersion: 
     GitDependencies:
     - PackageName: com.elmortem.delone
       GitUrl: https://github.com/elmortem/triangulation-delone.git?path=Packages/triangulation-delone
+      Version: 0.0.1
     AddonDependencies:
     - com.elmortem.pcg.splines
   - DisplayName: PCG Octree
     Description: 
     PackageName: com.elmortem.pcg.octree
+    Version: 0.0.2
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Octree
     OpenUpmVersion: 
     GitDependencies:
     - PackageName: com.elmortem.octree
       GitUrl: https://github.com/elmortem/octree.git?path=Packages/Octree
+      Version: 0.0.3
     AddonDependencies: []
   - DisplayName: PCG BRG
     Description: 
     PackageName: com.elmortem.pcg.brg
+    Version: 0.0.2
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.BRG
     OpenUpmVersion: 
     GitDependencies:
     - PackageName: com.elmortem.brg
       GitUrl: https://github.com/elmortem/brg.git?path=Packages/BRG
+      Version: 0.0.2
     AddonDependencies: []
   - DisplayName: PCG MCP
     Description: 
     PackageName: com.elmortem.pcg.mcp
+    Version: 0.0.8
     GitUrl: https://github.com/elmortem/pcg4u-mcp.git?path=PCG4UMCPUnity/Packages/PCG.Mcp
     OpenUpmVersion: 
     GitDependencies: []
@@ -74,9 +85,10 @@ MonoBehaviour:
   - DisplayName: PCG Sweep
     Description: 
     PackageName: com.elmortem.pcg.sweep
+    Version: 0.0.5
     GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Sweep
     OpenUpmVersion: 
-    GitDependencies:
-    - PackageName: com.elmortem.pcg.splines
-      GitUrl: https://github.com/elmortem/pcg4u-addons.git?path=PCGAddons/Packages/PCG.Splines
-    AddonDependencies: []
+    GitDependencies: []
+    AddonDependencies:
+    - com.elmortem.pcg.splines
+    - com.elmortem.pcg.polygons

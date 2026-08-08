@@ -9,7 +9,7 @@ namespace PCG.Setup
 	{
 		private PcgExtrasCatalog _catalog;
 		private Vector2 _scroll;
-		private readonly HashSet<string> _installed = new();
+		private readonly Dictionary<string, string> _installedVersions = new();
 
 		[MenuItem("Tools/PCG/Extras...")]
 		public static void Open()
@@ -52,10 +52,10 @@ namespace PCG.Setup
 
 		private void RefreshInstalled()
 		{
-			_installed.Clear();
+			_installedVersions.Clear();
 			var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages();
 			foreach (var package in packages)
-				_installed.Add(package.name);
+				_installedVersions[package.name] = package.version;
 		}
 
 		private static PcgExtrasCatalog LoadCatalog()
@@ -90,7 +90,7 @@ namespace PCG.Setup
 			EditorGUILayout.LabelField("Allocation-free async/await library and native collections used by the PCG4U compute pipeline.", EditorStyles.wordWrappedMiniLabel);
 			EditorGUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			if (_installed.Contains(PcgSetupConstants.UniTaskPackageName) && _installed.Contains(PcgSetupConstants.CollectionsPackageName))
+			if (_installedVersions.ContainsKey(PcgSetupConstants.UniTaskPackageName) && _installedVersions.ContainsKey(PcgSetupConstants.CollectionsPackageName))
 			{
 				EditorGUILayout.LabelField("Installed", EditorStyles.boldLabel, GUILayout.Width(70f));
 			}
@@ -115,14 +115,31 @@ namespace PCG.Setup
 		private void DrawRow(PcgExtrasPackageEntry entry)
 		{
 			EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-			EditorGUILayout.LabelField(entry.DisplayName, EditorStyles.boldLabel);
+			var title = string.IsNullOrEmpty(entry.Version) ? entry.DisplayName : entry.DisplayName + " " + entry.Version;
+			EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
 			if (!string.IsNullOrEmpty(entry.Description))
 				EditorGUILayout.LabelField(entry.Description, EditorStyles.wordWrappedMiniLabel);
 			EditorGUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			var hasGit = !string.IsNullOrEmpty(entry.GitUrl);
 			var hasOpenUpm = !string.IsNullOrEmpty(entry.OpenUpmVersion) && !string.IsNullOrEmpty(entry.PackageName);
-			if (!string.IsNullOrEmpty(entry.PackageName) && _installed.Contains(entry.PackageName))
+			string installedVersion = null;
+			var installed = !string.IsNullOrEmpty(entry.PackageName) && _installedVersions.TryGetValue(entry.PackageName, out installedVersion);
+			var upToDate = installed && (string.IsNullOrEmpty(entry.Version) || installedVersion == entry.Version);
+			if (upToDate)
+			{
+				EditorGUILayout.LabelField("Installed", EditorStyles.boldLabel, GUILayout.Width(70f));
+			}
+			else if (installed && hasGit)
+			{
+				EditorGUILayout.LabelField(installedVersion, EditorStyles.miniLabel, GUILayout.Width(50f));
+				using (new EditorGUI.DisabledScope(PcgPackageInstaller.IsBusy))
+				{
+					if (GUILayout.Button("Update", GUILayout.Width(80f)))
+						InstallEntry(entry, PcgPackageIdentifier.Build(entry.GitUrl, entry.PackageName, entry.Version), false);
+				}
+			}
+			else if (installed)
 			{
 				EditorGUILayout.LabelField("Installed", EditorStyles.boldLabel, GUILayout.Width(70f));
 			}
@@ -136,7 +153,7 @@ namespace PCG.Setup
 				using (new EditorGUI.DisabledScope(PcgPackageInstaller.IsBusy))
 				{
 					if (hasGit && GUILayout.Button("Git", GUILayout.Width(80f)))
-						InstallEntry(entry, entry.GitUrl, false);
+						InstallEntry(entry, PcgPackageIdentifier.Build(entry.GitUrl, entry.PackageName, entry.Version), false);
 					if (hasOpenUpm && GUILayout.Button("OpenUPM", GUILayout.Width(80f)))
 						InstallEntry(entry, entry.PackageName + "@" + entry.OpenUpmVersion, true);
 				}

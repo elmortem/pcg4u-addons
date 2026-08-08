@@ -7,5 +7,6 @@ namespace PCG.Setup
 	{
 		public string PackageName;
 		public string GitUrl;
+		public string Version;
 	}
 }
