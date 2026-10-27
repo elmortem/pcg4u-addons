@@ -14,7 +14,7 @@
       "dependencies": {
         "com.unity.test-framework": "1.1.33"
       },
-      "hash": "4efe1d211985ad2dbd64b71f6a1e55ba914f52c3"
+      "hash": "5e75ddac9aea26568b8642109ff0e4d45fbd49a1"
     },
     "com.elmortem.brg": {
       "version": "https://github.com/elmortem/brg.git?path=Packages/BRG",
@@ -44,7 +44,7 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.elmortem.brg": "0.0.2",
+        "com.elmortem.brg": "0.0.3",
         "com.unity.mathematics": "1.2.6"
       }
     },
@@ -55,7 +55,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
-        "com.elmortem.pcg.splines": "0.0.7"
+        "com.elmortem.pcg.splines": "0.0.8"
       }
     },
     "com.elmortem.pcg.mcp": {
@@ -83,8 +83,8 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
-        "com.elmortem.pcg.splines": "0.0.7",
-        "com.elmortem.pcg.mazes": "0.0.3"
+        "com.elmortem.pcg.splines": "0.0.8",
+        "com.elmortem.pcg.mazes": "0.0.4"
       }
     },
     "com.elmortem.pcg.splines": {
@@ -104,7 +104,7 @@
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
         "com.unity.2d.spriteshape": "9.1.0",
-        "com.elmortem.pcg.splines": "0.0.7"
+        "com.elmortem.pcg.splines": "0.0.8"
       }
     },
     "com.elmortem.pcg.sweep": {
@@ -114,8 +114,8 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
         "com.unity.splines": "2.8.2",
-        "com.elmortem.pcg.splines": "0.0.7",
-        "com.elmortem.pcg.polygons": "0.0.6"
+        "com.elmortem.pcg.splines": "0.0.8",
+        "com.elmortem.pcg.polygons": "0.0.7"
       }
     },
     "com.unity.2d.common": {
