@@ -120,7 +120,11 @@ namespace PCG.Splines.Tools
 
 		public static PcgSplineEditContainer FindOrphan(string graphId, string addressKey)
 		{
+#if UNITY_6000_4_OR_NEWER
+			var all = Object.FindObjectsByType<PcgSplineEditContainer>(FindObjectsInactive.Exclude);
+#else
 			var all = Object.FindObjectsByType<PcgSplineEditContainer>(FindObjectsSortMode.None);
+#endif
 			PcgSplineEditContainer chosen = null;
 			var duplicates = new List<PcgSplineEditContainer>();
 
@@ -129,7 +133,11 @@ namespace PCG.Splines.Tools
 				if (marker.GraphId != graphId || marker.AddressKey != addressKey)
 					continue;
 
+#if UNITY_6000_4_OR_NEWER
+				if (chosen == null || marker.GetEntityId().CompareTo(chosen.GetEntityId()) < 0)
+#else
 				if (chosen == null || marker.GetInstanceID() < chosen.GetInstanceID())
+#endif
 				{
 					if (chosen != null)
 						duplicates.Add(chosen);

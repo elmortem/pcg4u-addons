@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using PCG.Splines.Utilities;
+using PCG.Utilities;
 using PCG.Values;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -58,7 +59,7 @@ namespace PCG.Splines
 				for (int i = 0; i < Containers.Count; i++)
 				{
 					var container = Containers[i];
-					hash = (hash * 397) ^ (container != null ? container.GetInstanceID() : 0);
+					hash = (hash * 397) ^ PcgObjectIdentity.Get(container);
 					if (container != null)
 					{
 						hash = (hash * 397) ^ container.transform.localToWorldMatrix.GetHashCode();

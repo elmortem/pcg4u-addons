@@ -1,4 +1,5 @@
 using System;
+using PCG.Utilities;
 using PCG.Values;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -15,6 +16,6 @@ namespace PCG.SpriteShapes
 
 		public override object GetValue(Transform transform) => Value;
 
-		public override int GetContentHash() => Value != null ? Value.GetInstanceID() : 0;
+		public override int GetContentHash() => PcgObjectIdentity.Get(Value);
 	}
 }

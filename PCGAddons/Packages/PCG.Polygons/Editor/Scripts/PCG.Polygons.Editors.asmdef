@@ -4,6 +4,7 @@
     "references": [
         "PCG",
         "PCG.Editors",
+        "PCG.Gizmos.Editor",
         "PCG.Polygons",
         "PCG.Mazes",
         "PCG.Splines",

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -61,7 +62,7 @@ namespace PCG.Splines
 			{
 				if (!string.IsNullOrEmpty(Data.Name))
 				{
-					_sources.AddRange(UnityEngine.Object.FindObjectsOfType<SplineContainer>(false).Where(p => p.name == Data.Name));
+					_sources.AddRange(FindActiveContainers().Where(p => p.name == Data.Name));
 					if (_sources.Count <= 0)
 						return;
 				}
@@ -131,6 +132,17 @@ namespace PCG.Splines
 
 			Gizmos.color = gizmosOptions.Color;
 			SplinesGizmoUtility.DrawGizmos(Results.Value.Splines, transform);
+		}
+
+		private static SplineContainer[] FindActiveContainers()
+		{
+#if UNITY_6000_4_OR_NEWER
+			var containers = UnityEngine.Object.FindObjectsByType<SplineContainer>(FindObjectsInactive.Exclude);
+			Array.Sort(containers, (a, b) => a.GetEntityId().CompareTo(b.GetEntityId()));
+			return containers;
+#else
+			return UnityEngine.Object.FindObjectsByType<SplineContainer>(FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID);
+#endif
 		}
 	}
 }
